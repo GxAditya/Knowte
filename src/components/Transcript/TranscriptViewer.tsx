@@ -1,6 +1,12 @@
 import { useMemo, useState } from "react";
 import { useLectureStore } from "../../stores";
 
+interface TranscriptViewerProps {
+  activeSegmentIndex?: number | null;
+  onSegmentClick?: (index: number) => void;
+  showHeader?: boolean;
+}
+
 const formatTimestamp = (seconds: number) => {
   const safeSeconds = Math.max(0, Math.floor(seconds));
   const minutes = Math.floor(safeSeconds / 60)
@@ -10,7 +16,11 @@ const formatTimestamp = (seconds: number) => {
   return `${minutes}:${remainder}`;
 };
 
-export default function TranscriptViewer() {
+export default function TranscriptViewer({
+  activeSegmentIndex = null,
+  onSegmentClick,
+  showHeader = true,
+}: TranscriptViewerProps) {
   const [query, setQuery] = useState("");
   const [copied, setCopied] = useState(false);
   const { lectures, currentLectureId } = useLectureStore();
@@ -25,11 +35,12 @@ export default function TranscriptViewer() {
 
   const filteredSegments = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
+    const indexedSegments = segments.map((segment, index) => ({ segment, index }));
     if (!normalizedQuery) {
-      return segments;
+      return indexedSegments;
     }
 
-    return segments.filter((segment) =>
+    return indexedSegments.filter(({ segment }) =>
       segment.text.toLowerCase().includes(normalizedQuery),
     );
   }, [segments, query]);
@@ -61,10 +72,12 @@ export default function TranscriptViewer() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-bold text-slate-100">Transcript</h1>
-        <p className="text-sm text-slate-400">{lecture.filename}</p>
-      </header>
+      {showHeader && (
+        <header className="space-y-1">
+          <h1 className="text-2xl font-bold text-slate-100">Transcript</h1>
+          <p className="text-sm text-slate-400">{lecture.filename}</p>
+        </header>
+      )}
 
       <section className="rounded-xl border border-slate-700 bg-slate-800/70 p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -94,12 +107,17 @@ export default function TranscriptViewer() {
       <section className="rounded-xl border border-slate-700 bg-slate-800/70 p-4">
         {filteredSegments.length > 0 ? (
           <div className="space-y-3">
-            {filteredSegments.map((segment, index) => (
+            {filteredSegments.map(({ segment, index }) => (
               <button
                 key={`${segment.start}-${segment.end}-${index}`}
                 type="button"
-                className="block w-full rounded-md border border-slate-700 bg-slate-900/60 px-4 py-3 text-left transition-colors hover:border-slate-500"
-                title="Clickable segment (audio sync will be added in Task 2.2)"
+                onClick={() => onSegmentClick?.(index)}
+                className={`block w-full rounded-md border bg-slate-900/60 px-4 py-3 text-left transition-colors ${
+                  activeSegmentIndex === index
+                    ? "border-blue-500 ring-1 ring-blue-500/70"
+                    : "border-slate-700 hover:border-slate-500"
+                }`}
+                title="Click to seek audio playback to this segment"
               >
                 <p className="text-xs text-blue-300">
                   {formatTimestamp(segment.start)} - {formatTimestamp(segment.end)}

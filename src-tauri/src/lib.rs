@@ -9,7 +9,10 @@ use commands::audio::{
     accept_audio_file, pick_audio_file, start_recording, stop_recording, RecordingState,
 };
 use commands::settings::{check_ollama_status, get_settings, save_settings};
-use commands::transcribe::{check_whisper_models, download_whisper_model, transcribe_audio};
+use commands::transcribe::{
+    check_whisper_models, download_whisper_model, get_lecture_audio_url, transcribe_audio,
+    update_transcript_segment,
+};
 use db::init_database;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -32,7 +35,9 @@ pub fn run() {
             stop_recording,
             download_whisper_model,
             check_whisper_models,
-            transcribe_audio
+            transcribe_audio,
+            update_transcript_segment,
+            get_lecture_audio_url
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

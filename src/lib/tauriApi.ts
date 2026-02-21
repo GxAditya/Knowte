@@ -3,6 +3,7 @@ import type {
   AudioFileMetadata,
   OllamaStatus,
   Settings,
+  TranscriptUpdateResult,
   TranscriptionResult,
 } from "./types";
 
@@ -44,4 +45,20 @@ export async function downloadWhisperModel(modelSize: string): Promise<string> {
 
 export async function transcribeAudio(lectureId: string): Promise<TranscriptionResult> {
   return invoke<TranscriptionResult>("transcribe_audio", { lectureId });
+}
+
+export async function updateTranscriptSegment(
+  transcriptId: string,
+  segmentIndex: number,
+  newText: string,
+): Promise<TranscriptUpdateResult> {
+  return invoke<TranscriptUpdateResult>("update_transcript_segment", {
+    transcriptId,
+    segmentIndex,
+    newText,
+  });
+}
+
+export async function getLectureAudioUrl(lectureId: string): Promise<string> {
+  return invoke<string>("get_lecture_audio_url", { lectureId });
 }

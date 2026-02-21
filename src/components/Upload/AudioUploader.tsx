@@ -85,8 +85,10 @@ export default function AudioUploader() {
       const result = await transcribeAudio(lectureId);
       updateLecture(lectureId, {
         status: "processing",
+        transcriptId: result.transcript_id,
         transcript: result.full_text,
         transcriptSegments: result.segments,
+        originalTranscriptSegments: result.segments.map((segment) => ({ ...segment })),
         error: undefined,
       });
       setCurrentLecture(lectureId);

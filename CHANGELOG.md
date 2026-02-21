@@ -2,6 +2,32 @@
 
 All notable changes to the Cognote project will be documented in this file.
 
+## [Task 2.2] - 2026-02-21
+- Added: Transcript editing mode with per-segment `contenteditable` fields, 1-second debounced auto-save, and per-segment reset-to-original controls
+- Added: Fixed bottom transcript audio player with play/pause, seek slider, and playback speed controls (0.5x, 1x, 1.25x, 1.5x, 2x)
+- Added: Segment-aware playback sync so the active segment highlights as audio time advances
+- Added: Segment click-to-seek behavior in both read-only TranscriptViewer and editable TranscriptEditor
+- Added: Backend command `update_transcript_segment` to persist segment text edits in SQLite and return the updated transcript payload
+- Added: Backend command `get_lecture_audio_url` to resolve lecture audio to an `asset://localhost/...` URL for HTML5 playback
+- Changed: Transcription result contract now includes `transcript_id` and upload flow stores it for downstream transcript editing
+- Changed: Lecture type now tracks original transcript segments for per-segment reset behavior
+- Changed: Enabled Tauri asset protocol support in backend/runtime configuration for local audio playback
+- Files modified:
+  - src-tauri/Cargo.toml
+  - src-tauri/tauri.conf.json
+  - src-tauri/src/lib.rs
+  - src-tauri/src/commands/transcribe.rs
+  - src-tauri/src/db/queries.rs
+  - src/lib/types.ts
+  - src/lib/tauriApi.ts
+  - src/components/Upload/AudioUploader.tsx
+  - src/components/Transcript/TranscriptViewer.tsx
+  - src/components/Transcript/TranscriptEditor.tsx
+  - src/components/Transcript/TranscriptAudioPlayer.tsx
+  - src/components/Transcript/index.ts
+  - src/pages/Transcript.tsx
+  - CHANGELOG.md
+
 ## [Task 2.1] - 2026-02-20
 - Added: Whisper transcription command module with `download_whisper_model`, `check_whisper_models`, and `transcribe_audio`
 - Added: Whisper model download progress events (`whisper-download-progress`) and transcription progress events (`transcription-progress`)

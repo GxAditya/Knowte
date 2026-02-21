@@ -1,13 +1,15 @@
 use crate::commands::settings::get_settings;
 use crate::db::queries::{
-    get_lecture_by_id, update_lecture_status, upsert_transcript, TranscriptRecord,
+    get_lecture_by_id, get_transcript_by_id, update_lecture_status, update_transcript_content,
+    upsert_transcript, TranscriptRecord,
 };
 use crate::db::AppDatabase;
 use chrono::Utc;
 use futures_util::StreamExt;
 use hound::{SampleFormat, WavReader, WavSpec, WavWriter};
+use reqwest::Url;
 use rubato::{FftFixedInOut, Resampler};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -39,7 +41,7 @@ pub struct TranscriptionProgressEvent {
     pub percent: u8,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TranscriptSegment {
     pub start: f64,
     pub end: f64,
@@ -48,10 +50,19 @@ pub struct TranscriptSegment {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct TranscriptionResult {
+    pub transcript_id: String,
     pub lecture_id: String,
     pub full_text: String,
     pub segments: Vec<TranscriptSegment>,
     pub model_used: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct TranscriptUpdateResult {
+    pub transcript_id: String,
+    pub lecture_id: String,
+    pub full_text: String,
+    pub segments: Vec<TranscriptSegment>,
 }
 
 #[derive(Debug, Error)]
@@ -88,6 +99,20 @@ enum TranscribeError {
     WhisperTranscriptionFailed,
     #[error("Unable to save transcript to database.")]
     TranscriptSaveFailed,
+    #[error("Transcript not found for id: {0}.")]
+    TranscriptNotFound(String),
+    #[error("Transcript segment index is out of range.")]
+    TranscriptSegmentOutOfRange,
+    #[error("Unable to parse transcript segments from database.")]
+    TranscriptParseFailed,
+    #[error("Unable to apply transcript edits.")]
+    TranscriptUpdateFailed,
+    #[error("Unable to resolve lecture audio file.")]
+    LectureAudioFileUnavailable,
+    #[error("Unable to create lecture audio URL.")]
+    LectureAudioUrlFailed,
+    #[error("Unable to authorize audio path for asset protocol.")]
+    AssetScopeUpdateFailed,
     #[error("Background transcription worker failed.")]
     BackgroundTaskFailed,
 }
@@ -143,6 +168,108 @@ pub async fn transcribe_audio(
     .await
     .map_err(|_| TranscribeError::BackgroundTaskFailed)?
     .map_err(Into::into)
+}
+
+#[tauri::command]
+pub fn update_transcript_segment(
+    database: State<'_, AppDatabase>,
+    transcript_id: String,
+    segment_index: usize,
+    new_text: String,
+) -> Result<TranscriptUpdateResult, String> {
+    update_transcript_segment_impl(database.inner(), transcript_id, segment_index, new_text)
+        .map_err(Into::into)
+}
+
+#[tauri::command]
+pub fn get_lecture_audio_url(
+    app: AppHandle,
+    database: State<'_, AppDatabase>,
+    lecture_id: String,
+) -> Result<String, String> {
+    get_lecture_audio_url_impl(&app, database.inner(), lecture_id).map_err(Into::into)
+}
+
+fn update_transcript_segment_impl(
+    database: &AppDatabase,
+    transcript_id: String,
+    segment_index: usize,
+    new_text: String,
+) -> Result<TranscriptUpdateResult, TranscribeError> {
+    let connection = database
+        .connect()
+        .map_err(|_| TranscribeError::LectureDataUnavailable)?;
+    let transcript = get_transcript_by_id(&connection, &transcript_id)
+        .map_err(|_| TranscribeError::LectureDataUnavailable)?
+        .ok_or_else(|| TranscribeError::TranscriptNotFound(transcript_id.clone()))?;
+
+    let mut segments: Vec<TranscriptSegment> = serde_json::from_str(&transcript.segments_json)
+        .map_err(|_| TranscribeError::TranscriptParseFailed)?;
+    if segment_index >= segments.len() {
+        return Err(TranscribeError::TranscriptSegmentOutOfRange);
+    }
+
+    segments[segment_index].text = new_text;
+    let full_text = rebuild_full_text(&segments);
+    let segments_json =
+        serde_json::to_string(&segments).map_err(|_| TranscribeError::TranscriptUpdateFailed)?;
+
+    update_transcript_content(&connection, &transcript_id, &full_text, &segments_json)
+        .map_err(|_| TranscribeError::TranscriptUpdateFailed)?;
+
+    Ok(TranscriptUpdateResult {
+        transcript_id,
+        lecture_id: transcript.lecture_id,
+        full_text,
+        segments,
+    })
+}
+
+fn get_lecture_audio_url_impl(
+    app: &AppHandle,
+    database: &AppDatabase,
+    lecture_id: String,
+) -> Result<String, TranscribeError> {
+    let connection = database
+        .connect()
+        .map_err(|_| TranscribeError::LectureDataUnavailable)?;
+    let lecture = get_lecture_by_id(&connection, &lecture_id)
+        .map_err(|_| TranscribeError::LectureDataUnavailable)?
+        .ok_or_else(|| TranscribeError::LectureNotFound(lecture_id.clone()))?;
+
+    let audio_path = PathBuf::from(&lecture.audio_path);
+    if !audio_path.exists() {
+        return Err(TranscribeError::LectureAudioFileUnavailable);
+    }
+
+    let canonical_path = audio_path
+        .canonicalize()
+        .map_err(|_| TranscribeError::LectureAudioFileUnavailable)?;
+
+    app.asset_protocol_scope()
+        .allow_file(&canonical_path)
+        .map_err(|_| TranscribeError::AssetScopeUpdateFailed)?;
+
+    let file_url =
+        Url::from_file_path(&canonical_path).map_err(|_| TranscribeError::LectureAudioUrlFailed)?;
+    Ok(format!("asset://localhost{}", file_url.path()))
+}
+
+fn rebuild_full_text(segments: &[TranscriptSegment]) -> String {
+    let mut full_text = String::new();
+    for segment in segments {
+        let text = segment.text.trim();
+        if text.is_empty() {
+            continue;
+        }
+
+        if !full_text.is_empty() {
+            full_text.push(' ');
+        }
+        full_text.push_str(text);
+    }
+
+    full_text
 }
 
 fn check_whisper_models_impl() -> Result<Vec<String>, TranscribeError> {
@@ -309,6 +436,7 @@ fn transcribe_audio_impl(
         .map_err(|_| TranscribeError::LectureStatusUpdateFailed)?;
 
     emit_transcription_progress(&app, &lecture_id, 100);
+    transcription.transcript_id = transcript_record.id.clone();
     transcription.model_used = transcript_record.model_used;
     Ok(transcription)
 }
@@ -361,7 +489,6 @@ fn run_whisper_transcription(
 
     let segment_count = state.full_n_segments().max(0) as usize;
     let mut segments = Vec::with_capacity(segment_count);
-    let mut full_text = String::new();
 
     for index in 0..segment_count {
         let Some(segment) = state.get_segment(index as i32) else {
@@ -376,17 +503,13 @@ fn run_whisper_transcription(
         let start = segment.start_timestamp() as f64 / 100.0;
         let end = segment.end_timestamp() as f64 / 100.0;
 
-        if !text.is_empty() {
-            if !full_text.is_empty() {
-                full_text.push(' ');
-            }
-            full_text.push_str(&text);
-        }
-
         segments.push(TranscriptSegment { start, end, text });
     }
 
+    let full_text = rebuild_full_text(&segments);
+
     Ok(TranscriptionResult {
+        transcript_id: String::new(),
         lecture_id: lecture_id.to_string(),
         full_text,
         segments,

@@ -115,3 +115,51 @@ pub fn upsert_transcript(
 
     Ok(())
 }
+
+pub fn get_transcript_by_id(
+    connection: &Connection,
+    transcript_id: &str,
+) -> rusqlite::Result<Option<TranscriptRecord>> {
+    let mut statement = connection.prepare(
+        r#"
+        SELECT id, lecture_id, full_text, segments_json, model_used, created_at
+        FROM transcripts
+        WHERE id = ?1
+        "#,
+    )?;
+
+    let result = statement.query_row(params![transcript_id], |row| {
+        Ok(TranscriptRecord {
+            id: row.get(0)?,
+            lecture_id: row.get(1)?,
+            full_text: row.get(2)?,
+            segments_json: row.get(3)?,
+            model_used: row.get(4)?,
+            created_at: row.get(5)?,
+        })
+    });
+
+    match result {
+        Ok(transcript) => Ok(Some(transcript)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(error) => Err(error),
+    }
+}
+
+pub fn update_transcript_content(
+    connection: &Connection,
+    transcript_id: &str,
+    full_text: &str,
+    segments_json: &str,
+) -> rusqlite::Result<()> {
+    connection.execute(
+        r#"
+        UPDATE transcripts
+        SET full_text = ?1, segments_json = ?2
+        WHERE id = ?3
+        "#,
+        params![full_text, segments_json, transcript_id],
+    )?;
+
+    Ok(())
+}

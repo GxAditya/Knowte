@@ -38,10 +38,18 @@ export interface TranscriptionProgress {
 }
 
 export interface TranscriptionResult {
+  transcript_id: string;
   lecture_id: string;
   full_text: string;
   segments: TranscriptSegment[];
   model_used: string;
+}
+
+export interface TranscriptUpdateResult {
+  transcript_id: string;
+  lecture_id: string;
+  full_text: string;
+  segments: TranscriptSegment[];
 }
 
 export interface StructuredNoteSection {
@@ -108,8 +116,10 @@ export interface Lecture {
   audioPath: string;
   duration: number;
   status: LectureStatus;
+  transcriptId?: string;
   transcript?: string;
   transcriptSegments?: TranscriptSegment[];
+  originalTranscriptSegments?: TranscriptSegment[];
   summary?: string;
   notes?: StructuredNotes;
   quiz?: Quiz;

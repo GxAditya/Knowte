@@ -1,0 +1,12 @@
+[package]
+name = "http-range"
+version = "0.1.0"
+edition = "2021"
+description = "Minimal HTTP Range header parsing for Tauri asset protocol"
+license = "MIT"
+
+[dependencies]
+
+[features]
+default = []
+std = []

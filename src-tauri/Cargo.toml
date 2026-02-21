@@ -35,7 +35,7 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 whisper-rs = "0.15"
 rubato = "0.16"
 futures-util = "0.3"
-tokio = { version = "1", features = ["fs", "io-util", "time"] }
+tokio = { version = "1", features = ["fs", "io-util", "time", "net", "rt", "macros"] }
 zip = { version = "2", default-features = false, features = ["deflate"] }
 fs2 = "0.4"
 

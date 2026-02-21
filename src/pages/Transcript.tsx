@@ -1,11 +1,10 @@
-import { convertFileSrc } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   TranscriptAudioPlayer,
   TranscriptEditor,
   TranscriptViewer,
 } from "../components";
-import { getLectureAudioUrl, getLectureTranscript } from "../lib/tauriApi";
+import { getAudioServerPort, getLectureTranscript } from "../lib/tauriApi";
 import { useLectureStore } from "../stores";
 
 const PLAYBACK_RATE_DEFAULT = 1;
@@ -102,37 +101,27 @@ export default function Transcript() {
 
     let isCancelled = false;
 
-    const resolveAudioUrl = async () => {
+    // Ask the Rust backend for the local HTTP server port, then build a
+    // standard http URL that WebKitGTK/GStreamer can natively stream.
+    void (async () => {
       try {
-        const resolved = await getLectureAudioUrl(lecture.id);
-        if (isCancelled) {
-          return;
-        }
-
-        setAudioUrl(
-          resolved.startsWith("asset://") ? resolved : convertFileSrc(resolved),
-        );
+        const port = await getAudioServerPort();
+        if (isCancelled) return;
+        const encoded = encodeURIComponent(lecture.id);
+        setAudioUrl(`http://127.0.0.1:${port}/${encoded}`);
         setAudioError(null);
-      } catch (error) {
-        if (isCancelled) {
-          return;
-        }
-
-        setAudioUrl(convertFileSrc(lecture.audioPath));
+      } catch (err) {
+        if (isCancelled) return;
         setAudioError(
-          error instanceof Error
-            ? error.message
-            : "Unable to resolve lecture audio URL.",
+          err instanceof Error ? err.message : "Unable to resolve audio server.",
         );
       }
-    };
-
-    void resolveAudioUrl();
+    })();
 
     return () => {
       isCancelled = true;
     };
-  }, [lecture?.id, lecture?.audioPath]);
+  }, [lecture?.id]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -153,12 +142,28 @@ export default function Transcript() {
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => setIsPlaying(false);
+    const handleError = () => {
+      // MediaError codes: 1=ABORTED, 2=NETWORK, 3=DECODE, 4=SRC_NOT_SUPPORTED
+      const code = audio.error?.code;
+      const detail = audio.error?.message ?? "";
+      if (code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+        setAudioError(
+          "Unable to play this audio format. Re-transcribe the lecture to regenerate a compatible playback file.",
+        );
+      } else if (code === MediaError.MEDIA_ERR_DECODE) {
+        setAudioError("Audio decoding failed. The file may be corrupt.");
+      } else {
+        setAudioError(detail || "An unexpected audio playback error occurred.");
+      }
+      setIsPlaying(false);
+    };
 
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
     audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("error", handleError);
 
     return () => {
       audio.removeEventListener("timeupdate", handleTimeUpdate);
@@ -166,6 +171,7 @@ export default function Transcript() {
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
       audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("error", handleError);
     };
   }, [audioUrl, lecture?.duration]);
 

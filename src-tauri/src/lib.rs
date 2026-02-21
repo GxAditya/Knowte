@@ -1,3 +1,4 @@
+mod audio_stream;
 mod commands;
 mod db;
 mod models;
@@ -6,6 +7,7 @@ mod utils;
 
 use tauri::Manager;
 
+use audio_stream::AudioServerPort;
 use commands::audio::{
     accept_audio_file, pick_audio_file, start_recording, stop_recording, RecordingState,
 };
@@ -24,6 +26,11 @@ use commands::transcribe::{
 };
 use db::init_database;
 
+#[tauri::command]
+fn get_audio_server_port(state: tauri::State<'_, AudioServerPort>) -> u16 {
+    state.0
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -31,10 +38,16 @@ pub fn run() {
         .setup(|app| {
             let database = init_database(&app.handle()).map_err(|error| error.to_string())?;
             app.manage(database);
+
+            // Start the local HTTP server for audio streaming and store the port.
+            let port = audio_stream::start_audio_server(&app.handle());
+            app.manage(AudioServerPort(port));
+
             Ok(())
         })
         .manage(RecordingState::default())
         .invoke_handler(tauri::generate_handler![
+            get_audio_server_port,
             check_ollama_status,
             get_settings,
             save_settings,

@@ -103,6 +103,10 @@ export async function getLectureAudioUrl(lectureId: string): Promise<string> {
   return invoke<string>("get_lecture_audio_url", { lectureId });
 }
 
+export async function getAudioServerPort(): Promise<number> {
+  return invoke<number>("get_audio_server_port");
+}
+
 export async function getLectureTranscript(
   lectureId: string,
 ): Promise<TranscriptionResult | null> {

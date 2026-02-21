@@ -105,6 +105,42 @@ export default function SettingsPanel() {
           </div>
         </div>
 
+        <div className="p-6 bg-slate-800 rounded-lg border border-slate-700 space-y-4">
+          <h2 className="text-lg font-semibold text-slate-200">Research</h2>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <div className="relative mt-0.5">
+              <input
+                type="checkbox"
+                checked={formData.enable_research}
+                onChange={(e) => updateField("enable_research", e.target.checked)}
+                className="sr-only"
+              />
+              <div
+                onClick={() => updateField("enable_research", !formData.enable_research)}
+                className={`w-10 h-5 rounded-full transition-colors ${
+                  formData.enable_research ? "bg-blue-600" : "bg-slate-600"
+                } flex items-center px-0.5 cursor-pointer`}
+              >
+                <div
+                  className={`w-4 h-4 bg-white rounded-full shadow transform transition-transform ${
+                    formData.enable_research ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-200">
+                Enable research paper search (requires internet)
+              </p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                When enabled, Cognote queries the Semantic Scholar API to find papers
+                related to your lecture content. This is the only external network call
+                the app makes.
+              </p>
+            </div>
+          </label>
+        </div>
+
         <div className="flex justify-end">
           <button
             type="submit"

@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   AudioFileMetadata,
   OllamaStatus,
+  Paper,
   PipelineStageRecord,
   Settings,
   TranscriptUpdateResult,
@@ -137,4 +138,22 @@ export async function getFlashcards(lectureId: string): Promise<string | null> {
 /** Retrieve mind-map JSON for a lecture (null if not yet generated). */
 export async function getMindmap(lectureId: string): Promise<string | null> {
   return invoke<string | null>("get_mindmap", { lectureId });
+}
+
+// ─── Research Commands ────────────────────────────────────────────────────────
+
+/**
+ * Search Semantic Scholar for papers related to this lecture.
+ * Reads keywords from the pipeline results, calls the external API,
+ * saves results, and returns them. Requires internet access.
+ */
+export async function searchRelatedPapers(lectureId: string): Promise<Paper[]> {
+  return invoke<Paper[]>("search_related_papers", { lectureId });
+}
+
+/**
+ * Return previously-saved research papers for a lecture (null if none saved yet).
+ */
+export async function getLecturePapers(lectureId: string): Promise<Paper[] | null> {
+  return invoke<Paper[] | null>("get_lecture_papers", { lectureId });
 }

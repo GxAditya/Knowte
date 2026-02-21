@@ -70,6 +70,14 @@ pub fn run_migrations(connection: &Connection) -> rusqlite::Result<()> {
             created_at TEXT NOT NULL,
             FOREIGN KEY (lecture_id) REFERENCES lectures(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS papers (
+            id TEXT PRIMARY KEY,
+            lecture_id TEXT NOT NULL UNIQUE,
+            papers_json TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (lecture_id) REFERENCES lectures(id) ON DELETE CASCADE
+        );
         "#,
     )
 

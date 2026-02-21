@@ -5,6 +5,7 @@ export interface Settings {
   personalization_level: string;
   language: string;
   export_path: string;
+  enable_research: boolean;
 }
 
 export interface OllamaStatus {
@@ -101,12 +102,15 @@ export interface Quiz {
 }
 
 export interface Paper {
-  id: string;
+  paper_id: string;
   title: string;
+  abstract_text: string | null;
+  year: number | null;
   authors: string[];
-  abstract: string;
-  year?: number;
-  url?: string;
+  url: string;
+  citation_count: number;
+  venue: string | null;
+  pdf_url: string | null;
 }
 
 export interface MindMapNode {
@@ -223,4 +227,5 @@ export const DEFAULT_SETTINGS: Settings = {
   personalization_level: "undergraduate_2nd_year",
   language: "en",
   export_path: "",
+  enable_research: true,
 };

@@ -444,3 +444,63 @@ pub fn get_mindmap(
     }
 }
 
+// ─── Keywords Query ───────────────────────────────────────────────────────────
+
+pub fn get_lecture_keywords(
+    connection: &Connection,
+    lecture_id: &str,
+) -> rusqlite::Result<Vec<String>> {
+    let result = connection.query_row(
+        "SELECT keywords_json FROM lectures WHERE id = ?1",
+        params![lecture_id],
+        |row| row.get::<_, Option<String>>(0),
+    );
+    match result {
+        Ok(Some(json)) => {
+            let keywords: Vec<String> = serde_json::from_str(&json).unwrap_or_default();
+            Ok(keywords)
+        }
+        Ok(None) => Ok(vec![]),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(vec![]),
+        Err(e) => Err(e),
+    }
+}
+
+// ─── Papers Queries ───────────────────────────────────────────────────────────
+
+pub fn upsert_papers(
+    connection: &Connection,
+    lecture_id: &str,
+    papers_json: &str,
+) -> rusqlite::Result<()> {
+    let id = uuid::Uuid::new_v4().to_string();
+    let now = chrono::Utc::now().to_rfc3339();
+    connection.execute(
+        r#"
+        INSERT INTO papers (id, lecture_id, papers_json, created_at)
+        VALUES (?1, ?2, ?3, ?4)
+        ON CONFLICT(lecture_id) DO UPDATE SET
+            papers_json = excluded.papers_json,
+            created_at  = excluded.created_at
+        "#,
+        params![id, lecture_id, papers_json, now],
+    )?;
+    Ok(())
+}
+
+pub fn get_papers(
+    connection: &Connection,
+    lecture_id: &str,
+) -> rusqlite::Result<Option<String>> {
+    let result = connection.query_row(
+        "SELECT papers_json FROM papers WHERE lecture_id = ?1",
+        params![lecture_id],
+        |row| row.get::<_, String>(0),
+    );
+    match result {
+        Ok(v) => Ok(Some(v)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e),
+    }
+}
+

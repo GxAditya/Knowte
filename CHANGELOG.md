@@ -2,6 +2,20 @@
 
 All notable changes to the Cognote project will be documented in this file.
 
+## [Task 3.3] - 2026-02-21
+- Added: `src-tauri/src/commands/research.rs` — Tauri commands `search_related_papers` and `get_lecture_papers`; `search_papers()` queries Semantic Scholar Academic Graph API (`/paper/search`) per keyword (limit 3 per keyword), deduplicates by `paperId`, sorts by citation count, returns top 10; handles HTTP 429 rate-limit with an automatic 3 s retry; `Paper` struct with `paper_id`, `title`, `abstract_text`, `year`, `authors`, `url`, `citation_count`, `venue`, `pdf_url`
+- Added: `src-tauri/src/db/schema.rs` — new `papers` table; `src-tauri/src/db/queries.rs` — `get_lecture_keywords`, `upsert_papers`, `get_papers` query helpers
+- Changed: `src-tauri/src/commands/settings.rs` — added `enable_research: bool` field (default `true`) with serde default helper so older saved settings files deserialise correctly
+- Changed: `src-tauri/src/commands/mod.rs` — registered `research` module; `src-tauri/src/lib.rs` — wired `search_related_papers` and `get_lecture_papers` into invoke handler
+- Changed: `src-tauri/Cargo.toml` — added `time` feature to `tokio` dependency (required for `tokio::time::sleep`)
+- Added: `src/components/Research/PaperCard.tsx` — card rendering `title`, `authors`, `year`, `venue`, citation count, expandable abstract, "Open Paper" (via `openUrl`), and optional "Download PDF" button
+- Added: `src/components/Research/PaperList.tsx` — grid of PaperCards with sort (citations / year / relevance), filter (PDF-only, year range), and "Refresh Papers" button
+- Added: `src/components/Research/index.ts` — barrel export
+- Changed: `src/pages/Research.tsx` — full Research page with lecture context, saved-paper restore on mount, search trigger, error banner, empty state, and internet disclaimer
+- Changed: `src/components/Settings/SettingsPanel.tsx` — added "Research" section with toggle for `enable_research`
+- Changed: `src/lib/types.ts` — updated `Paper` interface to match Rust struct; added `enable_research` to `Settings` and `DEFAULT_SETTINGS`
+- Changed: `src/lib/tauriApi.ts` — added `searchRelatedPapers` and `getLecturePapers` typed wrappers
+
 ## [Task 3.2] - 2026-02-21
 - Added: `src-tauri/src/pipeline/orchestrator.rs` — `run_full_pipeline()` runs 6 AI stages sequentially (summary, notes, quiz, flashcards, mindmap, research keywords); emits `pipeline-stage` Tauri events at start/completion of each stage; handles long transcripts by chunking (~4 000 tokens per chunk) with intermediate summaries; failed stages log an error and continue
 - Added: `src-tauri/src/pipeline/mod.rs` — pipeline module root

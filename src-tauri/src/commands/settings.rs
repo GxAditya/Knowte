@@ -12,6 +12,8 @@ pub struct Settings {
     pub personalization_level: String,
     pub language: String,
     pub export_path: String,
+    #[serde(default = "Settings::default_enable_research")]
+    pub enable_research: bool,
 }
 
 impl Default for Settings {
@@ -28,7 +30,14 @@ impl Default for Settings {
             personalization_level: "undergraduate_2nd_year".to_string(),
             language: "en".to_string(),
             export_path,
+            enable_research: true,
         }
+    }
+}
+
+impl Settings {
+    fn default_enable_research() -> bool {
+        true
     }
 }
 

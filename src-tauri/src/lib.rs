@@ -18,6 +18,7 @@ use commands::transcribe::{
 use commands::pipeline::{
     get_flashcards, get_mindmap, get_notes, get_pipeline_status, get_quiz, start_pipeline,
 };
+use commands::research::{get_lecture_papers, search_related_papers};
 use db::init_database;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -51,6 +52,8 @@ pub fn run() {
             get_quiz,
             get_flashcards,
             get_mindmap,
+            search_related_papers,
+            get_lecture_papers,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

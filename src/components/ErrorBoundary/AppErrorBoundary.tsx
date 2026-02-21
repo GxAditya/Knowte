@@ -31,17 +31,17 @@ export default class AppErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-900 px-6 text-slate-100">
-          <div className="w-full max-w-lg rounded-xl border border-red-600/40 bg-slate-800 p-8 shadow-lg">
-            <h1 className="text-2xl font-bold text-red-300">Something went wrong</h1>
-            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+        <div className="flex min-h-screen items-center justify-center bg-[var(--bg-base)] px-6 text-[var(--text-primary)]">
+          <div className="w-full max-w-lg rounded-xl border border-[var(--color-error-muted)] bg-[var(--bg-elevated)] p-8 shadow-lg">
+            <h1 className="text-2xl font-bold text-[var(--color-error)]">Something went wrong</h1>
+            <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)]">
               Cognote hit an unexpected UI error. No lecture files were deleted, but this screen
               cannot recover automatically.
             </p>
             <button
               type="button"
               onClick={this.handleReload}
-              className="mt-6 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-500"
+              className="mt-6 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--accent-primary-hover)]"
             >
               Reload App
             </button>

@@ -17,10 +17,10 @@ function CircularProgress({ score, total }: CircularProgressProps) {
 
   const color =
     pct >= 0.7
-      ? { stroke: "#22c55e", text: "text-emerald-400", label: "Excellent!" }
+      ? { stroke: "var(--color-success)", text: "text-[var(--color-success)]", label: "Excellent!" }
       : pct >= 0.5
-        ? { stroke: "#f59e0b", text: "text-amber-400", label: "Good effort!" }
-        : { stroke: "#ef4444", text: "text-red-400", label: "Keep practicing" };
+        ? { stroke: "var(--color-warning)", text: "text-[var(--color-warning)]", label: "Good effort!" }
+        : { stroke: "var(--color-error)", text: "text-[var(--color-error)]", label: "Keep practicing" };
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -38,7 +38,7 @@ function CircularProgress({ score, total }: CircularProgressProps) {
             cy="66"
             r={radius}
             fill="none"
-            stroke="#1e293b"
+            stroke="var(--border-strong)"
             strokeWidth="10"
           />
           {/* Progress arc */}
@@ -58,11 +58,11 @@ function CircularProgress({ score, total }: CircularProgressProps) {
         {/* Score label */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className={`text-3xl font-bold ${color.text}`}>{score}</span>
-          <span className="text-slate-400 text-sm">/ {total}</span>
+          <span className="text-[var(--text-muted)] text-sm">/ {total}</span>
         </div>
       </div>
       <p className={`text-sm font-semibold ${color.text}`}>{color.label}</p>
-      <p className="text-slate-300 text-base font-medium">
+      <p className="text-[var(--text-secondary)] text-base font-medium">
         {Math.round(pct * 100)}% correct
       </p>
     </div>
@@ -89,8 +89,8 @@ function QuestionRow({ question, userAnswer, index }: QuestionRowProps) {
     <div
       className={`rounded-lg border transition-colors ${
         correct
-          ? "border-emerald-700/40 bg-emerald-900/10"
-          : "border-red-700/40 bg-red-900/10"
+          ? "border-[var(--color-success-muted)] bg-[var(--color-success-muted)]"
+          : "border-[var(--color-error)]/40 bg-[var(--color-error-muted)]"
       }`}
     >
       <button
@@ -100,27 +100,27 @@ function QuestionRow({ question, userAnswer, index }: QuestionRowProps) {
         <span
           className={`flex-shrink-0 mt-0.5 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
             correct
-              ? "bg-emerald-600 text-white"
-              : "bg-red-600 text-white"
+              ? "bg-[var(--color-success)] text-white"
+              : "bg-[var(--color-error)] text-white"
           }`}
         >
           {correct ? "✓" : "✗"}
         </span>
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-slate-200 leading-snug">
-            <span className="text-slate-500 mr-1.5">Q{index + 1}.</span>
+          <p className="text-sm text-[var(--text-secondary)] leading-snug">
+            <span className="text-[var(--text-muted)] mr-1.5">Q{index + 1}.</span>
             {question.question}
           </p>
           {!correct && !expanded && (
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">
               Click to see explanation
             </p>
           )}
         </div>
 
         {!correct && (
-          <span className="flex-shrink-0 text-slate-500 text-sm">
+          <span className="flex-shrink-0 text-[var(--text-muted)] text-sm">
             {expanded ? "▲" : "▼"}
           </span>
         )}
@@ -129,22 +129,22 @@ function QuestionRow({ question, userAnswer, index }: QuestionRowProps) {
       {/* Expanded explanation for wrong answers */}
       {!correct && expanded && (
         <div className="px-4 pb-4 pt-0 pl-12 space-y-1.5">
-          <p className="text-xs text-slate-400">
-            <span className="font-semibold text-slate-300">Your answer: </span>
+          <p className="text-xs text-[var(--text-muted)]">
+            <span className="font-semibold text-[var(--text-secondary)]">Your answer: </span>
             {userAnswer && userAnswer.trim() !== "" ? (
-              <span className="text-red-300">{userAnswer}</span>
+              <span className="text-[var(--color-error)]">{userAnswer}</span>
             ) : (
-              <span className="italic text-slate-600">Not answered</span>
+              <span className="italic text-[var(--text-muted)]">Not answered</span>
             )}
           </p>
           {!isShortAnswer && (
-            <p className="text-xs text-slate-400">
-              <span className="font-semibold text-slate-300">Correct answer: </span>
-              <span className="text-emerald-400">{question.correct_answer}</span>
+            <p className="text-xs text-[var(--text-muted)]">
+              <span className="font-semibold text-[var(--text-secondary)]">Correct answer: </span>
+              <span className="text-[var(--color-success)]">{question.correct_answer}</span>
             </p>
           )}
-          <p className="text-xs text-slate-400 leading-relaxed">
-            <span className="font-semibold text-slate-300">Explanation: </span>
+          <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+            <span className="font-semibold text-[var(--text-secondary)]">Explanation: </span>
             {question.explanation}
           </p>
         </div>
@@ -178,26 +178,26 @@ export function QuizResults({
   return (
     <div className="max-w-2xl mx-auto w-full space-y-8">
       {/* Score card */}
-      <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-8 flex flex-col items-center gap-6 shadow-xl shadow-slate-900/30">
-        <h2 className="text-2xl font-bold text-slate-100">Quiz Complete!</h2>
+      <div className="bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-2xl p-8 flex flex-col items-center gap-6 shadow-xl shadow-slate-900/30">
+        <h2 className="text-2xl font-bold text-[var(--text-primary)]">Quiz Complete!</h2>
         <CircularProgress score={score} total={total} />
 
         {/* Action buttons */}
         <div className="flex gap-3 flex-wrap justify-center">
           <button
             onClick={onRetake}
-            className="flex items-center gap-2 px-5 py-2.5 bg-violet-700 hover:bg-violet-600 text-white font-semibold text-sm rounded-lg transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] text-white font-semibold text-sm rounded-lg transition-colors"
           >
             🔁 Retake Quiz
           </button>
           <button
             onClick={onRegenerateQuiz}
             disabled={isRegenerating}
-            className="flex items-center gap-2 px-5 py-2.5 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-slate-200 font-semibold text-sm rounded-lg transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] disabled:opacity-50 text-[var(--text-secondary)] font-semibold text-sm rounded-lg transition-colors"
           >
             {isRegenerating ? (
               <>
-                <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-[var(--border-default)] border-t-transparent rounded-full animate-spin" />
                 Generating…
               </>
             ) : (
@@ -209,7 +209,7 @@ export function QuizResults({
 
       {/* Question review list */}
       <div className="space-y-3">
-        <h3 className="text-base font-semibold text-slate-300">Question Review</h3>
+        <h3 className="text-base font-semibold text-[var(--text-secondary)]">Question Review</h3>
         <div className="space-y-2">
           {questions.map((q, i) => (
             <QuestionRow

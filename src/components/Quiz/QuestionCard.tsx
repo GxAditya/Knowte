@@ -3,9 +3,9 @@ import type { Question, QuestionDifficulty } from "../../lib/types";
 // ─── Difficulty Badge ─────────────────────────────────────────────────────────
 
 const DIFFICULTY_STYLES: Record<QuestionDifficulty, string> = {
-  easy: "bg-emerald-900/40 text-emerald-400 border border-emerald-700/40",
-  medium: "bg-amber-900/40 text-amber-400 border border-amber-700/40",
-  hard: "bg-red-900/40 text-red-400 border border-red-700/40",
+  easy: "bg-[var(--color-success-muted)] text-[var(--color-success)] border border-[var(--color-success-muted)]",
+  medium: "bg-[var(--color-warning-muted)] text-[var(--color-warning)] border border-[var(--color-warning-muted)]",
+  hard: "bg-[var(--color-error-muted)] text-[var(--color-error)] border border-[var(--color-error)]/40",
 };
 
 function DifficultyBadge({ difficulty }: { difficulty: QuestionDifficulty }) {
@@ -42,18 +42,18 @@ function MultipleChoiceInput({
         const isCorrect = option === correctAnswer;
 
         let cardStyle =
-          "border border-slate-700 bg-slate-800/60 text-slate-200 hover:border-violet-500/60 hover:bg-slate-700/50";
+          "border border-[var(--border-default)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:border-[var(--accent-primary)] hover:bg-[var(--bg-elevated)]";
 
         if (submitted) {
           if (isCorrect) {
-            cardStyle = "border border-emerald-500 bg-emerald-900/30 text-emerald-200";
+            cardStyle = "border border-[var(--color-success)] bg-[var(--color-success-muted)] text-[var(--color-success)]";
           } else if (isSelected && !isCorrect) {
-            cardStyle = "border border-red-500 bg-red-900/30 text-red-200";
+            cardStyle = "border border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]";
           } else {
-            cardStyle = "border border-slate-700/50 bg-slate-800/30 text-slate-500";
+            cardStyle = "border border-[var(--border-default)]/50 bg-[var(--bg-elevated)]/30 text-[var(--text-muted)]";
           }
         } else if (isSelected) {
-          cardStyle = "border border-violet-500 bg-violet-900/30 text-violet-100";
+          cardStyle = "border border-[var(--accent-primary)] bg-[var(--accent-glow)] text-[var(--text-primary)]";
         }
 
         return (
@@ -66,12 +66,12 @@ function MultipleChoiceInput({
             <span
               className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center text-xs font-bold ${
                 submitted && isCorrect
-                  ? "border-emerald-400 bg-emerald-500 text-white"
+                  ? "border-[var(--color-success)] bg-[var(--color-success)] text-white"
                   : submitted && isSelected && !isCorrect
-                    ? "border-red-400 bg-red-500 text-white"
+                    ? "border-[var(--color-error)] bg-[var(--color-error)] text-white"
                     : isSelected
-                      ? "border-violet-400 bg-violet-500 text-white"
-                      : "border-slate-600"
+                      ? "border-[var(--accent-primary)] bg-[var(--accent-primary)] text-white"
+                      : "border-[var(--border-strong)]"
               }`}
             >
               {submitted && isCorrect ? "✓" : submitted && isSelected && !isCorrect ? "✗" : ""}
@@ -103,22 +103,22 @@ function TrueFalseInput({ selected, submitted, correctAnswer, onSelect }: TrueFa
         const isCorrect = option === correctAnswer;
 
         let style =
-          "flex-1 py-4 rounded-xl border border-slate-700 bg-slate-800/60 text-slate-200 hover:border-violet-500/60 hover:bg-slate-700/50 font-semibold text-base transition-all duration-150";
+          "flex-1 py-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:border-[var(--accent-primary)] hover:bg-[var(--bg-elevated)] font-semibold text-base transition-all duration-150";
 
         if (submitted) {
           if (isCorrect) {
             style =
-              "flex-1 py-4 rounded-xl border border-emerald-500 bg-emerald-900/30 text-emerald-200 font-semibold text-base";
+              "flex-1 py-4 rounded-xl border border-[var(--color-success)] bg-[var(--color-success-muted)] text-[var(--color-success)] font-semibold text-base";
           } else if (isSelected && !isCorrect) {
             style =
-              "flex-1 py-4 rounded-xl border border-red-500 bg-red-900/30 text-red-200 font-semibold text-base";
+              "flex-1 py-4 rounded-xl border border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)] font-semibold text-base";
           } else {
             style =
-              "flex-1 py-4 rounded-xl border border-slate-700/50 bg-slate-800/30 text-slate-500 font-semibold text-base";
+              "flex-1 py-4 rounded-xl border border-[var(--border-default)]/50 bg-[var(--bg-elevated)]/30 text-[var(--text-muted)] font-semibold text-base";
           }
         } else if (isSelected) {
           style =
-            "flex-1 py-4 rounded-xl border border-violet-500 bg-violet-900/30 text-violet-100 font-semibold text-base";
+            "flex-1 py-4 rounded-xl border border-[var(--accent-primary)] bg-[var(--accent-glow)] text-[var(--text-primary)] font-semibold text-base";
         }
 
         return (
@@ -156,13 +156,13 @@ function ShortAnswerInput({ value, submitted, correctAnswer, onChange }: ShortAn
         rows={3}
         className={`w-full px-4 py-3 rounded-lg border text-sm leading-relaxed resize-none transition-colors focus:outline-none ${
           submitted
-            ? "border-slate-600 bg-slate-800/30 text-slate-500 cursor-default"
-            : "border-slate-600 bg-slate-800/60 text-slate-100 placeholder-slate-500 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/30"
+            ? "border-[var(--border-strong)] bg-[var(--bg-elevated)]/30 text-[var(--text-muted)] cursor-default"
+            : "border-[var(--border-strong)] bg-[var(--bg-elevated)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)]"
         }`}
       />
       {submitted && (
-        <p className="text-xs text-slate-400">
-          <span className="font-semibold text-emerald-400">Model answer: </span>
+        <p className="text-xs text-[var(--text-muted)]">
+          <span className="font-semibold text-[var(--color-success)]">Model answer: </span>
           {correctAnswer}
         </p>
       )}
@@ -196,14 +196,14 @@ export function QuestionCard({
     <div className="w-full">
       {/* Header row */}
       <div className="flex items-center justify-between mb-4">
-        <span className="text-sm text-slate-400 font-medium">
+        <span className="text-sm text-[var(--text-muted)] font-medium">
           Question {questionNumber} of {totalQuestions}
         </span>
         <DifficultyBadge difficulty={question.difficulty} />
       </div>
 
       {/* Question text */}
-      <p className="text-slate-100 text-lg font-medium leading-relaxed mb-1">
+      <p className="text-[var(--text-primary)] text-lg font-medium leading-relaxed mb-1">
         {question.question}
       </p>
 
@@ -241,22 +241,22 @@ export function QuestionCard({
         <div
           className={`mt-5 rounded-lg p-4 border transition-all duration-300 ${
             correct
-              ? "bg-emerald-900/20 border-emerald-700/50"
+              ? "bg-[var(--color-success-muted)] border-[var(--color-success-muted)]"
               : incorrect
-                ? "bg-red-900/20 border-red-700/50"
-                : "bg-slate-800/40 border-slate-700/50"
+                ? "bg-[var(--color-error-muted)] border-[var(--color-error-muted)]"
+                : "bg-[var(--bg-elevated)] border-[var(--border-default)]/50"
           }`}
         >
           {correct && (
-            <p className="text-emerald-400 font-semibold text-sm mb-1.5">✓ Correct!</p>
+            <p className="text-[var(--color-success)] font-semibold text-sm mb-1.5">✓ Correct!</p>
           )}
           {incorrect && (
             <div className="mb-1.5">
-              <p className="text-red-400 font-semibold text-sm">✗ Incorrect</p>
+              <p className="text-[var(--color-error)] font-semibold text-sm">✗ Incorrect</p>
               {question.type !== "short_answer" && (
-                <p className="text-slate-300 text-sm mt-1">
+                <p className="text-[var(--text-secondary)] text-sm mt-1">
                   Correct answer:{" "}
-                  <span className="font-semibold text-emerald-400">
+                  <span className="font-semibold text-[var(--color-success)]">
                     {question.correct_answer}
                   </span>
                 </p>
@@ -264,8 +264,8 @@ export function QuestionCard({
             </div>
           )}
           {!submitted || (!correct && !incorrect) ? null : (
-            <p className="text-slate-300 text-sm leading-relaxed mt-1">
-              <span className="text-slate-400 font-medium">Explanation: </span>
+            <p className="text-[var(--text-secondary)] text-sm leading-relaxed mt-1">
+              <span className="text-[var(--text-muted)] font-medium">Explanation: </span>
               {question.explanation}
             </p>
           )}

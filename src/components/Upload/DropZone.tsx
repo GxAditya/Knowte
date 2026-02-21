@@ -204,38 +204,42 @@ export default function DropZone({
   return (
     <div className="space-y-4">
       <div
-        className={`rounded-lg border-2 border-dashed p-10 text-center shadow-sm ${
+        className={`rounded-lg border-2 border-dashed p-10 text-center shadow-sm transition-colors ${
           isDragActive
-            ? "dropzone-drag-active border-blue-500 bg-blue-500/10"
-            : "border-slate-600 bg-slate-800/40"
+            ? "dropzone-drag-active"
+            : ""
         }`}
+        style={{
+          borderColor: isDragActive ? "var(--accent-primary)" : "var(--border-strong)",
+          background: isDragActive ? "var(--accent-glow)" : "var(--bg-elevated)",
+        }}
       >
-        <h3 className="text-lg font-semibold text-slate-100">
+        <h3 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>
           Drag and drop lecture files
         </h3>
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
           Supported: {SUPPORTED_MEDIA_EXTENSIONS.map((ext) => `.${ext}`).join(", ")}
         </p>
         <button
           type="button"
           onClick={() => void handleBrowseClick()}
           disabled={disabled || isProcessing}
-          className="mt-6 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn-primary mt-6"
         >
           {isProcessing ? "Importing..." : "Browse files"}
         </button>
 
         {isProcessing && (
           <div className="mt-5 space-y-1">
-            <div className="h-2 overflow-hidden rounded-md bg-slate-700/70">
-              <div className="h-full bg-blue-500" style={{ width: `${uploadProgress}%` }} />
+            <div className="h-2 overflow-hidden rounded-md" style={{ background: "var(--bg-elevated)" }}>
+              <div className="h-full transition-all" style={{ width: `${uploadProgress}%`, background: "var(--accent-primary)" }} />
             </div>
-            <p className="text-xs text-slate-400">{Math.round(uploadProgress)}%</p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>{Math.round(uploadProgress)}%</p>
           </div>
         )}
       </div>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm" style={{ color: "var(--color-error)" }}>{error}</p>}
     </div>
   );
 }

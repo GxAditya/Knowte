@@ -32,7 +32,7 @@ export default function Pipeline() {
           onPipelineComplete={handlePipelineComplete}
         />
       ) : (
-        <div className="rounded-lg border border-slate-700 bg-slate-800 px-6 py-10 text-center text-slate-400 shadow-sm">
+        <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] px-6 py-10 text-center text-[var(--text-muted)] shadow-sm">
           No lecture selected. Please upload and process a lecture first.
         </div>
       )}
@@ -43,7 +43,7 @@ export default function Pipeline() {
           type="button"
           onClick={() => currentLectureId && navigate(`/lecture/${currentLectureId}/notes`)}
           disabled={!currentLectureId}
-          className="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600"
+          className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
         >
           View Notes
         </button>
@@ -51,7 +51,7 @@ export default function Pipeline() {
           type="button"
           onClick={() => currentLectureId && navigate(`/lecture/${currentLectureId}/quiz`)}
           disabled={!currentLectureId}
-          className="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600"
+          className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
         >
           View Quiz
         </button>
@@ -59,7 +59,7 @@ export default function Pipeline() {
           type="button"
           onClick={() => currentLectureId && navigate(`/lecture/${currentLectureId}/flashcards`)}
           disabled={!currentLectureId}
-          className="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600"
+          className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
         >
           View Flashcards
         </button>
@@ -67,7 +67,7 @@ export default function Pipeline() {
           type="button"
           onClick={() => currentLectureId && navigate(`/lecture/${currentLectureId}/mindmap`)}
           disabled={!currentLectureId}
-          className="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600"
+          className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
         >
           View Mind Map
         </button>

@@ -61,9 +61,9 @@ export default function TranscriptViewer({
 
   if (!lecture) {
     return (
-      <div className="mx-auto max-w-[900px] rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm">
-        <h1 className="text-xl font-semibold text-slate-100">Transcript</h1>
-        <p className="mt-2 text-sm text-slate-400">
+      <div className="mx-auto max-w-[900px] rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4 shadow-sm">
+        <h1 className="text-xl font-semibold text-[var(--text-primary)]">Transcript</h1>
+        <p className="mt-2 text-sm text-[var(--text-muted)]">
           Process a lecture from the Upload page to generate a transcript.
         </p>
       </div>
@@ -74,12 +74,12 @@ export default function TranscriptViewer({
     <div className="mx-auto max-w-[900px] space-y-6">
       {showHeader && (
         <header className="space-y-1">
-          <h1 className="text-2xl font-bold text-slate-100">Transcript</h1>
-          <p className="text-sm text-slate-400">{lecture.filename}</p>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Transcript</h1>
+          <p className="text-sm text-[var(--text-muted)]">{lecture.filename}</p>
         </header>
       )}
 
-      <section className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm">
+      <section className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4 shadow-sm">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex-1">
             <label htmlFor="transcript-search" className="sr-only">
@@ -90,48 +90,48 @@ export default function TranscriptViewer({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search transcript..."
-              className="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-[var(--border-strong)] bg-[var(--bg-surface-overlay)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
             />
           </div>
           <button
             type="button"
             onClick={() => void handleCopyAll()}
             disabled={!fullTranscript}
-            className="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-slate-100 transition-colors hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--border-strong)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {copied ? "Copied" : "Copy All"}
           </button>
         </div>
       </section>
 
-      <section className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm">
+      <section className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4 shadow-sm">
         {filteredSegments.length > 0 ? (
           <div className="space-y-3">
             {filteredSegments.map(({ segment, index }) => (
               <article
                 key={`${segment.start}-${segment.end}-${index}`}
-                className={`block w-full rounded-md border bg-slate-900/60 px-4 py-3 text-left transition-colors ${
+                className={`block w-full rounded-md border bg-[var(--bg-surface-overlay)] px-4 py-3 text-left transition-colors ${
                   activeSegmentIndex === index
-                    ? "border-blue-500 ring-1 ring-blue-500/70"
-                    : "border-slate-700 hover:border-slate-500"
+                    ? "border-[var(--accent-primary)] ring-1 ring-[var(--accent-primary)]"
+                    : "border-[var(--border-default)] hover:border-[var(--border-strong)]"
                 }`}
               >
                 <button
                   type="button"
                   onClick={() => onSegmentClick?.(index)}
-                  className="rounded-md bg-slate-800 px-2 py-1 text-xs text-blue-300 transition-colors hover:bg-slate-700"
+                  className="rounded-md bg-[var(--bg-elevated)] px-2 py-1 text-xs text-[var(--color-info)] transition-colors hover:bg-[var(--bg-elevated)]"
                   title="Seek audio playback to this segment"
                 >
                   {formatTimestamp(segment.start)} - {formatTimestamp(segment.end)}
                 </button>
-                <p className="mt-2 select-text text-sm text-slate-200" data-selection-context>
+                <p className="mt-2 select-text text-sm text-[var(--text-secondary)]" data-selection-context>
                   {segment.text}
                 </p>
               </article>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-[var(--text-muted)]">
             {query
               ? "No transcript segments match your search."
               : "No transcript segments are available for this lecture yet."}

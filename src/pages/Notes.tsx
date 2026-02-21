@@ -52,7 +52,7 @@ function TableOfContents({ items, activeId }: TableOfContentsProps) {
 
   return (
     <nav className="space-y-1">
-      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+      <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">
         Contents
       </p>
       {items.map((item) => (
@@ -61,8 +61,8 @@ function TableOfContents({ items, activeId }: TableOfContentsProps) {
           onClick={() => scrollTo(item.id)}
           className={`block w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors ${
             activeId === item.id
-              ? "text-violet-300 bg-violet-900/30 font-medium"
-              : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/40"
+              ? "text-[var(--accent-primary)] bg-[var(--accent-glow)] font-medium"
+              : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
           } ${item.level === "h2" ? "pl-3" : "pl-5"}`}
         >
           {item.label}
@@ -109,7 +109,7 @@ function useActiveSection(ids: string[]) {
 function EmptyState({ reason }: { reason: "no-lecture" | "no-notes" }) {
   if (reason === "no-lecture") {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-slate-500 space-y-2">
+      <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-2">
         <span className="text-4xl">📝</span>
         <p className="text-sm">No lecture selected.</p>
         <p className="text-xs">Upload and process a lecture to view notes.</p>
@@ -117,9 +117,9 @@ function EmptyState({ reason }: { reason: "no-lecture" | "no-notes" }) {
     );
   }
   return (
-    <div className="flex flex-col items-center justify-center h-64 text-slate-500 space-y-2">
+    <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-2">
       <span className="text-4xl">📝</span>
-      <p className="text-sm font-medium text-slate-300">No notes generated yet.</p>
+      <p className="text-sm font-medium text-[var(--text-secondary)]">No notes generated yet.</p>
       <p className="text-xs">Run the processing pipeline to generate structured notes.</p>
     </div>
   );
@@ -237,13 +237,13 @@ export default function Notes() {
     return (
       <div className={notesContainerClass}>
         <ViewHeader title="Lecture Notes" description={currentLecture.filename} />
-        <div className="bg-red-950/40 border border-red-700/50 rounded-lg p-4 text-red-300 text-sm">
+        <div className="bg-[var(--color-error-muted)] border border-[var(--color-error-muted)] rounded-lg p-4 text-[var(--color-error)] text-sm">
           {error}
         </div>
         <button
           type="button"
           onClick={() => void loadNotes()}
-          className="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600"
+          className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
         >
           Retry
         </button>
@@ -262,7 +262,7 @@ export default function Notes() {
             <button
               onClick={handleRegenerate}
               disabled={isRegenerating}
-              className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-blue-700"
+              className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-[var(--accent-primary-hover)]"
             >
               {isRegenerating ? (
                 <>
@@ -291,18 +291,18 @@ export default function Notes() {
             <button
               type="button"
               onClick={() => setIsOutlineOpen((previous) => !previous)}
-              className="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700"
+              className="rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all duration-150 hover:bg-[var(--bg-surface-overlay)] hover:border-[var(--accent-primary)] hover:text-[var(--text-primary)] active:scale-[0.97]"
             >
               {isOutlineOpen ? "Hide Outline" : "Show Outline"}
             </button>
             <button
               onClick={handleRegenerate}
               disabled={isRegenerating}
-              className="flex items-center gap-2 rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-600 disabled:opacity-60"
+              className="flex items-center gap-2 rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--border-strong)] disabled:opacity-60"
             >
               {isRegenerating ? (
                 <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--border-default)] border-t-transparent" />
                   Regenerating…
                 </>
               ) : (
@@ -314,7 +314,7 @@ export default function Notes() {
       />
 
       {isOutlineOpen && (
-        <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-4 shadow-sm lg:hidden">
+        <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4 shadow-sm lg:hidden">
           <TableOfContents items={tocItems} activeId={activeId} />
         </div>
       )}
@@ -322,7 +322,7 @@ export default function Notes() {
       <div className="relative flex h-full gap-6">
         {isOutlineOpen && (
           <aside className="hidden w-56 flex-shrink-0 lg:block">
-            <div className="sticky top-6 rounded-lg border border-slate-700 bg-slate-800/60 p-3 shadow-sm">
+            <div className="sticky top-6 rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-3 shadow-sm">
               <TableOfContents items={tocItems} activeId={activeId} />
             </div>
           </aside>

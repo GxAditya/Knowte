@@ -86,32 +86,50 @@ export default function TitleBar({
   }, [nativeWindow]);
 
   return (
-    <header className="flex h-11 items-center justify-between border-b border-slate-300/90 bg-slate-100/90 px-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
+    <header
+      className="flex h-11 items-center justify-between px-3 backdrop-blur-sm"
+      style={{
+        background: "var(--bg-surface-overlay)",
+        borderBottom: "1px solid var(--border-default)",
+      }}
+    >
       <div className="flex min-w-0 items-center gap-2" data-tauri-drag-region>
         <img src={appIcon} alt="Cognote app icon" className="h-5 w-5 shrink-0" />
         <div className="min-w-0 leading-tight" data-tauri-drag-region>
-          <p className="truncate text-xs font-semibold tracking-wide text-slate-700 dark:text-slate-200">
+          <p
+            className="truncate text-xs font-semibold tracking-widest"
+            style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}
+          >
             COGNOTE
           </p>
-          <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">
+          <p
+            className="truncate text-[11px]"
+            style={{ color: "var(--text-muted)" }}
+          >
             {currentViewLabel}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
+        {/* Theme toggle button */}
         <button
           type="button"
           onClick={onToggleTheme}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 bg-white/70 text-slate-600 hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] transition-all duration-200 hover:scale-110"
+          style={{
+            color: "var(--text-tertiary)",
+            background: "var(--bg-muted)",
+            border: "1px solid var(--border-default)",
+          }}
           aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
         >
           {theme === "dark" ? (
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current" style={{ color: "var(--accent-secondary)" }}>
               <path d="M12 4.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V5.25A.75.75 0 0 1 12 4.5zm0 12a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 1 .75-.75zm7.5-4.5a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 .75.75zM8.25 12a.75.75 0 0 1-.75.75H6a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 .75.75zm7.273-4.773a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 1 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06zM6.297 16.453a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 0 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06zm11.346 1.06a.75.75 0 0 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 1.06-1.06l1.06 1.06zM8.417 7.227a.75.75 0 1 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 1.06-1.06l1.06 1.06zM12 8.25a3.75 3.75 0 1 1 0 7.5 3.75 3.75 0 0 1 0-7.5z" />
             </svg>
           ) : (
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current" style={{ color: "var(--accent-primary)" }}>
               <path d="M12.996 2a.75.75 0 0 1 .721.954 8.25 8.25 0 1 0 7.33 10.323.75.75 0 0 1 1.423-.073A9.75 9.75 0 1 1 12.275 2.279a.75.75 0 0 1 .721-.279z" />
             </svg>
           )}
@@ -122,26 +140,54 @@ export default function TitleBar({
             <button
               type="button"
               onClick={() => void handleMinimize()}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 bg-white/70 text-slate-700 hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] transition-colors"
+              style={{
+                color: "var(--text-tertiary)",
+                background: "var(--bg-muted)",
+                border: "1px solid var(--border-default)",
+              }}
               aria-label="Minimize window"
             >
-              <span aria-hidden="true">-</span>
+              <svg aria-hidden="true" className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <path d="M2 6h8" />
+              </svg>
             </button>
             <button
               type="button"
               onClick={() => void handleToggleMaximize()}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 bg-white/70 text-slate-700 hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] transition-colors"
+              style={{
+                color: "var(--text-tertiary)",
+                background: "var(--bg-muted)",
+                border: "1px solid var(--border-default)",
+              }}
               aria-label={isMaximized ? "Restore window" : "Maximize window"}
             >
-              <span aria-hidden="true">{isMaximized ? "▢" : "□"}</span>
+              {isMaximized ? (
+                <svg aria-hidden="true" className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.2}>
+                  <rect x="2" y="4" width="6" height="6" rx="1" />
+                  <path d="M4 4V3a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H9" />
+                </svg>
+              ) : (
+                <svg aria-hidden="true" className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.2}>
+                  <rect x="2" y="2" width="8" height="8" rx="1" />
+                </svg>
+              )}
             </button>
             <button
               type="button"
               onClick={() => void handleClose()}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-red-300 bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:border-red-800 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] transition-colors"
+              style={{
+                color: "var(--color-error)",
+                background: "var(--color-error-subtle)",
+                border: "1px solid transparent",
+              }}
               aria-label="Close window"
             >
-              <span aria-hidden="true">×</span>
+              <svg aria-hidden="true" className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <path d="M3 3l6 6M9 3l-6 6" />
+              </svg>
             </button>
           </div>
         )}

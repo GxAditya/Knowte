@@ -82,29 +82,29 @@ const toLecture = (metadata: AudioFileMetadata): Lecture => ({
 
 function statusBadgeClass(status: QueueStatus): string {
   if (status === "complete") {
-    return "border-emerald-500/40 bg-emerald-500/15 text-emerald-200";
+    return "badge-success";
   }
   if (status === "processing") {
-    return "border-blue-500/40 bg-blue-500/15 text-blue-200";
+    return "badge-info";
   }
   if (status === "importing") {
-    return "border-amber-500/40 bg-amber-500/15 text-amber-200";
+    return "badge-warning";
   }
   if (status === "error") {
-    return "border-red-500/40 bg-red-500/15 text-red-200";
+    return "badge-error";
   }
-  return "border-slate-500/40 bg-slate-500/15 text-slate-200";
+  return "badge-neutral";
 }
 
 function sourceBadgeClass(origin: QueueOrigin, sourceType: LectureSourceType): string {
   if (origin === "youtube") {
-    return "border-red-500/40 bg-red-500/15 text-red-200";
+    return "badge-error";
   }
   if (sourceType === "video") {
-    return "border-violet-500/40 bg-violet-500/15 text-violet-200";
+    return "badge-accent";
   }
 
-  return "border-cyan-500/40 bg-cyan-500/15 text-cyan-200";
+  return "badge-info";
 }
 
 function sourceLabel(origin: QueueOrigin, sourceType: LectureSourceType): string {
@@ -663,7 +663,8 @@ export default function AudioUploader() {
       />
 
       <div
-        className="inline-flex rounded-lg border border-slate-700 bg-slate-800 p-1 shadow-sm"
+        className="inline-flex rounded-lg p-1 shadow-sm"
+        style={{ border: "1px solid var(--border-default)", background: "var(--bg-elevated)" }}
         role="tablist"
         aria-label="Lecture input modes"
       >
@@ -676,9 +677,10 @@ export default function AudioUploader() {
           onClick={() => setActiveTab("upload")}
           className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === "upload"
-              ? "bg-blue-600 text-white"
-              : "text-slate-300 hover:bg-slate-700"
+              ? "btn-primary"
+              : ""
           }`}
+          style={activeTab !== "upload" ? { color: "var(--text-secondary)" } : undefined}
         >
           Upload Files
         </button>
@@ -691,9 +693,10 @@ export default function AudioUploader() {
           onClick={() => setActiveTab("record")}
           className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === "record"
-              ? "bg-blue-600 text-white"
-              : "text-slate-300 hover:bg-slate-700"
+              ? "btn-primary"
+              : ""
           }`}
+          style={activeTab !== "record" ? { color: "var(--text-secondary)" } : undefined}
         >
           Record Live
         </button>
@@ -703,7 +706,7 @@ export default function AudioUploader() {
         id="lecture-input-panel"
         role="tabpanel"
         aria-labelledby={activeTab === "upload" ? "upload-tab" : "record-tab"}
-        className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm"
+        className="card p-4"
       >
         {activeTab === "upload" ? (
           <div className="space-y-5">
@@ -714,10 +717,10 @@ export default function AudioUploader() {
               disabled={isRecording || isProcessingLecture || isYoutubeImporting}
             />
 
-            <section className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/50 p-4">
+            <section className="space-y-3 rounded-lg p-4" style={{ border: "1px solid var(--border-default)", background: "var(--bg-surface-overlay)" }}>
               <div>
-                <h3 className="text-sm font-semibold text-slate-100">Import from YouTube</h3>
-                <p className="text-xs text-slate-400">
+                <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Import from YouTube</h3>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                   Paste a public YouTube URL to download audio and add it to the queue.
                 </p>
               </div>
@@ -734,7 +737,7 @@ export default function AudioUploader() {
                   }}
                   placeholder="https://www.youtube.com/watch?v=..."
                   disabled={isUploading || isRecording || isProcessingLecture || isYoutubeImporting}
-                  className="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                  className="input w-full"
                 />
                 <button
                   type="button"
@@ -746,13 +749,14 @@ export default function AudioUploader() {
                     isYoutubeImporting ||
                     youtubeUrl.trim().length === 0
                   }
-                  className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="btn-primary whitespace-nowrap"
+                  style={{ background: "#dc2626" }}
                 >
                   {isYoutubeImporting ? "Importing..." : "Add to Queue"}
                 </button>
               </div>
 
-              {youtubeError && <p className="text-xs text-red-300">{youtubeError}</p>}
+              {youtubeError && <p className="text-xs" style={{ color: "var(--color-error)" }}>{youtubeError}</p>}
             </section>
           </div>
         ) : (
@@ -765,7 +769,7 @@ export default function AudioUploader() {
       </section>
 
       {(isUploading || isRecording) && (
-        <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-sm text-blue-200">
+        <div className="rounded-lg px-4 py-3 text-sm" style={{ border: "1px solid var(--color-info-muted)", background: "var(--color-info-muted)", color: "var(--color-info)" }}>
           {isUploading
             ? isYoutubeImporting
               ? "Importing from YouTube..."
@@ -775,23 +779,23 @@ export default function AudioUploader() {
       )}
 
       {isProcessingLecture && (
-        <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-sm text-blue-200">
+        <div className="rounded-lg px-4 py-3 text-sm" style={{ border: "1px solid var(--color-info-muted)", background: "var(--color-info-muted)", color: "var(--color-info)" }}>
           {processHint ?? "Processing queue..."}
         </div>
       )}
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-lg px-4 py-3 text-sm" style={{ border: "1px solid var(--color-error-muted)", background: "var(--color-error-muted)", color: "var(--color-error)" }}>
           {error}
         </div>
       )}
 
       {hasQueueItems && (
-        <section className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
+        <section className="card space-y-4 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-slate-100">Batch Queue</h2>
-              <p className="text-sm text-slate-400">
+              <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Batch Queue</h2>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
                 {waitingCount > 0
                   ? `${waitingCount} lecture${waitingCount === 1 ? "" : "s"} waiting to process.`
                   : "No waiting lectures in queue."}
@@ -801,7 +805,8 @@ export default function AudioUploader() {
               type="button"
               onClick={() => void handleProcessAll()}
               disabled={isUploading || isRecording || isBatchRunning || waitingCount === 0}
-              className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn-primary"
+              style={{ background: "var(--color-success)" }}
             >
               {isBatchRunning ? "Processing Queue..." : "Process All"}
             </button>
@@ -815,11 +820,12 @@ export default function AudioUploader() {
               return (
                 <li
                   key={item.queueId}
-                  className="rounded-md border border-slate-700 bg-slate-900/60 px-3 py-3"
+                  className="rounded-md px-3 py-3"
+                  style={{ border: "1px solid var(--border-default)", background: "var(--bg-surface-overlay)" }}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 space-y-1">
-                      <p className="break-all text-sm font-medium text-slate-100">{item.filename}</p>
+                      <p className="break-all text-sm font-medium" style={{ color: "var(--text-primary)" }}>{item.filename}</p>
 
                       <div className="flex flex-wrap items-center gap-2">
                         <span
@@ -827,16 +833,16 @@ export default function AudioUploader() {
                         >
                           {sourceLabel(item.origin, item.sourceType)}
                         </span>
-                        <span className="text-xs text-slate-400">{stageLabel(item.stage)}</span>
+                        <span className="text-xs" style={{ color: "var(--text-muted)" }}>{stageLabel(item.stage)}</span>
                       </div>
 
                       {item.metadata ? (
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                           {formatDuration(item.metadata.duration_seconds)} /{" "}
                           {formatSize(item.metadata.size_bytes)}
                         </p>
                       ) : (
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                           {item.stage === "validating url"
                             ? "Validating YouTube URL..."
                             : item.stage === "downloading"
@@ -847,8 +853,8 @@ export default function AudioUploader() {
                         </p>
                       )}
 
-                      <p className="break-all text-xs text-slate-500">{item.sourcePath}</p>
-                      {item.error && <p className="text-xs text-red-300">{item.error}</p>}
+                      <p className="break-all text-xs" style={{ color: "var(--text-muted)" }}>{item.sourcePath}</p>
+                      {item.error && <p className="text-xs" style={{ color: "var(--color-error)" }}>{item.error}</p>}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -861,7 +867,7 @@ export default function AudioUploader() {
                         type="button"
                         onClick={() => removeQueueItem(item.queueId)}
                         disabled={!canRemove}
-                        className="rounded-md border border-slate-600 px-2.5 py-1 text-xs text-slate-300 transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="btn-ghost px-2.5 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Remove
                       </button>
@@ -870,8 +876,8 @@ export default function AudioUploader() {
 
                   {activeQueueLectureId === item.lectureId && item.stage === "transcribing" && progress && (
                     <div className="mt-2 space-y-1">
-                      <p className="text-xs text-blue-300">Currently transcribing...</p>
-                      <p className="text-xs text-slate-300">
+                      <p className="text-xs" style={{ color: "var(--color-info)" }}>Currently transcribing...</p>
+                      <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
                         Transcription {progress.percent}%{" "}
                         {typeof progress.chunk_index === "number" &&
                         typeof progress.chunk_total === "number"

@@ -11,7 +11,12 @@ function renderShortcutKeys(keys: string) {
   return keys.split("+").map((part) => (
     <kbd
       key={`${keys}-${part}`}
-      className="rounded border border-slate-500 bg-slate-800 px-2 py-0.5 text-xs font-semibold text-slate-100"
+      className="rounded px-2 py-0.5 text-xs font-semibold"
+      style={{
+        border: "1px solid var(--border-strong)",
+        background: "var(--bg-surface-overlay)",
+        color: "var(--text-primary)",
+      }}
     >
       {part}
     </kbd>
@@ -98,7 +103,7 @@ export default function SettingsPanel() {
   if (isLoading || !formData) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-slate-400">Loading settings...</div>
+        <div style={{ color: "var(--text-muted)" }}>Loading settings...</div>
       </div>
     );
   }
@@ -111,17 +116,17 @@ export default function SettingsPanel() {
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-200">Ollama Connection</h2>
+        <div className="card space-y-4 p-4">
+          <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Ollama Connection</h2>
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-slate-300">
+            <label className="block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
               Ollama URL
             </label>
             <input
               type="text"
               value={formData.ollama_url}
               onChange={(e) => updateField("ollama_url", e.target.value)}
-              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input w-full"
               placeholder="http://localhost:11434"
             />
           </div>
@@ -134,7 +139,7 @@ export default function SettingsPanel() {
           />
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-slate-300">
+            <label className="block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
               LLM timeout (seconds)
             </label>
             <input
@@ -146,44 +151,44 @@ export default function SettingsPanel() {
               onChange={(e) =>
                 updateField("llm_timeout_seconds", Math.max(30, Math.min(1800, Number(e.target.value) || 300)))
               }
-              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input w-full"
               placeholder="300"
             />
-            <p className="text-xs text-slate-400">
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
               Applies to all LLM requests. Recommended range: 120-600 seconds.
             </p>
           </div>
         </div>
 
-        <div className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-200">Personalization</h2>
+        <div className="card space-y-4 p-4">
+          <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Personalization</h2>
           <PersonalizationConfig
             value={formData.personalization_level}
             onChange={(value) => updateField("personalization_level", value)}
           />
         </div>
 
-        <div className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-200">Export Settings</h2>
+        <div className="card space-y-4 p-4">
+          <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Export Settings</h2>
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-slate-300">
+            <label className="block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
               Export Path
             </label>
             <input
               type="text"
               value={formData.export_path}
               onChange={(e) => updateField("export_path", e.target.value)}
-              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input w-full"
               placeholder="~/Documents/Cognote"
             />
-            <p className="text-xs text-slate-400">
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
               Default location for exported files
             </p>
           </div>
         </div>
 
-        <div className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-200">Storage</h2>
+        <div className="card space-y-4 p-4">
+          <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Storage</h2>
 
           <label className="flex items-start gap-3 cursor-pointer">
             <div className="relative mt-0.5">
@@ -197,54 +202,49 @@ export default function SettingsPanel() {
                 onClick={() =>
                   updateField("delete_audio_after_processing", !formData.delete_audio_after_processing)
                 }
-                className={`w-10 h-5 rounded-full transition-colors ${
-                  formData.delete_audio_after_processing ? "bg-blue-600" : "bg-slate-600"
-                } flex items-center px-0.5 cursor-pointer`}
+                className="toggle-track cursor-pointer"
+                data-checked={formData.delete_audio_after_processing || undefined}
               >
-                <div
-                  className={`w-4 h-4 bg-white rounded-full shadow transform transition-transform ${
-                    formData.delete_audio_after_processing ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
+                <div className="toggle-knob" />
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-200">Delete audio after processing</p>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Delete audio after processing</p>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                 Removes original and prepared audio files once pipeline generation finishes successfully.
               </p>
             </div>
           </label>
 
-          <div className="rounded-md border border-slate-700 bg-slate-900/50 p-3">
+          <div className="rounded-md p-3" style={{ border: "1px solid var(--border-default)", background: "var(--bg-surface-overlay)" }}>
             {isStorageLoading ? (
-              <p className="text-xs text-slate-400">Loading storage usage…</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Loading storage usage…</p>
             ) : storageUsage ? (
-              <div className="space-y-1.5 text-xs text-slate-300">
-                <p>App data: <span className="text-slate-100">{formatBytes(storageUsage.app_data_bytes)}</span></p>
-                <p>Lectures audio: <span className="text-slate-100">{formatBytes(storageUsage.lectures_bytes)}</span></p>
-                <p>Prepared audio: <span className="text-slate-100">{formatBytes(storageUsage.prepared_audio_bytes)}</span></p>
-                <p>Free disk space: <span className="text-slate-100">{formatBytes(storageUsage.free_bytes)}</span></p>
-                <p className="break-all text-slate-500">Path: {storageUsage.app_data_dir}</p>
+              <div className="space-y-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
+                <p>App data: <span style={{ color: "var(--text-primary)" }}>{formatBytes(storageUsage.app_data_bytes)}</span></p>
+                <p>Lectures audio: <span style={{ color: "var(--text-primary)" }}>{formatBytes(storageUsage.lectures_bytes)}</span></p>
+                <p>Prepared audio: <span style={{ color: "var(--text-primary)" }}>{formatBytes(storageUsage.prepared_audio_bytes)}</span></p>
+                <p>Free disk space: <span style={{ color: "var(--text-primary)" }}>{formatBytes(storageUsage.free_bytes)}</span></p>
+                <p className="break-all" style={{ color: "var(--text-muted)" }}>Path: {storageUsage.app_data_dir}</p>
               </div>
             ) : (
-              <p className="text-xs text-slate-400">Storage usage is unavailable.</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Storage usage is unavailable.</p>
             )}
 
-            {storageError && <p className="mt-2 text-xs text-red-300">{storageError}</p>}
+            {storageError && <p className="mt-2 text-xs" style={{ color: "var(--color-error)" }}>{storageError}</p>}
             <button
               type="button"
               onClick={() => void loadStorageUsage()}
               disabled={isStorageLoading}
-              className="mt-3 rounded-md border border-slate-600 px-2.5 py-1 text-xs text-slate-200 transition-colors hover:bg-slate-700 disabled:opacity-60"
+              className="btn-ghost mt-3 text-xs"
             >
               {isStorageLoading ? "Refreshing…" : "Refresh usage"}
             </button>
           </div>
         </div>
 
-        <div className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-200">Research</h2>
+        <div className="card space-y-4 p-4">
+          <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Research</h2>
           <label className="flex items-start gap-3 cursor-pointer">
             <div className="relative mt-0.5">
               <input
@@ -255,22 +255,17 @@ export default function SettingsPanel() {
               />
               <div
                 onClick={() => updateField("enable_research", !formData.enable_research)}
-                className={`w-10 h-5 rounded-full transition-colors ${
-                  formData.enable_research ? "bg-blue-600" : "bg-slate-600"
-                } flex items-center px-0.5 cursor-pointer`}
+                className="toggle-track cursor-pointer"
+                data-checked={formData.enable_research || undefined}
               >
-                <div
-                  className={`w-4 h-4 bg-white rounded-full shadow transform transition-transform ${
-                    formData.enable_research ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
+                <div className="toggle-knob" />
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-200">
+              <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
                 Enable research paper search (requires internet)
               </p>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                 When enabled, Cognote queries the Semantic Scholar API to find papers
                 related to your lecture content. This is the only external network call
                 the app makes.
@@ -279,37 +274,39 @@ export default function SettingsPanel() {
           </label>
         </div>
 
-        <div className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
+        <div className="card space-y-4 p-4">
           <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-slate-200">Keyboard Shortcuts</h2>
-            <p className="text-xs text-slate-400">
-              Press <kbd className="rounded border border-slate-500 bg-slate-800 px-1.5 py-0.5 text-[11px] text-slate-200">?</kbd> anywhere in the app to open the full shortcuts modal.
+            <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Keyboard Shortcuts</h2>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              Press <kbd className="rounded px-1.5 py-0.5 text-[11px]" style={{ border: "1px solid var(--border-strong)", background: "var(--bg-surface-overlay)", color: "var(--text-secondary)" }}>?</kbd> anywhere in the app to open the full shortcuts modal.
             </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Global</p>
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Global</p>
               {GLOBAL_SHORTCUTS.map((shortcut) => (
                 <div
                   key={shortcut.keys}
-                  className="flex items-center justify-between gap-3 rounded-md border border-slate-700 bg-slate-900/50 px-3 py-2"
+                  className="flex items-center justify-between gap-3 rounded-md px-3 py-2"
+                  style={{ border: "1px solid var(--border-default)", background: "var(--bg-surface-overlay)" }}
                 >
                   <div className="flex items-center gap-1">{renderShortcutKeys(shortcut.keys)}</div>
-                  <span className="text-xs text-slate-300">{shortcut.action}</span>
+                  <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{shortcut.action}</span>
                 </div>
               ))}
             </div>
 
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Lecture Views</p>
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Lecture Views</p>
               {LECTURE_VIEW_SHORTCUTS.map((shortcut) => (
                 <div
                   key={shortcut.key}
-                  className="flex items-center justify-between gap-3 rounded-md border border-slate-700 bg-slate-900/50 px-3 py-2"
+                  className="flex items-center justify-between gap-3 rounded-md px-3 py-2"
+                  style={{ border: "1px solid var(--border-default)", background: "var(--bg-surface-overlay)" }}
                 >
                   <div className="flex items-center gap-1">{renderShortcutKeys(`Ctrl+${shortcut.key}`)}</div>
-                  <span className="text-xs text-slate-300">{shortcut.label}</span>
+                  <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{shortcut.label}</span>
                 </div>
               ))}
             </div>
@@ -320,7 +317,7 @@ export default function SettingsPanel() {
           <button
             type="submit"
             disabled={isSaving}
-            className="rounded-md bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-primary px-6 py-2"
           >
             {isSaving ? "Saving..." : "Save Settings"}
           </button>
@@ -328,7 +325,7 @@ export default function SettingsPanel() {
       </form>
 
       {error && (
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+        <div className="rounded-lg px-4 py-3 text-sm" style={{ border: "1px solid var(--color-error-muted)", background: "var(--color-error-muted)", color: "var(--color-error)" }}>
           {error}
         </div>
       )}

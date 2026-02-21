@@ -47,14 +47,14 @@ export default function TranscriptAudioPlayer({
 
   return createPortal(
     <footer
-      className="fixed bottom-0 right-0 z-40 border-t border-slate-700 bg-slate-900/95 backdrop-blur"
+      className="fixed bottom-0 right-0 z-40 border-t border-[var(--border-default)] bg-[var(--bg-surface-overlay)]/95 backdrop-blur"
       style={{ left: "var(--app-sidebar-width, 16rem)" }}
     >
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-medium text-slate-100">Now Playing</p>
-            <p className="max-w-xs truncate text-xs text-slate-400 md:max-w-md">
+            <p className="text-sm font-medium text-[var(--text-primary)]">Now Playing</p>
+            <p className="max-w-xs truncate text-xs text-[var(--text-muted)] md:max-w-md">
               {lectureFilename}
             </p>
           </div>
@@ -64,12 +64,12 @@ export default function TranscriptAudioPlayer({
               type="button"
               onClick={onTogglePlay}
               disabled={isDisabled}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPlaying ? "Pause" : "Play"}
             </button>
 
-            <div className="flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800 p-1">
+            <div className="flex items-center gap-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-elevated)] p-1">
               {PLAYBACK_RATES.map((rate) => (
                 <button
                   key={rate}
@@ -78,8 +78,8 @@ export default function TranscriptAudioPlayer({
                   onClick={() => onPlaybackRateChange(rate)}
                   className={`rounded px-2 py-1 text-xs transition-colors ${
                     playbackRate === rate
-                      ? "bg-blue-600 text-white"
-                      : "text-slate-300 hover:bg-slate-700"
+                      ? "bg-[var(--accent-primary)] text-white"
+                      : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
                   } disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   {rate}x
@@ -90,7 +90,7 @@ export default function TranscriptAudioPlayer({
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="min-w-12 text-xs text-slate-300">{formatTimestamp(safeCurrentTime)}</span>
+          <span className="min-w-12 text-xs text-[var(--text-secondary)]">{formatTimestamp(safeCurrentTime)}</span>
           <input
             type="range"
             min={0}
@@ -99,15 +99,15 @@ export default function TranscriptAudioPlayer({
             value={safeCurrentTime}
             onChange={(event) => onSeek(Number(event.target.value))}
             disabled={isDisabled || safeDuration <= 0}
-            className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-slate-700 accent-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+            className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-[var(--bg-elevated)] accent-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
           />
-          <span className="min-w-12 text-right text-xs text-slate-300">
+          <span className="min-w-12 text-right text-xs text-[var(--text-secondary)]">
             {formatTimestamp(safeDuration)}
           </span>
         </div>
 
         {isDisabled && (
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-[var(--text-muted)]">
             {disabledReason ?? "Audio source is unavailable for this lecture."}
           </p>
         )}

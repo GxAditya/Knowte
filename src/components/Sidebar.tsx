@@ -38,7 +38,7 @@ type NavIconName =
   | "flashcards";
 
 function NavIcon({ name }: { name: NavIconName }) {
-  const iconClass = "h-4 w-4 shrink-0";
+  const iconClass = "h-[18px] w-[18px] shrink-0";
 
   if (name === "library") {
     return (
@@ -156,19 +156,33 @@ function NavIcon({ name }: { name: NavIconName }) {
 }
 
 function navLinkClass(isActive: boolean, isCollapsed: boolean): string {
-  return [
-    "group flex items-center rounded-md text-sm font-medium transition-all duration-200",
-    isCollapsed ? "justify-center px-0 py-2.5" : "gap-3 px-3 py-2",
-    isActive
-      ? "bg-blue-600 text-white"
-      : "text-slate-700 hover:bg-slate-700 hover:text-white dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white",
-  ].join(" ");
+  const base = [
+    "group relative flex items-center text-sm font-medium",
+    "transition-all duration-200",
+    isCollapsed
+      ? "justify-center px-0 py-2.5 rounded-[var(--radius-md)]"
+      : "gap-3 px-3 py-2 rounded-[var(--radius-md)]",
+  ];
+
+  if (isActive) {
+    base.push(
+      "bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-text)]",
+      "shadow-[0_1px_3px_rgba(0,0,0,0.12)]",
+    );
+  } else {
+    base.push(
+      "text-[var(--text-secondary)]",
+      "hover:bg-[var(--sidebar-item-hover)] hover:text-[var(--text-primary)]",
+    );
+  }
+
+  return base.join(" ");
 }
 
 function lectureBadgeClass(isActive: boolean): string {
   return isActive
-    ? "bg-blue-500/50 text-white"
-    : "bg-slate-200 text-slate-700 group-hover:bg-slate-600 group-hover:text-white dark:bg-slate-700 dark:text-slate-200 dark:group-hover:bg-slate-600";
+    ? "bg-white/20 text-[var(--sidebar-item-active-text)]"
+    : "bg-[var(--badge-neutral-bg)] text-[var(--text-tertiary)]";
 }
 
 export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
@@ -181,17 +195,28 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
 
   return (
     <aside
-      className={`flex shrink-0 flex-col border-r border-slate-300 bg-slate-50/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 ${
+      className={`flex shrink-0 flex-col backdrop-blur-sm ${
         isCollapsed ? "w-16" : "w-64"
-      } transition-all duration-200`}
+      } transition-all duration-300`}
+      style={{
+        background: "var(--sidebar-bg)",
+        borderRight: "1px solid var(--sidebar-border)",
+      }}
       aria-label="Sidebar navigation"
     >
-      <div className={`${isCollapsed ? "px-2 py-3" : "p-4"} border-b border-slate-300/90 dark:border-slate-800`}>
+      {/* ── Brand + Collapse ──────────────────────────────────────────── */}
+      <div
+        className={`${isCollapsed ? "px-2 py-3" : "px-4 py-4"}`}
+        style={{ borderBottom: "1px solid var(--sidebar-border)" }}
+      >
         <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"} gap-2`}>
           {!isCollapsed && (
-            <div className="flex min-w-0 items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2.5">
               <img src={appIcon} alt="Cognote app icon" className="h-5 w-5 shrink-0" />
-              <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+              <p
+                className="truncate text-sm font-semibold tracking-tight"
+                style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}
+              >
                 Cognote
               </p>
             </div>
@@ -199,12 +224,17 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)]"
+            style={{
+              color: "var(--text-tertiary)",
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border-default)",
+            }}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <svg
               aria-hidden="true"
-              className={`h-4 w-4 transition-transform duration-200 ${isCollapsed ? "rotate-180" : ""}`}
+              className={`h-3.5 w-3.5 transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -216,19 +246,23 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
         </div>
 
         {!isCollapsed && currentLectureId && (
-          <p className="mt-2 truncate text-xs text-slate-500 dark:text-slate-400">
+          <p
+            className="mt-2 truncate text-xs"
+            style={{ color: "var(--text-muted)" }}
+          >
             {lectureTitle}
           </p>
         )}
       </div>
 
+      {/* ── Navigation ────────────────────────────────────────────────── */}
       <nav
-        className={`${isCollapsed ? "p-2" : "p-3"} flex-1`}
+        className={`${isCollapsed ? "p-2" : "p-3"} flex-1 overflow-y-auto`}
         role="tablist"
         aria-label={currentLectureId ? "Lecture view navigation" : "Primary navigation"}
       >
         {currentLectureId ? (
-          <ul className="space-y-1">
+          <ul className="space-y-0.5">
             <li>
               <NavLink
                 to="/"
@@ -244,7 +278,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
                       <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
                         <span>Library</span>
                         <span
-                          className={`rounded-full px-2 py-0.5 text-[11px] ${lectureBadgeClass(isActive)}`}
+                          className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${lectureBadgeClass(isActive)}`}
                         >
                           {lectureCount}
                         </span>
@@ -254,8 +288,20 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
                 )}
               </NavLink>
             </li>
-            {lectureNavItems.map((item) => (
-              <li key={item.segment}>
+
+            {!isCollapsed && (
+              <li className="pt-3 pb-1.5">
+                <p
+                  className="px-3 text-[10px] font-semibold uppercase tracking-widest"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Lecture views
+                </p>
+              </li>
+            )}
+
+            {lectureNavItems.map((item, i) => (
+              <li key={item.segment} className="animate-fade-in" style={{ animationDelay: `${i * 30}ms` }}>
                 <NavLink
                   to={`/lecture/${currentLectureId}/${item.segment}`}
                   role="tab"
@@ -267,6 +313,18 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
                 </NavLink>
               </li>
             ))}
+
+            {!isCollapsed && (
+              <li className="pt-3 pb-1.5">
+                <p
+                  className="px-3 text-[10px] font-semibold uppercase tracking-widest"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Tools
+                </p>
+              </li>
+            )}
+
             <li>
               <NavLink
                 to="/compare"
@@ -280,9 +338,9 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
             </li>
           </ul>
         ) : (
-          <ul className="space-y-1">
-            {baseNavItems.map((item) => (
-              <li key={item.to}>
+          <ul className="space-y-0.5">
+            {baseNavItems.map((item, i) => (
+              <li key={item.to} className="animate-fade-in" style={{ animationDelay: `${i * 40}ms` }}>
                 <NavLink
                   to={item.to}
                   end={item.to === "/"}
@@ -298,7 +356,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
                           <span>{item.label}</span>
                           {item.to === "/" && (
                             <span
-                              className={`rounded-full px-2 py-0.5 text-[11px] ${lectureBadgeClass(isActive)}`}
+                              className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${lectureBadgeClass(isActive)}`}
                             >
                               {lectureCount}
                             </span>

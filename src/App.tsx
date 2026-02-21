@@ -344,7 +344,7 @@ function AppLayout() {
   });
 
   return (
-    <div className="flex h-screen flex-col bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="flex h-screen flex-col" style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}>
       <TitleBar
         currentViewLabel={viewLabelFromPath(location.pathname)}
         theme={theme}
@@ -361,7 +361,8 @@ function AppLayout() {
           ref={mainContentRef}
           id="main-content"
           tabIndex={-1}
-          className="flex-1 overflow-auto bg-slate-100/90 p-6 dark:bg-slate-950/50"
+          className="flex-1 overflow-auto p-6"
+          style={{ background: "var(--bg-base)" }}
         >
           <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
             {routeAnnouncement}
@@ -369,7 +370,7 @@ function AppLayout() {
           <div key={location.pathname} className="h-full animate-view-in">
             <Suspense
               fallback={(
-                <div className="flex h-full items-center justify-center text-sm text-slate-400">
+                <div className="flex h-full items-center justify-center text-sm" style={{ color: "var(--text-muted)" }}>
                   Loading view...
                 </div>
               )}

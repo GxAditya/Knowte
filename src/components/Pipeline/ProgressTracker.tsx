@@ -28,7 +28,7 @@ function SpinnerIcon() {
   return (
     <svg
       aria-hidden="true"
-      className="h-4 w-4 animate-spin text-blue-400"
+      className="h-4 w-4 animate-spin text-[var(--accent-primary)]"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -59,17 +59,17 @@ function StageRow({
   onSkip: () => void;
 }) {
   const statusColors: Record<string, string> = {
-    pending: "border-slate-600 bg-slate-800/40",
-    running: "border-blue-500/50 bg-blue-500/10",
-    complete: "border-emerald-500/40 bg-emerald-500/5",
-    error: "border-red-500/40 bg-red-500/5",
+    pending: "border-[var(--border-strong)] bg-[var(--bg-elevated)]",
+    running: "border-[var(--accent-primary)]/50 bg-[var(--accent-primary)]/10",
+    complete: "border-[var(--color-success-muted)] bg-[var(--color-success)]/5",
+    error: "border-[var(--color-error-muted)] bg-[var(--color-error)]/5",
   };
 
   const iconColors: Record<string, string> = {
-    pending: "text-slate-500",
-    running: "text-blue-400",
-    complete: "text-emerald-400",
-    error: "text-red-400",
+    pending: "text-[var(--text-muted)]",
+    running: "text-[var(--accent-primary)]",
+    complete: "text-[var(--color-success)]",
+    error: "text-[var(--color-error)]",
   };
 
   return (
@@ -99,50 +99,50 @@ function StageRow({
         <span
           className={`flex-1 text-sm font-medium ${
             stage.status === "pending"
-              ? "text-slate-500"
+              ? "text-[var(--text-muted)]"
               : stage.status === "complete"
-                ? "text-emerald-300"
+                ? "text-[var(--color-success)]"
                 : stage.status === "error"
-                  ? "text-red-300"
-                  : "text-slate-200"
+                  ? "text-[var(--color-error)]"
+                  : "text-[var(--text-secondary)]"
           }`}
         >
           {stage.label}
         </span>
 
-        <span className="text-xs capitalize text-slate-500">
+        <span className="text-xs capitalize text-[var(--text-muted)]">
           {stage.status === "running" ? "In progress…" : stage.status}
         </span>
       </div>
 
       {sectionProgressText && (
-        <p className="mt-1 text-[11px] text-slate-400">{sectionProgressText}</p>
+        <p className="mt-1 text-[11px] text-[var(--text-muted)]">{sectionProgressText}</p>
       )}
 
       {/* Streaming preview while running */}
       {stage.status === "running" && streamingPreview && (
-        <div className="mt-2 rounded border border-blue-500/20 bg-slate-900/60 px-3 py-2">
-          <p className="line-clamp-3 font-mono text-xs text-slate-400">{streamingPreview}</p>
+        <div className="mt-2 rounded border border-[var(--accent-primary)]/20 bg-[var(--bg-surface-overlay)] px-3 py-2">
+          <p className="line-clamp-3 font-mono text-xs text-[var(--text-muted)]">{streamingPreview}</p>
         </div>
       )}
 
       {/* Result preview once complete */}
       {stage.status === "complete" && stage.preview && (
-        <div className="mt-2 rounded border border-emerald-500/20 bg-slate-900/40 px-3 py-1.5">
-          <p className="line-clamp-2 text-xs text-slate-400">{stage.preview}</p>
+        <div className="mt-2 rounded border border-[var(--color-success)]/20 bg-[var(--bg-surface-overlay)]/40 px-3 py-1.5">
+          <p className="line-clamp-2 text-xs text-[var(--text-muted)]">{stage.preview}</p>
         </div>
       )}
 
       {/* Error message */}
       {stage.status === "error" && stage.error && (
         <div className="mt-2 space-y-2">
-          <p className="text-xs text-red-400">{stage.error}</p>
+          <p className="text-xs text-[var(--color-error)]">{stage.error}</p>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={onRetry}
               disabled={isMutating}
-              className="rounded-md bg-red-900/50 px-2.5 py-1 text-xs font-medium text-red-100 transition-colors hover:bg-red-800/60 disabled:opacity-50"
+              className="rounded-md bg-[var(--color-error-muted)] px-2.5 py-1 text-xs font-medium text-[var(--color-error)] transition-colors hover:bg-[var(--color-error-muted)] disabled:opacity-50"
             >
               {isMutating ? "Retrying..." : "Retry"}
             </button>
@@ -150,7 +150,7 @@ function StageRow({
               type="button"
               onClick={onSkip}
               disabled={isMutating}
-              className="rounded-md bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-600 disabled:opacity-50"
+              className="rounded-md bg-[var(--bg-elevated)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)] disabled:opacity-50"
             >
               Skip
             </button>
@@ -389,20 +389,20 @@ export default function ProgressTracker({
   return (
     <section className={`space-y-4 ${className ?? ""}`}>
       {pipelineWarning && (
-        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+        <div className="rounded-lg border border-[var(--color-warning-muted)] bg-[var(--color-warning)]/10 px-4 py-3 text-sm text-[var(--color-warning)]">
           {pipelineWarning}
         </div>
       )}
 
       {/* Overall progress bar */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 overflow-hidden rounded-full bg-slate-700 h-2">
+        <div className="flex-1 overflow-hidden rounded-full bg-[var(--bg-elevated)] h-2">
           <div
-            className="h-full rounded-full bg-blue-500 transition-all duration-500"
+            className="h-full rounded-full bg-[var(--accent-primary)] transition-all duration-500"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
-        <span className="min-w-[3rem] text-right text-xs text-slate-400 tabular-nums">
+        <span className="min-w-[3rem] text-right text-xs text-[var(--text-muted)] tabular-nums">
           {progressPercent}%
         </span>
       </div>
@@ -429,7 +429,7 @@ export default function ProgressTracker({
       </div>
 
       {isDone && (
-        <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-300">
+        <div className="rounded-lg border border-[var(--color-success-muted)] bg-[var(--color-success-muted)] px-4 py-3 text-sm font-medium text-[var(--color-success)]">
           All stages complete! Your results are ready to view.
         </div>
       )}

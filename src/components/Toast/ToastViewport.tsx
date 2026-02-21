@@ -5,23 +5,35 @@ const AUTO_DISMISS_MS = 5000;
 
 const TOAST_STYLES = {
   success: {
-    container: "border-emerald-500/40 bg-emerald-900/80 text-emerald-50",
-    badge: "bg-emerald-500/25 text-emerald-200",
+    bg: "var(--color-success-muted)",
+    border: "var(--color-success)",
+    text: "var(--text-primary)",
+    badgeBg: "var(--color-success)",
+    badgeText: "#fff",
     label: "Success",
   },
   warning: {
-    container: "border-amber-500/40 bg-amber-900/80 text-amber-50",
-    badge: "bg-amber-500/25 text-amber-200",
+    bg: "var(--color-warning-muted)",
+    border: "var(--color-warning)",
+    text: "var(--text-primary)",
+    badgeBg: "var(--color-warning)",
+    badgeText: "#fff",
     label: "Warning",
   },
   error: {
-    container: "border-red-500/40 bg-red-900/80 text-red-50",
-    badge: "bg-red-500/25 text-red-200",
+    bg: "var(--color-error-muted)",
+    border: "var(--color-error)",
+    text: "var(--text-primary)",
+    badgeBg: "var(--color-error)",
+    badgeText: "#fff",
     label: "Error",
   },
   info: {
-    container: "border-blue-500/40 bg-blue-900/80 text-blue-50",
-    badge: "bg-blue-500/25 text-blue-200",
+    bg: "var(--color-info-muted)",
+    border: "var(--color-info)",
+    text: "var(--text-primary)",
+    badgeBg: "var(--color-info)",
+    badgeText: "#fff",
     label: "Info",
   },
 } as const;
@@ -50,21 +62,27 @@ export default function ToastViewport() {
   return (
     <div className="pointer-events-none fixed right-4 top-4 z-[100] flex w-[22rem] max-w-[calc(100vw-2rem)] flex-col gap-2">
       {toasts.map((toast) => {
-        const style = TOAST_STYLES[toast.kind];
+        const s = TOAST_STYLES[toast.kind];
         return (
           <button
             key={toast.id}
             type="button"
             onClick={() => dismissToast(toast.id)}
-            className={`pointer-events-auto rounded-lg border px-4 py-3 text-left shadow-lg backdrop-blur-sm transition-opacity hover:opacity-95 ${style.container}`}
+            className="pointer-events-auto rounded-lg px-4 py-3 text-left shadow-lg backdrop-blur-sm transition-all hover:opacity-95 animate-slide-in-right"
+            style={{
+              border: `1px solid ${s.border}`,
+              background: s.bg,
+              color: s.text,
+            }}
           >
             <div className="flex items-center gap-2">
               <span
-                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${style.badge}`}
+                className="rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+                style={{ background: s.badgeBg, color: s.badgeText }}
               >
-                {toast.title ?? style.label}
+                {toast.title ?? s.label}
               </span>
-              <span className="text-xs text-white/75">Click to dismiss</span>
+              <span className="text-xs opacity-60">Click to dismiss</span>
             </div>
             <p className="mt-2 text-sm leading-relaxed">{toast.message}</p>
           </button>

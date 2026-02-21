@@ -280,7 +280,7 @@ export function NotesExport({ lectureId, notes, summary }: NotesExportProps) {
         <button
           type="button"
           onClick={handleCopyMarkdown}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] rounded-lg text-sm font-medium transition-colors"
         >
           <span>📋</span> Copy as Markdown
         </button>
@@ -290,7 +290,7 @@ export function NotesExport({ lectureId, notes, summary }: NotesExportProps) {
           data-hotkey-export="true"
           onClick={handleDownloadMarkdown}
           disabled={savingMd}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-slate-200 rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] disabled:opacity-50 text-[var(--text-secondary)] rounded-lg text-sm font-medium transition-colors"
         >
           <span>⬇️</span> {savingMd ? "Saving…" : "Download as Markdown"}
         </button>
@@ -298,7 +298,7 @@ export function NotesExport({ lectureId, notes, summary }: NotesExportProps) {
         <button
           type="button"
           onClick={handlePrint}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] rounded-lg text-sm font-medium transition-colors"
         >
           <span>🖨️</span> Download as PDF
         </button>

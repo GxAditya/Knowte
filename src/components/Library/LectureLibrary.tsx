@@ -68,10 +68,10 @@ function statusLabel(status: LectureStatus): string {
 }
 
 function statusBadgeClass(status: LectureStatus): string {
-  if (status === "complete") return "border-emerald-500/40 bg-emerald-500/15 text-emerald-200";
-  if (status === "error") return "border-red-500/40 bg-red-500/15 text-red-200";
-  if (status === "uploaded") return "border-slate-500/40 bg-slate-500/15 text-slate-200";
-  return "border-blue-500/40 bg-blue-500/15 text-blue-200";
+  if (status === "complete") return "badge-success";
+  if (status === "error") return "badge-error";
+  if (status === "uploaded") return "badge-neutral";
+  return "badge-info";
 }
 
 function statusMatchesFilter(status: LectureStatus, filter: StatusFilter): boolean {
@@ -83,10 +83,10 @@ function statusMatchesFilter(status: LectureStatus, filter: StatusFilter): boole
 
 function sourceBadgeClass(sourceType: LectureSourceType): string {
   if (sourceType === "video") {
-    return "border-violet-500/40 bg-violet-500/15 text-violet-200";
+    return "badge-accent";
   }
 
-  return "border-cyan-500/40 bg-cyan-500/15 text-cyan-200";
+  return "badge-info";
 }
 
 function sourceLabel(sourceType: LectureSourceType): string {
@@ -288,14 +288,14 @@ export default function LectureLibrary() {
           <button
             type="button"
             onClick={() => navigate("/upload")}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="btn-primary"
           >
             New Lecture
           </button>
         }
       />
 
-      <section className="grid gap-3 rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm md:grid-cols-[1fr_auto_auto]">
+      <section className="card grid gap-3 p-4 md:grid-cols-[1fr_auto_auto]">
         <label className="block">
           <span className="sr-only">Search lectures</span>
           <input
@@ -303,16 +303,16 @@ export default function LectureLibrary() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search title, transcript, or notes..."
-            className="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input w-full"
           />
         </label>
 
-        <label className="flex items-center gap-2 text-sm text-slate-300">
+        <label className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
           <span>Sort</span>
           <select
             value={sortOption}
             onChange={(event) => setSortOption(event.target.value as SortOption)}
-            className="rounded-md border border-slate-600 bg-slate-900 px-2 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input"
           >
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
@@ -320,12 +320,12 @@ export default function LectureLibrary() {
           </select>
         </label>
 
-        <label className="flex items-center gap-2 text-sm text-slate-300">
+        <label className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
           <span>Status</span>
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
-            className="rounded-md border border-slate-600 bg-slate-900 px-2 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input"
           >
             <option value="all">All</option>
             <option value="complete">Complete</option>
@@ -336,22 +336,22 @@ export default function LectureLibrary() {
       </section>
 
       {error && (
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+        <div className="rounded-lg px-4 py-3 text-sm" style={{ border: "1px solid var(--color-error-muted)", background: "var(--color-error-muted)", color: "var(--color-error)" }}>
           {error}
         </div>
       )}
 
       {isLoading ? (
-        <div className="flex h-64 items-center justify-center text-sm text-slate-400">
+        <div className="flex h-64 items-center justify-center text-sm" style={{ color: "var(--text-muted)" }}>
           <span className="inline-flex items-center gap-2">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: "var(--text-muted)", borderTopColor: "transparent" }} />
             Loading lectures...
           </span>
         </div>
       ) : lectureSummaries.length === 0 ? (
         <EmptyState />
       ) : filteredLectures.length === 0 ? (
-        <div className="rounded-lg border border-slate-700 bg-slate-800/60 px-6 py-10 text-center text-sm text-slate-400 shadow-sm">
+        <div className="card px-6 py-10 text-center text-sm" style={{ color: "var(--text-muted)" }}>
           No lectures match your filters.
         </div>
       ) : (
@@ -364,7 +364,8 @@ export default function LectureLibrary() {
             return (
               <article
                 key={lecture.id}
-                className="relative rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm hover:border-slate-500"
+                className="card relative p-4 transition-all hover:shadow-lg"
+                style={{ cursor: "pointer" }}
               >
                 <button
                   type="button"
@@ -372,9 +373,9 @@ export default function LectureLibrary() {
                   disabled={isBusy}
                   className="block w-full pr-10 text-left"
                 >
-                  <p className="truncate text-base font-semibold text-slate-100">{lecture.title}</p>
-                  <p className="mt-1 truncate text-xs text-slate-400">{lecture.filename}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                  <p className="truncate text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>{lecture.title}</p>
+                  <p className="mt-1 truncate text-xs" style={{ color: "var(--text-muted)" }}>{lecture.filename}</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs" style={{ color: "var(--text-muted)" }}>
                     <span>{formatDate(lecture.created_at)}</span>
                     <span>•</span>
                     <span>{formatDuration(lecture.duration)}</span>
@@ -393,13 +394,13 @@ export default function LectureLibrary() {
                   </div>
                   {showProgress && (
                     <div className="mt-3">
-                      <div className="h-1.5 overflow-hidden rounded-full bg-slate-700">
+                      <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--bg-elevated)" }}>
                         <div
-                          className="h-full rounded-full bg-blue-500 transition-all"
-                          style={{ width: `${progress}%` }}
+                          className="h-full rounded-full transition-all"
+                          style={{ width: `${progress}%`, background: "var(--accent-primary)" }}
                         />
                       </div>
-                      <p className="mt-1 text-xs text-slate-500">{progress}% complete</p>
+                      <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>{progress}% complete</p>
                     </div>
                   )}
                 </button>
@@ -414,7 +415,7 @@ export default function LectureLibrary() {
                       );
                     }}
                     disabled={isBusy}
-                    className="rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-xs text-slate-300 transition-colors hover:border-slate-500 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="btn-ghost px-2 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-50"
                     aria-label={`Lecture actions for ${lecture.title}`}
                   >
                     ⋮
@@ -422,27 +423,31 @@ export default function LectureLibrary() {
 
                   {activeMenuLectureId === lecture.id && (
                     <div
-                      className="absolute right-0 z-20 mt-2 w-44 rounded-md border border-slate-600 bg-slate-900 p-1 shadow-md"
+                      className="absolute right-0 z-20 mt-2 w-44 rounded-md p-1 shadow-lg"
+                      style={{ border: "1px solid var(--border-strong)", background: "var(--bg-surface-overlay)" }}
                       onClick={(event) => event.stopPropagation()}
                     >
                       <button
                         type="button"
                         onClick={() => void handleDeleteLecture(lecture)}
-                        className="block w-full rounded px-3 py-2 text-left text-xs text-red-300 transition-colors hover:bg-red-500/10"
+                        className="block w-full rounded px-3 py-2 text-left text-xs transition-colors hover:opacity-80"
+                        style={{ color: "var(--color-error)" }}
                       >
                         Delete
                       </button>
                       <button
                         type="button"
                         onClick={() => void handleReprocessLecture(lecture)}
-                        className="block w-full rounded px-3 py-2 text-left text-xs text-slate-200 transition-colors hover:bg-slate-700"
+                        className="block w-full rounded px-3 py-2 text-left text-xs transition-colors hover:opacity-80"
+                        style={{ color: "var(--text-secondary)" }}
                       >
                         Re-process
                       </button>
                       <button
                         type="button"
                         onClick={() => void handleExportLecture(lecture)}
-                        className="block w-full rounded px-3 py-2 text-left text-xs text-slate-200 transition-colors hover:bg-slate-700"
+                        className="block w-full rounded px-3 py-2 text-left text-xs transition-colors hover:opacity-80"
+                        style={{ color: "var(--text-secondary)" }}
                       >
                         Export All
                       </button>

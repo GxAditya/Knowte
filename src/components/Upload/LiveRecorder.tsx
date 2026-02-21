@@ -200,7 +200,8 @@ export default function LiveRecorder({
             onClick={() => void handleStartRecording()}
             disabled={disabled || isBusy}
             aria-label="Start recording"
-            className="flex h-20 w-20 items-center justify-center rounded-full bg-red-500 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-20 w-20 items-center justify-center rounded-full text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ background: "var(--color-error)" }}
           >
             Record
           </button>
@@ -210,36 +211,39 @@ export default function LiveRecorder({
             onClick={() => void handleStopRecording()}
             disabled={isBusy}
             aria-label="Stop recording"
-            className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-900 shadow-lg transition-transform hover:scale-105 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-20 w-20 items-center justify-center rounded-full text-sm font-semibold shadow-lg transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ background: "var(--bg-elevated)", color: "var(--text-primary)" }}
           >
             Stop
           </button>
         )}
 
         <div>
-          <p className="flex items-center gap-2 text-sm text-slate-400">
+          <p className="flex items-center gap-2 text-sm" style={{ color: "var(--text-muted)" }}>
             <span
               className={`h-2.5 w-2.5 rounded-full ${
-                isRecording ? "animate-pulse bg-red-500" : "bg-slate-500"
+                isRecording ? "animate-pulse" : ""
               }`}
+              style={{ background: isRecording ? "var(--color-error)" : "var(--text-muted)" }}
               aria-hidden="true"
             />
             {isRecording ? "Recording" : "Elapsed"}
           </p>
-          <p className="text-2xl font-mono text-slate-100">{formatElapsed(elapsedSeconds)}</p>
+          <p className="text-2xl font-mono" style={{ color: "var(--text-primary)" }}>{formatElapsed(elapsedSeconds)}</p>
         </div>
       </div>
 
-      <div className="rounded-lg border border-slate-700 bg-slate-900 p-3">
+      <div className="card p-3">
         <canvas
           ref={canvasRef}
           width={640}
           height={160}
-          className="h-32 w-full rounded bg-slate-950"
+          className="h-32 w-full rounded"
+          style={{ background: "var(--bg-base)" }}
         />
       </div>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm" style={{ color: "var(--color-error)" }}>{error}</p>}
     </div>
   );
 }

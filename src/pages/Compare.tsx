@@ -108,7 +108,7 @@ function highlightTerms(text: string, terms: string[]): ReactNode {
     termSet.has(part.toLowerCase()) ? (
       <mark
         key={`${part}-${index}`}
-        className="rounded bg-emerald-500/30 px-1 text-emerald-100"
+        className="rounded bg-[var(--color-success-muted)] px-1 text-[var(--color-success)]"
       >
         {part}
       </mark>
@@ -352,7 +352,7 @@ export default function Compare() {
               type="button"
               onClick={() => void handleCompare()}
               disabled={selectedIds.length < 2 || isComparing}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-primary)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isComparing ? "Comparing..." : "Run Comparison"}
             </button>
@@ -360,7 +360,7 @@ export default function Compare() {
               type="button"
               onClick={() => void handleMergeDeck()}
               disabled={selectedIds.length < 2 || isMergingDeck}
-              className="rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-200 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md border border-[var(--color-success-muted)] bg-[var(--color-success-muted)] px-4 py-2 text-sm font-medium text-[var(--color-success)] transition-colors hover:bg-[var(--color-success-muted)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isMergingDeck ? "Merging..." : "Merge Flashcards"}
             </button>
@@ -368,24 +368,24 @@ export default function Compare() {
         }
       />
 
-      <section className="space-y-4 rounded-lg border border-slate-700 bg-slate-900/60 p-4">
+      <section className="space-y-4 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <input
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search lectures by title or filename..."
-            className="w-full max-w-md rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
+            className="w-full max-w-md rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)] focus:outline-none"
           />
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-[var(--text-muted)]">
             Selected: {selectedIds.length}/3
           </span>
         </div>
 
         {isLoadingLectures ? (
-          <p className="text-sm text-slate-400">Loading lectures...</p>
+          <p className="text-sm text-[var(--text-muted)]">Loading lectures...</p>
         ) : filteredLectures.length === 0 ? (
-          <p className="text-sm text-slate-400">No lectures match your search.</p>
+          <p className="text-sm text-[var(--text-muted)]">No lectures match your search.</p>
         ) : (
           <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
             {filteredLectures.map((lecture) => {
@@ -397,8 +397,8 @@ export default function Compare() {
                   key={lecture.id}
                   className={`flex cursor-pointer items-start gap-3 rounded-md border px-3 py-2 text-sm transition-colors ${
                     checked
-                      ? "border-blue-500/60 bg-blue-500/15"
-                      : "border-slate-700 bg-slate-800/60 hover:border-slate-600"
+                      ? "border-[var(--accent-primary)] bg-[var(--accent-primary)]/15"
+                      : "border-[var(--border-default)] bg-[var(--bg-elevated)] hover:border-[var(--border-strong)]"
                   } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
                 >
                   <input
@@ -409,9 +409,9 @@ export default function Compare() {
                     className="mt-0.5 h-4 w-4 accent-blue-500"
                   />
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-slate-100">{lecture.title}</p>
-                    <p className="truncate text-xs text-slate-400">{lecture.filename}</p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="truncate font-medium text-[var(--text-primary)]">{lecture.title}</p>
+                    <p className="truncate text-xs text-[var(--text-muted)]">{lecture.filename}</p>
+                    <p className="mt-1 text-xs text-[var(--text-muted)]">
                       {lecture.summary ? "Summary ready" : "Summary not generated"}
                     </p>
                   </div>
@@ -424,28 +424,28 @@ export default function Compare() {
 
       {selectedLectures.length >= 2 && (
         <>
-          <section className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/60 p-4">
-            <h2 className="text-lg font-semibold text-slate-100">Overlapping Key Terms</h2>
+          <section className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-4">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Overlapping Key Terms</h2>
             {overlapTerms.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {overlapTerms.map((term) => (
                   <span
                     key={term}
-                    className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-200"
+                    className="rounded-full border border-[var(--color-success-muted)] bg-[var(--color-success-muted)] px-2.5 py-1 text-xs font-medium text-[var(--color-success)]"
                   >
                     {term}
                   </span>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-[var(--text-muted)]">
                 Run comparison after summaries are generated to see overlapping terms.
               </p>
             )}
           </section>
 
-          <section className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/60 p-4">
-            <h2 className="text-lg font-semibold text-slate-100">Summary Side-by-Side</h2>
+          <section className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-4">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Summary Side-by-Side</h2>
             <div
               className={`grid gap-4 ${
                 selectedLectures.length === 2 ? "md:grid-cols-2" : "md:grid-cols-2 xl:grid-cols-3"
@@ -454,10 +454,10 @@ export default function Compare() {
               {selectedLectures.map((lecture) => (
                 <article
                   key={lecture.id}
-                  className="rounded-lg border border-slate-700 bg-slate-800/70 p-4"
+                  className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4"
                 >
-                  <h3 className="text-sm font-semibold text-slate-100">{lecture.title}</h3>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-300">
+                  <h3 className="text-sm font-semibold text-[var(--text-primary)]">{lecture.title}</h3>
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--text-secondary)]">
                     {highlightTerms(
                       lecture.summary ?? "No summary available for this lecture yet.",
                       overlapTerms,
@@ -471,32 +471,32 @@ export default function Compare() {
       )}
 
       {comparison && (
-        <section className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/60 p-4">
-          <h2 className="text-lg font-semibold text-slate-100">Comparison Analysis</h2>
-          <p className="whitespace-pre-wrap text-sm leading-6 text-slate-300">{comparison}</p>
+        <section className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-4">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Comparison Analysis</h2>
+          <p className="whitespace-pre-wrap text-sm leading-6 text-[var(--text-secondary)]">{comparison}</p>
         </section>
       )}
 
       {combinedMindMap && (
-        <section className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/60 p-4">
-          <h2 className="text-lg font-semibold text-slate-100">Combined Mind Map</h2>
-          <div className="h-[520px] overflow-hidden rounded-lg border border-slate-700 bg-slate-900">
+        <section className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-4">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Combined Mind Map</h2>
+          <div className="h-[520px] overflow-hidden rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)]">
             <MindMapCanvas data={combinedMindMap} />
           </div>
         </section>
       )}
 
       {mergedDeck && (
-        <section className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/60 p-4">
-          <h2 className="text-lg font-semibold text-slate-100">Merged Flashcard Deck</h2>
-          <p className="text-sm text-slate-400">
+        <section className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-4">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Merged Flashcard Deck</h2>
+          <p className="text-sm text-[var(--text-muted)]">
             {mergedDeck.cards.length} cards from {mergedDeck.source_count} lectures (
             {mergedDeck.duplicate_count} near-duplicates removed).
           </p>
           {mergedDeck.cards.length > 0 ? (
             <FlashcardViewer cards={mergedDeck.cards} />
           ) : (
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-[var(--text-muted)]">
               No cards available after merge. Generate flashcards first.
             </p>
           )}
@@ -504,7 +504,7 @@ export default function Compare() {
       )}
 
       {error && (
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-lg border border-[var(--color-error-muted)] bg-[var(--color-error-muted)] px-4 py-3 text-sm text-[var(--color-error)]">
           {error}
         </div>
       )}

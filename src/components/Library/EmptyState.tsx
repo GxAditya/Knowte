@@ -4,11 +4,12 @@ export default function EmptyState() {
   const navigate = useNavigate();
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800/70 px-6 py-12 text-center shadow-sm">
-      <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-lg border border-slate-600 bg-slate-900/80">
+    <div className="card px-6 py-12 text-center animate-scale-in">
+      <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-lg" style={{ border: "1px solid var(--border-strong)", background: "var(--bg-surface-overlay)" }}>
         <svg
           aria-hidden="true"
-          className="h-10 w-10 text-slate-400"
+          className="h-10 w-10"
+          style={{ color: "var(--text-muted)" }}
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -21,14 +22,14 @@ export default function EmptyState() {
           />
         </svg>
       </div>
-      <h2 className="text-lg font-semibold text-slate-100">No lectures yet</h2>
-      <p className="mx-auto mt-2 max-w-md text-sm text-slate-400">
+      <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>No lectures yet</h2>
+      <p className="mx-auto mt-2 max-w-md text-sm" style={{ color: "var(--text-muted)" }}>
         Upload your first lecture to start generating transcripts, notes, quizzes, and flashcards.
       </p>
       <button
         type="button"
         onClick={() => navigate("/upload")}
-        className="mt-6 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+        className="btn-primary mt-6"
       >
         Upload your first lecture
       </button>

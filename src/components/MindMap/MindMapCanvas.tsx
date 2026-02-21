@@ -31,10 +31,10 @@ const NODE_DIMS = [
 ];
 
 const NODE_STYLES: Record<number, React.CSSProperties> = {
-  0: { background: "#4f46e5", border: "2px solid #818cf8", color: "#fff", fontSize: 15, fontWeight: 700, borderRadius: 12,  boxShadow: "0 4px 20px rgba(99,102,241,.45)" },
-  1: { background: "#1d4ed8", border: "2px solid #60a5fa", color: "#fff", fontSize: 13, fontWeight: 600, borderRadius: 10, boxShadow: "0 2px 12px rgba(37,99,235,.35)" },
-  2: { background: "#047857", border: "2px solid #34d399", color: "#fff", fontSize: 12, fontWeight: 500, borderRadius: 8,  boxShadow: "0 2px 10px rgba(5,150,105,.30)" },
-  3: { background: "#334155", border: "2px solid #64748b", color: "#cbd5e1", fontSize: 11, fontWeight: 400, borderRadius: 8,  boxShadow: "0 1px 6px rgba(0,0,0,.25)" },
+  0: { background: "var(--accent-primary)", border: "2px solid var(--accent-secondary)", color: "#fff", fontSize: 15, fontWeight: 700, borderRadius: 12,  boxShadow: "0 4px 20px var(--accent-glow)" },
+  1: { background: "var(--color-info)", border: "2px solid var(--color-info)", color: "#fff", fontSize: 13, fontWeight: 600, borderRadius: 10, boxShadow: "0 2px 12px var(--accent-glow)" },
+  2: { background: "var(--color-success)", border: "2px solid var(--color-success)", color: "#fff", fontSize: 12, fontWeight: 500, borderRadius: 8,  boxShadow: "0 2px 10px var(--color-success-muted)" },
+  3: { background: "var(--bg-surface-overlay)", border: "2px solid var(--border-strong)", color: "var(--text-secondary)", fontSize: 11, fontWeight: 400, borderRadius: 8,  boxShadow: "0 1px 6px rgba(0,0,0,.25)" },
 };
 
 // ─── Custom node component ─────────────────────────────────────────────────────
@@ -68,10 +68,10 @@ function MindMapNodeComp({ data, isConnectable }: NodeProps) {
   return (
     <>
       {level > 0 && (
-        <Handle type="target" position={Position.Left} isConnectable={isConnectable} style={{ background: "#475569" }} />
+        <Handle type="target" position={Position.Left} isConnectable={isConnectable} style={{ background: "var(--border-strong)" }} />
       )}
       <div style={style}>{d.label}</div>
-      <Handle type="source" position={Position.Right} isConnectable={isConnectable} style={{ background: "#475569" }} />
+      <Handle type="source" position={Position.Right} isConnectable={isConnectable} style={{ background: "var(--border-strong)" }} />
     </>
   );
 }
@@ -104,7 +104,7 @@ function flattenTree(
       target: node.id,
       type: "smoothstep",
       animated: false,
-      style: { stroke: "#475569", strokeWidth: 2 },
+      style: { stroke: "var(--border-strong)", strokeWidth: 2 },
     });
   }
   for (const child of node.children ?? []) {
@@ -190,10 +190,10 @@ function InnerCanvas({ data }: { data: MindMapData }) {
           ...e.style,
           stroke:
             selectedBranch === null
-              ? "#475569"
+              ? "var(--border-strong)"
               : selectedBranch.has(e.source) && selectedBranch.has(e.target)
-                ? "#818cf8"
-                : "#334155",
+                ? "var(--accent-primary)"
+                : "var(--bg-surface-overlay)",
           opacity: selectedBranch === null ? 1 : selectedBranch.has(e.source) && selectedBranch.has(e.target) ? 1 : 0.2,
         },
       })),
@@ -276,19 +276,25 @@ function InnerCanvas({ data }: { data: MindMapData }) {
         nodesConnectable={false}
         elementsSelectable={true}
         proOptions={{ hideAttribution: true }}
-        style={{ background: "#0f172a" }}
+        style={{ background: "var(--bg-base)" }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#1e293b" />
+        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="var(--border-default)" />
         <MiniMap
           nodeColor={(n) => {
             const level = Math.min(((n.data as MindMapNodeData).level ?? 0) as number, 3);
-            return ["#4f46e5", "#1d4ed8", "#047857", "#334155"][level];
+            const colors = getComputedStyle(document.documentElement);
+            return [
+              colors.getPropertyValue('--accent-primary').trim() || '#4f46e5',
+              colors.getPropertyValue('--color-info').trim() || '#1d4ed8',
+              colors.getPropertyValue('--color-success').trim() || '#047857',
+              colors.getPropertyValue('--bg-surface-overlay').trim() || '#334155',
+            ][level];
           }}
-          style={{ background: "#1e293b", border: "1px solid #334155" }}
+          style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)" }}
           maskColor="rgba(15,23,42,0.7)"
         />
         <Controls
-          style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8 }}
+          style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: 8 }}
           showInteractive={false}
         />
       </ReactFlow>
@@ -298,7 +304,7 @@ function InnerCanvas({ data }: { data: MindMapData }) {
         <button
           type="button"
           onClick={handleFitView}
-          className="px-3 py-1.5 text-xs font-medium bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg border border-slate-600 transition-colors"
+          className="px-3 py-1.5 text-xs font-medium bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] rounded-lg border border-[var(--border-strong)] transition-colors"
           title="Fit the full map in view"
         >
           Fit View
@@ -307,7 +313,7 @@ function InnerCanvas({ data }: { data: MindMapData }) {
           type="button"
           data-hotkey-export="true"
           onClick={downloadPng}
-          className="px-3 py-1.5 text-xs font-medium bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg border border-slate-600 transition-colors"
+          className="px-3 py-1.5 text-xs font-medium bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] rounded-lg border border-[var(--border-strong)] transition-colors"
           title="Download as PNG"
         >
           ↓ PNG
@@ -315,7 +321,7 @@ function InnerCanvas({ data }: { data: MindMapData }) {
         <button
           type="button"
           onClick={downloadSvg}
-          className="px-3 py-1.5 text-xs font-medium bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg border border-slate-600 transition-colors"
+          className="px-3 py-1.5 text-xs font-medium bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] rounded-lg border border-[var(--border-strong)] transition-colors"
           title="Download as SVG"
         >
           ↓ SVG
@@ -324,7 +330,7 @@ function InnerCanvas({ data }: { data: MindMapData }) {
           <button
             type="button"
             onClick={() => setSelectedBranch(null)}
-            className="px-3 py-1.5 text-xs font-medium bg-violet-700 hover:bg-violet-600 text-white rounded-lg border border-violet-500 transition-colors"
+            className="px-3 py-1.5 text-xs font-medium bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] text-white rounded-lg border border-[var(--accent-primary)] transition-colors"
           >
             Clear Selection
           </button>
@@ -332,7 +338,7 @@ function InnerCanvas({ data }: { data: MindMapData }) {
       </div>
 
       {selectedBranch !== null && (
-        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-full">
+        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)]/80 px-3 py-1.5 rounded-full">
           Click a node to highlight its branch · Click background to clear
         </p>
       )}

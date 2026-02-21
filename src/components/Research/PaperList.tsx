@@ -48,11 +48,11 @@ export default function PaperList({ papers, isLoading, onRefresh }: PaperListPro
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
-          <label className="text-xs text-slate-400 whitespace-nowrap">Sort by:</label>
+          <label className="text-xs text-[var(--text-muted)] whitespace-nowrap">Sort by:</label>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortKey)}
-            className="text-xs px-2 py-1 bg-slate-700 border border-slate-600 rounded text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="text-xs px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
           >
             <option value="citations">Citations</option>
             <option value="year">Year (newest first)</option>
@@ -67,25 +67,25 @@ export default function PaperList({ papers, isLoading, onRefresh }: PaperListPro
             onChange={(e) => setFilterPdfOnly(e.target.checked)}
             className="w-3.5 h-3.5 accent-blue-500"
           />
-          <span className="text-xs text-slate-400">PDF only</span>
+          <span className="text-xs text-[var(--text-muted)]">PDF only</span>
         </label>
 
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-slate-400">Year:</span>
+          <span className="text-xs text-[var(--text-muted)]">Year:</span>
           <input
             type="number"
             placeholder="from"
             value={yearFrom}
             onChange={(e) => setYearFrom(e.target.value)}
-            className="w-16 text-xs px-2 py-1 bg-slate-700 border border-slate-600 rounded text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-16 text-xs px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
           />
-          <span className="text-xs text-slate-500">–</span>
+          <span className="text-xs text-[var(--text-muted)]">–</span>
           <input
             type="number"
             placeholder="to"
             value={yearTo}
             onChange={(e) => setYearTo(e.target.value)}
-            className="w-16 text-xs px-2 py-1 bg-slate-700 border border-slate-600 rounded text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-16 text-xs px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
           />
         </div>
 
@@ -93,11 +93,11 @@ export default function PaperList({ papers, isLoading, onRefresh }: PaperListPro
           <button
             onClick={onRefresh}
             disabled={isLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-md border border-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] rounded-md border border-[var(--border-strong)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
-                <span className="inline-block w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                <span className="inline-block w-3 h-3 border-2 border-[var(--border-default)] border-t-transparent rounded-full animate-spin" />
                 Searching…
               </>
             ) : (
@@ -108,13 +108,13 @@ export default function PaperList({ papers, isLoading, onRefresh }: PaperListPro
       </div>
 
       {/* Count */}
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-[var(--text-muted)]">
         {filtered.length} paper{filtered.length !== 1 ? "s" : ""} found
       </p>
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="text-center py-12 text-slate-500 text-sm">
+        <div className="text-center py-12 text-[var(--text-muted)] text-sm">
           No papers match the current filters.
         </div>
       ) : (

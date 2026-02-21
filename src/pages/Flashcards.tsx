@@ -11,7 +11,7 @@ import { useLectureStore } from "../stores";
 function EmptyState({ reason }: { reason: "no-lecture" | "no-flashcards" }) {
   if (reason === "no-lecture") {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-slate-500 space-y-2">
+      <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-2">
         <span className="text-4xl">🃏</span>
         <p className="text-sm">No lecture selected.</p>
         <p className="text-xs">Upload and process a lecture to generate flashcards.</p>
@@ -19,9 +19,9 @@ function EmptyState({ reason }: { reason: "no-lecture" | "no-flashcards" }) {
     );
   }
   return (
-    <div className="flex flex-col items-center justify-center h-64 text-slate-500 space-y-2">
+    <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-2">
       <span className="text-4xl">🃏</span>
-      <p className="text-sm font-medium text-slate-300">No flashcards generated yet.</p>
+      <p className="text-sm font-medium text-[var(--text-secondary)]">No flashcards generated yet.</p>
       <p className="text-xs">Run the processing pipeline to generate flashcards.</p>
     </div>
   );
@@ -93,13 +93,13 @@ export default function Flashcards() {
           title="Flashcards"
           description="Review key terms using active recall cards."
         />
-        <div className="bg-red-900/20 border border-red-800/40 rounded-lg p-4 text-sm text-red-300 shadow-sm">
+        <div className="bg-[var(--color-error-muted)] border border-[var(--color-error-muted)] rounded-lg p-4 text-sm text-[var(--color-error)] shadow-sm">
           {error}
         </div>
         <button
           type="button"
           onClick={() => currentLectureId && void loadFlashcards(currentLectureId)}
-          className="mt-4 rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600"
+          className="mt-4 rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
         >
           Retry
         </button>

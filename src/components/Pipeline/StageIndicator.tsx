@@ -4,7 +4,7 @@ interface StageIndicatorProps {
 
 export default function StageIndicator({ label }: StageIndicatorProps) {
   return (
-    <span className="inline-flex items-center rounded-full bg-blue-500/20 px-2.5 py-1 text-xs font-medium text-blue-200">
+    <span className="inline-flex items-center rounded-full bg-[var(--color-info-muted)] px-2.5 py-1 text-xs font-medium text-[var(--color-info)]">
       {label}
     </span>
   );

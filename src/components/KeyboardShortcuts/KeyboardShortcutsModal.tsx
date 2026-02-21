@@ -10,7 +10,12 @@ function renderKeys(keys: string) {
   return keys.split("+").map((part) => (
     <kbd
       key={`${keys}-${part}`}
-      className="rounded border border-slate-500 bg-slate-800 px-2 py-0.5 text-xs font-semibold text-slate-100"
+      className="rounded px-2 py-0.5 text-xs font-semibold"
+      style={{
+        border: "1px solid var(--border-strong)",
+        background: "var(--bg-surface-overlay)",
+        color: "var(--text-primary)",
+      }}
     >
       {part}
     </kbd>
@@ -43,7 +48,8 @@ export default function KeyboardShortcutsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/75 px-4 py-8 backdrop-blur-sm"
+      className="fixed inset-0 z-[120] flex items-center justify-center px-4 py-8 backdrop-blur-sm animate-view-in"
+      style={{ background: "rgba(0,0,0,0.6)" }}
       onClick={onClose}
       role="presentation"
     >
@@ -51,15 +57,15 @@ export default function KeyboardShortcutsModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="keyboard-shortcuts-title"
-        className="w-full max-w-3xl rounded-lg border border-slate-600 bg-slate-900 p-6 shadow-md"
+        className="card w-full max-w-3xl p-6 shadow-lg animate-scale-in"
         onClick={(event) => event.stopPropagation()}
       >
         <header className="mb-5 flex items-center justify-between gap-3">
           <div>
-            <h2 id="keyboard-shortcuts-title" className="text-xl font-semibold text-slate-100">
+            <h2 id="keyboard-shortcuts-title" className="text-xl font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>
               Keyboard Shortcuts
             </h2>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
               Use these shortcuts to navigate and control Cognote faster.
             </p>
           </div>
@@ -68,7 +74,7 @@ export default function KeyboardShortcutsModal({
             type="button"
             onClick={onClose}
             aria-label="Close keyboard shortcuts dialog"
-            className="rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 transition-colors hover:bg-slate-700"
+            className="btn-ghost"
           >
             Close
           </button>
@@ -76,31 +82,33 @@ export default function KeyboardShortcutsModal({
 
         <div className="grid gap-6 md:grid-cols-2">
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
               Global
             </p>
             {GLOBAL_SHORTCUTS.map((shortcut) => (
               <div
                 key={shortcut.keys}
-                className="flex items-center justify-between gap-4 rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2"
+                className="flex items-center justify-between gap-4 rounded-lg px-3 py-2"
+                style={{ border: "1px solid var(--border-default)", background: "var(--bg-surface-overlay)" }}
               >
                 <div className="flex items-center gap-1">{renderKeys(shortcut.keys)}</div>
-                <span className="text-sm text-slate-300">{shortcut.action}</span>
+                <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{shortcut.action}</span>
               </div>
             ))}
           </div>
 
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
               Lecture Views
             </p>
             {LECTURE_VIEW_SHORTCUTS.map((shortcut) => (
               <div
                 key={shortcut.key}
-                className="flex items-center justify-between gap-4 rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2"
+                className="flex items-center justify-between gap-4 rounded-lg px-3 py-2"
+                style={{ border: "1px solid var(--border-default)", background: "var(--bg-surface-overlay)" }}
               >
                 <div className="flex items-center gap-1">{renderKeys(`Ctrl+${shortcut.key}`)}</div>
-                <span className="text-sm text-slate-300">{shortcut.label}</span>
+                <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{shortcut.label}</span>
               </div>
             ))}
           </div>

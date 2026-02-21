@@ -177,9 +177,9 @@ export default function TranscriptEditor({
 
   if (!lecture) {
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm">
-        <h1 className="text-xl font-semibold text-slate-100">Transcript Editor</h1>
-        <p className="mt-2 text-sm text-slate-400">
+      <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4 shadow-sm">
+        <h1 className="text-xl font-semibold text-[var(--text-primary)]">Transcript Editor</h1>
+        <p className="mt-2 text-sm text-[var(--text-muted)]">
           Process a lecture from the Upload page to edit transcript segments.
         </p>
       </div>
@@ -188,9 +188,9 @@ export default function TranscriptEditor({
 
   if (!lecture.transcriptId) {
     return (
-      <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 shadow-sm">
-        <h1 className="text-xl font-semibold text-amber-100">Transcript Editor</h1>
-        <p className="mt-2 text-sm text-amber-200">
+      <div className="rounded-lg border border-[var(--color-warning-muted)] bg-[var(--color-warning)]/10 p-4 shadow-sm">
+        <h1 className="text-xl font-semibold text-[var(--color-warning)]">Transcript Editor</h1>
+        <p className="mt-2 text-sm text-[var(--color-warning)]">
           Transcript editing is unavailable for this lecture. Re-process the lecture
           transcript to enable editing.
         </p>
@@ -200,7 +200,7 @@ export default function TranscriptEditor({
 
   return (
     <div className="space-y-4">
-      <section className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm">
+      <section className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4 shadow-sm">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex-1">
             <label htmlFor="transcript-editor-search" className="sr-only">
@@ -211,18 +211,18 @@ export default function TranscriptEditor({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search transcript segments..."
-              className="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-[var(--border-strong)] bg-[var(--bg-surface-overlay)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
             />
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-[var(--text-muted)]">
             Editing auto-saves 1 second after each change.
           </p>
         </div>
       </section>
 
-      <section className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm">
+      <section className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4 shadow-sm">
         {filteredSegments.length === 0 ? (
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-[var(--text-muted)]">
             {query
               ? "No transcript segments match your search."
               : "No transcript segments are available for this lecture."}
@@ -237,29 +237,29 @@ export default function TranscriptEditor({
               return (
                 <article
                   key={`${segment.start}-${segment.end}-${index}`}
-                  className={`rounded-md border bg-slate-900/60 p-3 transition-colors ${
+                  className={`rounded-md border bg-[var(--bg-surface-overlay)] p-3 transition-colors ${
                     activeSegmentIndex === index
-                      ? "border-blue-500 ring-1 ring-blue-500/70"
-                      : "border-slate-700"
+                      ? "border-[var(--accent-primary)] ring-1 ring-[var(--accent-primary)]"
+                      : "border-[var(--border-default)]"
                   }`}
                 >
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <button
                       type="button"
                       onClick={() => onSegmentClick?.(index)}
-                      className="rounded-md bg-slate-800 px-2 py-1 text-xs text-blue-300 transition-colors hover:bg-slate-700"
+                      className="rounded-md bg-[var(--bg-elevated)] px-2 py-1 text-xs text-[var(--color-info)] transition-colors hover:bg-[var(--bg-elevated)]"
                     >
                       {formatTimestamp(segment.start)} - {formatTimestamp(segment.end)}
                     </button>
 
                     <div className="flex items-center gap-2 text-xs">
-                      {isSaving && <span className="text-blue-300">Saving...</span>}
-                      {errorMessage && <span className="text-red-300">{errorMessage}</span>}
+                      {isSaving && <span className="text-[var(--color-info)]">Saving...</span>}
+                      {errorMessage && <span className="text-[var(--color-error)]">{errorMessage}</span>}
                       <button
                         type="button"
                         disabled={!hasOriginal}
                         onClick={() => handleResetSegment(index)}
-                        className="rounded-md border border-slate-600 px-2 py-1 text-slate-200 transition-colors hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-md border border-[var(--border-strong)] px-2 py-1 text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Reset to original
                       </button>
@@ -270,7 +270,7 @@ export default function TranscriptEditor({
                     value={segment.text}
                     onChange={(event) => handleSegmentInput(index, event.target.value)}
                     rows={Math.max(2, Math.ceil(segment.text.length / 80))}
-                    className="w-full resize-none rounded-md border border-slate-700 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full resize-none rounded-md border border-[var(--border-default)] bg-[var(--bg-base)]/80 px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
                   />
                 </article>
               );

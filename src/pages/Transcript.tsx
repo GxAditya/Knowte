@@ -279,7 +279,7 @@ export default function Transcript() {
             type="button"
             onClick={() => setIsEditing((previous) => !previous)}
             disabled={!lecture.transcriptSegments || lecture.transcriptSegments.length === 0}
-            className="rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all duration-150 hover:bg-[var(--bg-surface-overlay)] hover:border-[var(--accent-primary)] hover:text-[var(--text-primary)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isEditing ? "View Transcript" : "Edit Transcript"}
           </button>
@@ -287,7 +287,7 @@ export default function Transcript() {
       />
 
       {audioError && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200 shadow-sm">
+        <div className="rounded-lg border border-[var(--color-warning-muted)] bg-[var(--color-warning)]/10 px-4 py-3 text-sm text-[var(--color-warning)] shadow-sm">
           {audioError}
         </div>
       )}

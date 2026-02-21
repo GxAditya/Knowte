@@ -34,32 +34,32 @@ export default function PaperCard({ paper }: PaperCardProps) {
         : `${paper.authors[0]} et al.`;
 
   return (
-    <div className="p-4 bg-slate-800 border border-slate-700 rounded-lg space-y-3 hover:border-slate-500 transition-colors">
+    <div className="p-4 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-lg space-y-3 hover:border-[var(--border-strong)] transition-colors">
       {/* Header row */}
       <div className="space-y-1">
-        <h3 className="text-sm font-semibold text-slate-100 leading-snug line-clamp-2">
+        <h3 className="text-sm font-semibold text-[var(--text-primary)] leading-snug line-clamp-2">
           {paper.title}
         </h3>
-        <p className="text-xs text-slate-400">{authorLine}</p>
+        <p className="text-xs text-[var(--text-muted)]">{authorLine}</p>
       </div>
 
       {/* Meta badges */}
       <div className="flex flex-wrap gap-2 text-xs">
         {paper.year != null && (
-          <span className="px-2 py-0.5 bg-slate-700 text-slate-300 rounded-full">
+          <span className="px-2 py-0.5 bg-[var(--bg-elevated)] text-[var(--text-secondary)] rounded-full">
             {paper.year}
           </span>
         )}
         {paper.venue && (
-          <span className="px-2 py-0.5 bg-slate-700 text-slate-300 rounded-full truncate max-w-[200px]">
+          <span className="px-2 py-0.5 bg-[var(--bg-elevated)] text-[var(--text-secondary)] rounded-full truncate max-w-[200px]">
             {paper.venue}
           </span>
         )}
-        <span className="px-2 py-0.5 bg-blue-900/50 text-blue-300 rounded-full">
+        <span className="px-2 py-0.5 bg-[var(--color-info-muted)] text-[var(--color-info)] rounded-full">
           {paper.citation_count.toLocaleString()} citations
         </span>
         {paper.pdf_url && (
-          <span className="px-2 py-0.5 bg-green-900/50 text-green-300 rounded-full">
+          <span className="px-2 py-0.5 bg-[var(--color-success-muted)] text-[var(--color-success)] rounded-full">
             Open Access PDF
           </span>
         )}
@@ -70,12 +70,12 @@ export default function PaperCard({ paper }: PaperCardProps) {
         <div>
           <button
             onClick={() => setExpanded((v) => !v)}
-            className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+            className="text-xs text-[var(--accent-primary)] hover:text-[var(--color-info)] transition-colors"
           >
             {expanded ? "Hide abstract ▲" : "View abstract ▼"}
           </button>
           {expanded && (
-            <p className="mt-2 text-xs text-slate-300 leading-relaxed line-clamp-5">
+            <p className="mt-2 text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-5">
               {paper.abstract_text}
             </p>
           )}
@@ -86,14 +86,14 @@ export default function PaperCard({ paper }: PaperCardProps) {
       <div className="flex gap-2 pt-1">
         <button
           onClick={handleOpenPaper}
-          className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+          className="px-3 py-1.5 text-xs bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white rounded-md transition-colors"
         >
           Open Paper ↗
         </button>
         {paper.pdf_url && (
           <button
             onClick={handleOpenPdf}
-            className="px-3 py-1.5 text-xs bg-green-700 hover:bg-green-600 text-white rounded-md transition-colors"
+            className="px-3 py-1.5 text-xs bg-[var(--color-success)] hover:bg-[var(--color-success)] text-white rounded-md transition-colors"
           >
             Download PDF ↓
           </button>

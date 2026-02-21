@@ -41,33 +41,33 @@ export default function ModelSelector({
       <div className="flex items-center gap-2">
         <div
           className={`h-3 w-3 rounded-full ${
-            isConnected ? "bg-green-500" : "bg-red-500"
+            isConnected ? "bg-[var(--color-success)]" : "bg-[var(--color-error)]"
           }`}
           title={isConnected ? "Connected to Ollama" : "Not connected to Ollama"}
         />
-        <span className="text-sm text-slate-300">
+        <span className="text-sm text-[var(--text-secondary)]">
           {isConnected ? "Connected to Ollama" : "Ollama not reachable"}
         </span>
         <button
           type="button"
           onClick={() => void checkOllama(ollamaUrl)}
-          className="text-xs text-blue-400 hover:text-blue-300"
+          className="text-xs text-[var(--accent-primary)] hover:text-[var(--color-info)]"
         >
           Refresh
         </button>
       </div>
 
       {!isConnected && ollamaStatus?.error && (
-        <p className="text-xs text-red-400">{ollamaStatus.error}</p>
+        <p className="text-xs text-[var(--color-error)]">{ollamaStatus.error}</p>
       )}
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-slate-300">LLM Model</label>
+        <label className="block text-sm font-medium text-[var(--text-secondary)]">LLM Model</label>
         <select
           value={llmModel}
           onChange={(event) => onLlmModelChange(event.target.value)}
           disabled={!isConnected}
-          className="w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isConnected ? (
             llmModels.length > 0 ? (
@@ -84,20 +84,20 @@ export default function ModelSelector({
           )}
         </select>
         {!isConnected && (
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-[var(--text-muted)]">
             Start Ollama to refresh available models.
           </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-slate-300">
+        <label className="block text-sm font-medium text-[var(--text-secondary)]">
           Whisper Model
         </label>
         <select
           value={whisperModel}
           onChange={(event) => onWhisperModelChange(event.target.value)}
-          className="w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
         >
           {WHISPER_MODELS.map((model) => (
             <option key={model.value} value={model.value}>
@@ -107,10 +107,10 @@ export default function ModelSelector({
         </select>
       </div>
 
-      <div className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/50 p-3">
+      <div className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-200">Whisper Models</h3>
-          <span className="text-xs text-slate-400">Stored in `src-tauri/whisper-models`</span>
+          <h3 className="text-sm font-semibold text-[var(--text-secondary)]">Whisper Models</h3>
+          <span className="text-xs text-[var(--text-muted)]">Stored in `src-tauri/whisper-models`</span>
         </div>
 
         <div className="space-y-2">
@@ -122,15 +122,15 @@ export default function ModelSelector({
             return (
               <div
                 key={model.value}
-                className="flex items-center justify-between rounded-md border border-slate-700 bg-slate-800/70 px-3 py-2"
+                className="flex items-center justify-between rounded-md border border-[var(--border-default)] bg-[var(--bg-elevated)] px-3 py-2"
               >
                 <div>
-                  <p className="text-sm text-slate-200">{model.value}</p>
-                  <p className="text-xs text-slate-400">{fileName}</p>
+                  <p className="text-sm text-[var(--text-secondary)]">{model.value}</p>
+                  <p className="text-xs text-[var(--text-muted)]">{fileName}</p>
                 </div>
 
                 {isDownloaded ? (
-                  <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs text-emerald-300">
+                  <span className="rounded-full bg-[var(--color-success-muted)] px-3 py-1 text-xs text-[var(--color-success)]">
                     Downloaded
                   </span>
                 ) : (
@@ -138,7 +138,7 @@ export default function ModelSelector({
                     type="button"
                     onClick={() => void downloadWhisperModel(model.value)}
                     disabled={Boolean(whisperDownloadingModel)}
-                    className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-md bg-[var(--accent-primary)] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[var(--accent-primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isDownloading ? "Downloading..." : "Download"}
                   </button>
@@ -150,20 +150,20 @@ export default function ModelSelector({
 
         {whisperDownloadingModel && (
           <div className="space-y-1">
-            <div className="flex items-center justify-between text-xs text-slate-300">
+            <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
               <span>Downloading {whisperDownloadingModel}</span>
               <span>{Math.round(whisperDownloadProgress)}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded bg-slate-700">
+            <div className="h-2 overflow-hidden rounded bg-[var(--bg-elevated)]">
               <div
-                className="h-full bg-blue-500 transition-all"
+                className="h-full bg-[var(--accent-primary)] transition-all"
                 style={{ width: `${whisperDownloadProgress}%` }}
               />
             </div>
           </div>
         )}
 
-        {whisperError && <p className="text-xs text-red-400">{whisperError}</p>}
+        {whisperError && <p className="text-xs text-[var(--color-error)]">{whisperError}</p>}
       </div>
     </div>
   );

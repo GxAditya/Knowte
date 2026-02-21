@@ -85,7 +85,7 @@ export default function Research() {
           title="Related Research"
           description="Find relevant papers from Semantic Scholar."
         />
-        <div className="flex h-64 flex-col items-center justify-center space-y-2 text-slate-500">
+        <div className="flex h-64 flex-col items-center justify-center space-y-2 text-[var(--text-muted)]">
           <span className="text-4xl">🔬</span>
           <p className="text-sm">No lecture selected.</p>
           <p className="text-xs">Upload and process a lecture to find related papers.</p>
@@ -102,12 +102,12 @@ export default function Research() {
           title="Related Research"
           description="Find relevant papers from Semantic Scholar."
         />
-        <div className="flex h-48 flex-col items-center justify-center space-y-3 rounded-lg border border-slate-700 bg-slate-800 text-slate-500 shadow-sm">
+        <div className="flex h-48 flex-col items-center justify-center space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] text-[var(--text-muted)] shadow-sm">
           <span className="text-3xl">📡</span>
-          <p className="text-sm font-medium text-slate-300">Research paper search is disabled.</p>
+          <p className="text-sm font-medium text-[var(--text-secondary)]">Research paper search is disabled.</p>
           <p className="text-xs">
             Enable "Research paper search" in{" "}
-            <span className="text-blue-400">Settings → Research</span> to find related papers.
+            <span className="text-[var(--accent-primary)]">Settings → Research</span> to find related papers.
           </p>
         </div>
       </div>
@@ -125,7 +125,7 @@ export default function Research() {
             type="button"
             onClick={() => void handleSearch()}
             disabled={isLoading}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--accent-primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? "Searching..." : "Search Papers"}
           </button>
@@ -134,15 +134,15 @@ export default function Research() {
 
       {/* Error banner */}
       {error && (
-        <div className="flex items-start gap-3 p-3 bg-red-900/30 border border-red-700 rounded-lg text-sm text-red-300">
+        <div className="flex items-start gap-3 p-3 bg-[var(--color-error-muted)] border border-[var(--color-error)] rounded-lg text-sm text-[var(--color-error)]">
           <span className="mt-0.5">⚠</span>
           <div>
             <p className="font-medium">Search failed</p>
-            <p className="text-xs mt-0.5 text-red-400">{error}</p>
+            <p className="text-xs mt-0.5 text-[var(--color-error)]">{error}</p>
             <button
               type="button"
               onClick={() => void handleSearch()}
-              className="mt-3 rounded-md bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-100 transition-colors hover:bg-slate-600"
+              className="mt-3 rounded-md bg-[var(--bg-elevated)] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--border-strong)]"
             >
               Retry Search
             </button>
@@ -152,18 +152,18 @@ export default function Research() {
 
       {/* Empty state — no papers yet */}
       {hasLoaded && papers.length === 0 && !isLoading && !error && (
-        <div className="flex flex-col items-center justify-center h-56 bg-slate-800 rounded-lg border border-slate-700 border-dashed space-y-4 shadow-sm">
+        <div className="flex flex-col items-center justify-center h-56 bg-[var(--bg-elevated)] rounded-lg border border-[var(--border-default)] border-dashed space-y-4 shadow-sm">
           <span className="text-4xl">📚</span>
           <div className="text-center space-y-1">
-            <p className="text-sm font-medium text-slate-300">No papers found yet.</p>
-            <p className="text-xs text-slate-500">
+            <p className="text-sm font-medium text-[var(--text-secondary)]">No papers found yet.</p>
+            <p className="text-xs text-[var(--text-muted)]">
               Make sure the pipeline has finished, then click the button below.
             </p>
           </div>
           <button
             onClick={handleSearch}
             disabled={isLoading}
-            className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white rounded-md transition-colors disabled:opacity-50"
           >
             Search for Papers
           </button>
@@ -178,13 +178,13 @@ export default function Research() {
       {isLoading && papers.length === 0 && <PaperSkeleton />}
 
       {/* Internet disclaimer */}
-      <p className="text-xs text-slate-600 pt-2">
+      <p className="text-xs text-[var(--text-muted)] pt-2">
         ✦ Paper data is fetched from the{" "}
         <a
           href="https://www.semanticscholar.org"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-slate-500 hover:text-slate-400 underline"
+          className="text-[var(--text-muted)] hover:text-[var(--text-muted)] underline"
         >
           Semantic Scholar
         </a>{" "}

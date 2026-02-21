@@ -17,10 +17,10 @@ interface EmptyStateProps {
 
 function EmptyState({ isGenerating, error, onGenerate }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-6 text-slate-400 select-none">
+    <div className="flex flex-col items-center justify-center h-full gap-6 text-[var(--text-muted)] select-none">
       <svg
         aria-hidden="true"
-        className="w-20 h-20 text-slate-700"
+        className="w-20 h-20 text-[var(--text-muted)]"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -37,20 +37,20 @@ function EmptyState({ isGenerating, error, onGenerate }: EmptyStateProps) {
         <line x1="12" y1="15" x2="18.5" y2="17.5" />
       </svg>
       <div className="text-center space-y-2">
-        <p className="text-slate-300 font-medium text-lg">No mind map yet</p>
-        <p className="text-sm text-slate-500 max-w-xs">
+        <p className="text-[var(--text-secondary)] font-medium text-lg">No mind map yet</p>
+        <p className="text-sm text-[var(--text-muted)] max-w-xs">
           Generate a visual overview of the lecture's key concepts and their relationships.
         </p>
       </div>
       {error && (
-        <p className="text-red-400 text-sm bg-red-900/20 border border-red-800 rounded-lg px-4 py-2 max-w-sm text-center">
+        <p className="text-[var(--color-error)] text-sm bg-[var(--color-error-muted)] border border-[var(--color-error)] rounded-lg px-4 py-2 max-w-sm text-center">
           {error}
         </p>
       )}
       <button
         onClick={onGenerate}
         disabled={isGenerating}
-        className="flex items-center gap-2 rounded-md bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--accent-primary)] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isGenerating ? (
           <>
@@ -69,10 +69,10 @@ function EmptyState({ isGenerating, error, onGenerate }: EmptyStateProps) {
 
 function NoLecture() {
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-3 text-slate-400 select-none">
+    <div className="flex flex-col items-center justify-center h-full gap-3 text-[var(--text-muted)] select-none">
       <svg
         aria-hidden="true"
-        className="w-14 h-14 text-slate-700"
+        className="w-14 h-14 text-[var(--text-muted)]"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -80,7 +80,7 @@ function NoLecture() {
       >
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0H3" />
       </svg>
-      <p className="text-slate-500 text-sm">Upload a lecture to see its mind map</p>
+      <p className="text-[var(--text-muted)] text-sm">Upload a lecture to see its mind map</p>
     </div>
   );
 }
@@ -175,11 +175,11 @@ export default function MindMap() {
               <button
                 onClick={handleGenerate}
                 disabled={isGenerating}
-                className="flex items-center gap-2 rounded-md border border-slate-600 bg-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-2 rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--border-strong)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isGenerating ? (
                   <>
-                    <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-300 border-t-transparent" />
+                    <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--border-default)] border-t-transparent" />
                     Regenerating…
                   </>
                 ) : (

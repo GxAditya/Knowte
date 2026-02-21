@@ -2,6 +2,79 @@
 
 All notable changes to the Cognote project will be documented in this file.
 
+## [Task 6.2] - 2025-07-27
+- Added: Complete CSS custom properties design system in `index.css` with 50+ theme tokens (colors, typography, spacing, borders, shadows)
+- Added: Light and dark theme support via CSS variables — automatic switching with `.dark` class on `<html>` and `@custom-variant dark`
+- Added: Google Fonts import for Outfit (headings) + DM Sans (body) with font-heading/font-body CSS variables
+- Added: Animation keyframes — `view-fade-in`, `slide-up`, `slide-down`, `slide-in-right`, `scale-in`, `shimmer`, `pulse-glow` with stagger delay utility classes
+- Added: Reusable utility classes — `.card`, `.input`, `.btn-primary`, `.btn-secondary`, `.btn-ghost`, `.badge-*` (success, error, warning, info, neutral, accent), `.toggle-track`/`.toggle-knob`, `.skeleton`
+- Added: Custom scrollbar styling, subtle grain texture overlay, and `prefers-reduced-motion` support
+- Changed: Replaced ALL hardcoded Tailwind color classes (`bg-slate-*`, `text-slate-*`, `border-slate-*`, `bg-indigo-*`, `bg-violet-*`, etc.) with CSS variable references using Tailwind arbitrary value syntax across 40+ component files
+- Changed: Sidebar.tsx — redesigned with staggered nav item animations, section headers, CSS var tokens, and active state highlighting
+- Changed: TitleBar.tsx — theme toggle button with hover scale effect, SVG window control icons, semantic color tokens
+- Changed: ViewHeader.tsx — animate-slide-down entrance, font-heading typography, border divider
+- Changed: SettingsPanel.tsx — all sections use `.card` class, inputs use `.input`, toggles use `.toggle-track`/`.toggle-knob`, save button uses `.btn-primary`
+- Changed: ToastViewport.tsx — complete restructure from Tailwind classes to CSS var inline style objects with `animate-slide-in-right`
+- Changed: ContentSkeletons.tsx — skeleton bars use `.skeleton` class, containers use `.card` class
+- Changed: LectureLibrary.tsx — status/source badges use `.badge-*` classes, search uses `.input`, cards use `.card`, progress bars use `--accent-primary`
+- Changed: EmptyState.tsx — `.card` with `animate-scale-in`, CTA uses `.btn-primary`
+- Changed: AudioUploader.tsx — tab bar with `.btn-primary` active state, YouTube import section, batch queue items all use CSS vars
+- Changed: DropZone.tsx — border/bg use CSS vars, browse button uses `.btn-primary`
+- Changed: LiveRecorder.tsx — record/stop buttons use semantic color tokens
+- Changed: KeyboardShortcutsModal.tsx — overlay with `animate-view-in`, dialog uses `.card` + `animate-scale-in`
+- Changed: MindMapCanvas.tsx — ReactFlow node styles, handles, edges, minimap, controls, and backgrounds all use CSS variables for theme-awareness
+- Changed: QuizResults.tsx — SVG circular progress stroke colors use CSS variables
+- Changed: All quiz, flashcard, notes, research, pipeline, transcript, explain, and settings sub-components updated with theme-aware CSS variable colors
+- Fixed: Cleaned `App.css` to single comment (all styles moved to design system)
+- Files modified:
+  - src/index.css
+  - src/App.css
+  - src/App.tsx
+  - src/components/Sidebar.tsx
+  - src/components/Window/TitleBar.tsx
+  - src/components/Layout/ViewHeader.tsx
+  - src/components/Settings/SettingsPanel.tsx
+  - src/components/Settings/ModelSelector.tsx
+  - src/components/Settings/PersonalizationConfig.tsx
+  - src/components/Toast/ToastViewport.tsx
+  - src/components/Skeletons/ContentSkeletons.tsx
+  - src/components/Library/LectureLibrary.tsx
+  - src/components/Library/EmptyState.tsx
+  - src/components/Upload/AudioUploader.tsx
+  - src/components/Upload/DropZone.tsx
+  - src/components/Upload/LiveRecorder.tsx
+  - src/components/KeyboardShortcuts/KeyboardShortcutsModal.tsx
+  - src/components/ErrorBoundary/AppErrorBoundary.tsx
+  - src/components/MindMap/MindMapCanvas.tsx
+  - src/components/Quiz/QuizPlayer.tsx
+  - src/components/Quiz/QuizResults.tsx
+  - src/components/Quiz/QuestionCard.tsx
+  - src/components/Flashcards/FlashcardViewer.tsx
+  - src/components/Flashcards/AnkiExport.tsx
+  - src/components/Notes/StructuredNotes.tsx
+  - src/components/Notes/NotesExport.tsx
+  - src/components/Research/PaperCard.tsx
+  - src/components/Research/PaperList.tsx
+  - src/components/Pipeline/ProgressTracker.tsx
+  - src/components/Pipeline/StageIndicator.tsx
+  - src/components/Transcript/TranscriptViewer.tsx
+  - src/components/Transcript/TranscriptEditor.tsx
+  - src/components/Transcript/TranscriptAudioPlayer.tsx
+  - src/components/Explain/ExplainPanel.tsx
+  - src/components/Explain/ExplainableTextView.tsx
+  - src/components/Explain/TextSelectionToolbar.tsx
+  - src/pages/Compare.tsx
+  - src/pages/MindMap.tsx
+  - src/pages/Notes.tsx
+  - src/pages/Quiz.tsx
+  - src/pages/Research.tsx
+  - src/pages/Transcript.tsx
+  - src/pages/Pipeline.tsx
+  - src/pages/Flashcards.tsx
+  - src/pages/Library.tsx
+  - src/pages/Upload.tsx
+  - src/pages/Settings.tsx
+
 ## [Task 8.3] - 2026-02-21
 - Added: Backend Tauri command `import_youtube_audio(url)` to validate YouTube links, download source audio via `yt-dlp`, normalize to 16kHz mono WAV with ffmpeg, persist lecture metadata, and return standard `AudioFileMetadata`.
 - Added: YouTube import progress events (`youtube-import-progress`) with queue stages (`validating_url`, `downloading`, `extracting_audio`, `ready`, `error`) for frontend status updates.

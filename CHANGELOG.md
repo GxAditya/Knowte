@@ -2,6 +2,30 @@
 
 All notable changes to the Cognote project will be documented in this file.
 
+## [Task 7.2] - 2026-02-21
+- Added: Batch upload workflow on Upload page with multi-file import, queue display, remove-before-start controls, and sequential `Process All` execution (`waiting` -> `processing` -> `complete` / `error`)
+- Added: Frontend queue orchestration that transcribes each lecture and waits for pipeline completion events before starting the next item
+- Added: New Tauri command `pick_audio_files` for multi-file native selection
+- Added: New `/compare` route with searchable 2-3 lecture selection, side-by-side summary view, overlapping term highlighting, and LLM-generated comparison analysis
+- Added: Combined mind map rendering on comparison view by merging selected lecture mind-map trees
+- Added: New backend Tauri command `compare_lectures(lecture_ids)` to compare stored lecture summaries with the configured local model
+- Added: New backend Tauri command `merge_flashcards(lecture_ids)` that combines decks and removes near-duplicate cards using token-similarity heuristics
+- Added: Typed frontend IPC wrappers/types for lecture comparison and merged flashcard results
+- Files modified:
+  - src-tauri/src/commands/compare.rs (new)
+  - src-tauri/src/commands/audio.rs
+  - src-tauri/src/commands/mod.rs
+  - src-tauri/src/lib.rs
+  - src/App.tsx
+  - src/components/Sidebar.tsx
+  - src/components/Upload/AudioUploader.tsx
+  - src/components/Upload/DropZone.tsx
+  - src/lib/tauriApi.ts
+  - src/lib/types.ts
+  - src/pages/Compare.tsx (new)
+  - src/pages/index.ts
+  - CHANGELOG.md
+
 ## [Task 7.1] - 2026-02-21
 - Added: Contextual "Explain This" workflow for transcript and notes text selection with a floating action toolbar (`Explain`, `Add to Flashcards`, `Copy`)
 - Added: Slide-in explain panel with explanation history, streaming token display, close/reopen behavior, and one-step `Explain simpler` / `Explain deeper` controls

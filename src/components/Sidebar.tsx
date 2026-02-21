@@ -10,6 +10,7 @@ interface SidebarProps {
 const baseNavItems = [
   { to: "/", label: "Library", end: true, icon: "library" },
   { to: "/upload", label: "Upload", icon: "upload" },
+  { to: "/compare", label: "Compare", icon: "compare" },
   { to: "/settings", label: "Settings", icon: "settings" },
 ] as const;
 
@@ -26,6 +27,7 @@ const lectureNavItems = [
 type NavIconName =
   | "library"
   | "upload"
+  | "compare"
   | "settings"
   | "transcript"
   | "pipeline"
@@ -62,6 +64,16 @@ function NavIcon({ name }: { name: NavIconName }) {
       <svg aria-hidden="true" className={iconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
         <circle cx="12" cy="12" r="3.2" />
         <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6H20a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.6z" />
+      </svg>
+    );
+  }
+
+  if (name === "compare") {
+    return (
+      <svg aria-hidden="true" className={iconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+        <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H11v16H6.5A2.5 2.5 0 0 1 4 17.5z" />
+        <path d="M13 4h4.5A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20H13z" />
+        <path d="M8 9h1.5M8 13h1.5M14.5 9H16M14.5 13H16" />
       </svg>
     );
   }
@@ -255,6 +267,17 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
                 </NavLink>
               </li>
             ))}
+            <li>
+              <NavLink
+                to="/compare"
+                role="tab"
+                title="Compare"
+                className={({ isActive }) => navLinkClass(isActive, isCollapsed)}
+              >
+                <NavIcon name="compare" />
+                {!isCollapsed && <span>Compare</span>}
+              </NavLink>
+            </li>
           </ul>
         ) : (
           <ul className="space-y-1">

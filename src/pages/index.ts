@@ -8,3 +8,4 @@ export { default as Research } from "./Research";
 export { default as MindMap } from "./MindMap";
 export { default as Flashcards } from "./Flashcards";
 export { default as Settings } from "./Settings";
+export { default as Compare } from "./Compare";

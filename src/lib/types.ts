@@ -155,6 +155,12 @@ export interface FlashcardsOutput {
   cards: Flashcard[];
 }
 
+export interface MergedFlashcardsResult {
+  cards: Flashcard[];
+  source_count: number;
+  duplicate_count: number;
+}
+
 // Keywords (matches extract_keywords prompt schema)
 export interface KeywordsOutput {
   keywords: string[];

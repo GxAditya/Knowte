@@ -1,13 +1,21 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { transcribeAudio, startPipeline } from "../../lib/tauriApi";
+import { listen } from "@tauri-apps/api/event";
+import { useCallback, useMemo, useState } from "react";
+import { startPipeline, transcribeAudio } from "../../lib/tauriApi";
+import type { AudioFileMetadata, Lecture, PipelineStageEvent } from "../../lib/types";
 import { useLectureStore, useToastStore } from "../../stores";
-import type { AudioFileMetadata, Lecture } from "../../lib/types";
 import { ViewHeader } from "../Layout";
 import DropZone from "./DropZone";
 import LiveRecorder from "./LiveRecorder";
 
 type UploadTab = "upload" | "record";
+type QueueStatus = "waiting" | "processing" | "complete" | "error";
+
+interface QueueItem {
+  lectureId: string;
+  metadata: AudioFileMetadata;
+  status: QueueStatus;
+  error?: string;
+}
 
 const formatDuration = (durationSeconds: number) => {
   const minutes = Math.floor(durationSeconds / 60);
@@ -42,11 +50,25 @@ const toLecture = (metadata: AudioFileMetadata): Lecture => ({
   createdAt: new Date().toISOString(),
 });
 
+function statusBadgeClass(status: QueueStatus): string {
+  if (status === "complete") {
+    return "border-emerald-500/40 bg-emerald-500/15 text-emerald-200";
+  }
+  if (status === "processing") {
+    return "border-blue-500/40 bg-blue-500/15 text-blue-200";
+  }
+  if (status === "error") {
+    return "border-red-500/40 bg-red-500/15 text-red-200";
+  }
+  return "border-slate-500/40 bg-slate-500/15 text-slate-200";
+}
+
 export default function AudioUploader() {
   const [activeTab, setActiveTab] = useState<UploadTab>("upload");
-  const [latestMetadata, setLatestMetadata] = useState<AudioFileMetadata | null>(null);
+  const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
+  const [isBatchRunning, setIsBatchRunning] = useState(false);
+  const [activeQueueLectureId, setActiveQueueLectureId] = useState<string | null>(null);
   const [processHint, setProcessHint] = useState<string | null>(null);
-  const navigate = useNavigate();
   const pushToast = useToastStore((state) => state.pushToast);
 
   const {
@@ -63,57 +85,191 @@ export default function AudioUploader() {
     setError,
   } = useLectureStore();
 
-  const handleAudioSuccess = (metadata: AudioFileMetadata) => {
-    const lecture = toLecture(metadata);
-    addLecture(lecture);
-    setCurrentLecture(lecture.id);
-    setLatestMetadata(metadata);
-    setProcessHint(null);
-    setError(null);
-    pushToast({ kind: "success", message: "Audio imported successfully." });
-  };
+  const waitingCount = useMemo(
+    () => queueItems.filter((item) => item.status === "waiting").length,
+    [queueItems],
+  );
 
-  const handleProcessLecture = async () => {
-    if (!latestMetadata || isProcessingLecture) {
+  const hasQueueItems = queueItems.length > 0;
+
+  const waitForPipelineCompletion = useCallback((lectureId: string) => {
+    return new Promise<void>((resolve, reject) => {
+      let settled = false;
+      let unlisten: (() => void) | null = null;
+
+      const timeout = window.setTimeout(() => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        if (unlisten) {
+          unlisten();
+        }
+        reject(new Error("Pipeline timed out before completion."));
+      }, 25 * 60 * 1000);
+
+      const cleanup = () => {
+        window.clearTimeout(timeout);
+        if (unlisten) {
+          unlisten();
+          unlisten = null;
+        }
+      };
+
+      void listen<PipelineStageEvent>("pipeline-stage", (event) => {
+        const payload = event.payload;
+        if (payload.lecture_id !== lectureId) {
+          return;
+        }
+
+        if (payload.stage === "pipeline" && payload.status === "complete") {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          cleanup();
+          resolve();
+        }
+      })
+        .then((unsubscribe) => {
+          unlisten = unsubscribe;
+        })
+        .catch((listenError) => {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          cleanup();
+          reject(listenError);
+        });
+    });
+  }, []);
+
+  const handleAudioSuccess = (batch: AudioFileMetadata[]) => {
+    if (batch.length === 0) {
       return;
     }
 
-    const lectureId = latestMetadata.id;
+    for (const metadata of batch) {
+      addLecture(toLecture(metadata));
+    }
+
+    const latestId = batch[batch.length - 1]?.id;
+    if (latestId) {
+      setCurrentLecture(latestId);
+    }
+
+    setQueueItems((current) => {
+      const existingIds = new Set(current.map((item) => item.lectureId));
+      const next = [...current];
+      for (const metadata of batch) {
+        if (!existingIds.has(metadata.id)) {
+          next.push({
+            lectureId: metadata.id,
+            metadata,
+            status: "waiting",
+          });
+        }
+      }
+      return next;
+    });
+
+    setProcessHint(null);
+    setError(null);
+    pushToast({
+      kind: "success",
+      message:
+        batch.length === 1
+          ? `Imported "${batch[0].filename}".`
+          : `Imported ${batch.length} files to the processing queue.`,
+    });
+  };
+
+  const removeQueueItem = (lectureId: string) => {
+    if (isBatchRunning) {
+      return;
+    }
+
+    setQueueItems((current) =>
+      current.filter((item) => item.lectureId !== lectureId || item.status !== "waiting"),
+    );
+  };
+
+  const updateQueueStatus = (lectureId: string, status: QueueStatus, message?: string) => {
+    setQueueItems((current) =>
+      current.map((item) =>
+        item.lectureId === lectureId
+          ? {
+              ...item,
+              status,
+              error: message,
+            }
+          : item,
+      ),
+    );
+  };
+
+  const handleProcessAll = async () => {
+    if (isBatchRunning || waitingCount === 0) {
+      return;
+    }
+
+    const queueSnapshot = queueItems.filter((item) => item.status === "waiting");
+    if (queueSnapshot.length === 0) {
+      return;
+    }
+
+    setIsBatchRunning(true);
     setProcessingLecture(true);
     setError(null);
-    setProcessHint("Transcribing audio...");
-    updateLecture(lectureId, { status: "transcribing", error: undefined });
+    let completedCount = 0;
 
     try {
-      const result = await transcribeAudio(lectureId);
-      updateLecture(lectureId, {
-        status: "processing",
-        transcriptId: result.transcript_id,
-        transcript: result.full_text,
-        transcriptSegments: result.segments,
-        originalTranscriptSegments: result.segments.map((segment) => ({ ...segment })),
-        error: undefined,
-      });
-      setCurrentLecture(lectureId);
-      setProcessHint("Transcription complete. Starting AI pipeline...");
+      for (const item of queueSnapshot) {
+        const lectureId = item.lectureId;
+        const filename = item.metadata.filename;
 
-      // Start the pipeline in the background
-      await startPipeline(lectureId);
+        setActiveQueueLectureId(lectureId);
+        updateQueueStatus(lectureId, "processing", undefined);
+        setProcessHint(`Transcribing ${filename}...`);
+        updateLecture(lectureId, { status: "transcribing", error: undefined });
 
-      // Navigate to the pipeline progress view
-      navigate(`/lecture/${lectureId}/pipeline`);
-      pushToast({ kind: "info", message: "Transcription complete. Pipeline started." });
-    } catch (transcriptionError) {
-      const message =
-        transcriptionError instanceof Error
-          ? transcriptionError.message
-          : String(transcriptionError);
-      updateLecture(lectureId, { status: "error", error: message });
-      setError(message);
-      setProcessHint("Processing failed. See error details above.");
-      pushToast({ kind: "error", message });
+        try {
+          const transcription = await transcribeAudio(lectureId);
+          updateLecture(lectureId, {
+            status: "processing",
+            transcriptId: transcription.transcript_id,
+            transcript: transcription.full_text,
+            transcriptSegments: transcription.segments,
+            originalTranscriptSegments: transcription.segments.map((segment) => ({ ...segment })),
+            error: undefined,
+          });
+          setCurrentLecture(lectureId);
+
+          setProcessHint(`Running AI pipeline for ${filename}...`);
+          await startPipeline(lectureId);
+          await waitForPipelineCompletion(lectureId);
+
+          updateLecture(lectureId, { status: "complete", error: undefined });
+          updateQueueStatus(lectureId, "complete", undefined);
+          completedCount += 1;
+        } catch (processError) {
+          const message = processError instanceof Error ? processError.message : String(processError);
+          updateLecture(lectureId, { status: "error", error: message });
+          updateQueueStatus(lectureId, "error", message);
+          setError(message);
+          pushToast({ kind: "error", message: `${filename}: ${message}` });
+        }
+      }
     } finally {
+      setActiveQueueLectureId(null);
+      setProcessHint(null);
+      setIsBatchRunning(false);
       setProcessingLecture(false);
+      pushToast({
+        kind: completedCount === queueSnapshot.length ? "success" : "info",
+        message: `Batch processing finished (${completedCount}/${queueSnapshot.length} complete).`,
+      });
     }
   };
 
@@ -121,7 +277,7 @@ export default function AudioUploader() {
     <div className="mx-auto max-w-[900px] space-y-6">
       <ViewHeader
         title="Audio Input"
-        description="Upload a lecture file or record directly from your microphone."
+        description="Upload multiple lecture files or record directly from your microphone."
       />
 
       <div
@@ -142,7 +298,7 @@ export default function AudioUploader() {
               : "text-slate-300 hover:bg-slate-700"
           }`}
         >
-          Upload File
+          Upload Files
         </button>
         <button
           type="button"
@@ -175,7 +331,7 @@ export default function AudioUploader() {
           />
         ) : (
           <LiveRecorder
-            onRecordingSaved={handleAudioSuccess}
+            onRecordingSaved={(metadata) => handleAudioSuccess([metadata])}
             onRecordingStateChange={setRecording}
             disabled={isUploading || isProcessingLecture}
           />
@@ -184,13 +340,13 @@ export default function AudioUploader() {
 
       {(isUploading || isRecording) && (
         <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-sm text-blue-200">
-          {isUploading ? "Importing audio file..." : "Recording in progress..."}
+          {isUploading ? "Importing audio files..." : "Recording in progress..."}
         </div>
       )}
 
       {isProcessingLecture && (
         <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-sm text-blue-200">
-          {processHint ?? "Processing…"}
+          {processHint ?? "Processing queue..."}
         </div>
       )}
 
@@ -200,39 +356,68 @@ export default function AudioUploader() {
         </div>
       )}
 
-      {latestMetadata && (
+      {hasQueueItems && (
         <section className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-100">Lecture Ready</h2>
-          <div className="grid gap-4 text-sm text-slate-300 md:grid-cols-2">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-slate-400">Filename</p>
-              <p className="break-all">{latestMetadata.filename}</p>
+              <h2 className="text-lg font-semibold text-slate-100">Batch Queue</h2>
+              <p className="text-sm text-slate-400">
+                {waitingCount > 0
+                  ? `${waitingCount} lecture${waitingCount === 1 ? "" : "s"} waiting to process.`
+                  : "No waiting lectures in queue."}
+              </p>
             </div>
-            <div>
-              <p className="text-slate-400">Duration</p>
-              <p>{formatDuration(latestMetadata.duration_seconds)}</p>
-            </div>
-            <div>
-              <p className="text-slate-400">File Size</p>
-              <p>{formatSize(latestMetadata.size_bytes)}</p>
-            </div>
-            <div>
-              <p className="text-slate-400">Stored Path</p>
-              <p className="break-all">{latestMetadata.path}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
             <button
               type="button"
-              onClick={() => void handleProcessLecture()}
-              disabled={isUploading || isRecording || isProcessingLecture}
+              onClick={() => void handleProcessAll()}
+              disabled={isUploading || isRecording || isBatchRunning || waitingCount === 0}
               className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isProcessingLecture ? "Processing..." : "Process Lecture"}
+              {isBatchRunning ? "Processing Queue..." : "Process All"}
             </button>
-            {processHint && <p className="text-sm text-slate-400">{processHint}</p>}
           </div>
+
+          <ul className="space-y-2">
+            {queueItems.map((item) => (
+              <li
+                key={item.lectureId}
+                className="rounded-md border border-slate-700 bg-slate-900/60 px-3 py-3"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0 space-y-1">
+                    <p className="break-all text-sm font-medium text-slate-100">
+                      {item.metadata.filename}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {formatDuration(item.metadata.duration_seconds)} / {formatSize(item.metadata.size_bytes)}
+                    </p>
+                    <p className="break-all text-xs text-slate-500">{item.metadata.path}</p>
+                    {item.error && <p className="text-xs text-red-300">{item.error}</p>}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-xs font-medium capitalize ${statusBadgeClass(item.status)}`}
+                    >
+                      {item.status}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeQueueItem(item.lectureId)}
+                      disabled={isBatchRunning || item.status !== "waiting"}
+                      className="rounded-md border border-slate-600 px-2.5 py-1 text-xs text-slate-300 transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+
+                {activeQueueLectureId === item.lectureId && item.status === "processing" && (
+                  <p className="mt-2 text-xs text-blue-300">Currently processing...</p>
+                )}
+              </li>
+            ))}
+          </ul>
         </section>
       )}
     </div>

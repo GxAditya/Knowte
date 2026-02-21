@@ -1,4 +1,5 @@
 pub mod audio;
+pub mod compare;
 pub mod explain;
 pub mod library;
 pub mod llm;

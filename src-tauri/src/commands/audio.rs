@@ -108,6 +108,19 @@ pub fn pick_audio_file() -> Result<Option<String>, String> {
 }
 
 #[tauri::command]
+pub fn pick_audio_files() -> Result<Vec<String>, String> {
+    let files = rfd::FileDialog::new()
+        .add_filter("Audio and Video", &SUPPORTED_EXTENSIONS)
+        .pick_files()
+        .unwrap_or_default();
+
+    Ok(files
+        .into_iter()
+        .map(|path| path.to_string_lossy().to_string())
+        .collect())
+}
+
+#[tauri::command]
 pub fn accept_audio_file(
     app: AppHandle,
     database: State<'_, AppDatabase>,

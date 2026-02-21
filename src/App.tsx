@@ -17,6 +17,7 @@ import type { Lecture, LectureSummary, ThemeMode } from "./lib/types";
 import {
   Flashcards,
   Library,
+  Compare,
   MindMap,
   Notes,
   Pipeline,
@@ -68,6 +69,7 @@ function extractLectureSegment(pathname: string): string | null {
 function viewLabelFromPath(pathname: string): string {
   if (pathname === "/") return "Library";
   if (pathname === "/upload") return "Upload";
+  if (pathname === "/compare") return "Compare";
   if (pathname === "/settings") return "Settings";
 
   const lectureSegment = extractLectureSegment(pathname);
@@ -368,6 +370,7 @@ function AppLayout() {
             <Routes>
               <Route path="/" element={<Library />} />
               <Route path="/upload" element={<Upload />} />
+              <Route path="/compare" element={<Compare />} />
               <Route path="/lecture/:id/transcript" element={<Transcript />} />
               <Route path="/lecture/:id/pipeline" element={<Pipeline />} />
               <Route path="/lecture/:id/notes" element={<Notes />} />

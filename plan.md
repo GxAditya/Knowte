@@ -1,4 +1,4 @@
-# LectureToLearn — AI Agent Development Plan
+# Cognote — AI Agent Development Plan
 
 ## Architecture Decision Record
 
@@ -17,7 +17,7 @@ Export formats:  Anki (.apkg), Markdown, JSON, HTML mind-map
 ## Project File Structure (Target End-State)
 
 ```
-lecture-to-learn/
+cognote/
 ├── src-tauri/
 │   ├── src/
 │   │   ├── main.rs                  # Tauri entry point

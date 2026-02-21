@@ -2,11 +2,11 @@ import { isTauri } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useEffect, useState } from "react";
 import { SUPPORTED_AUDIO_EXTENSIONS } from "../../lib/constants";
-import { acceptAudioFile, pickAudioFile } from "../../lib/tauriApi";
+import { acceptAudioFile, pickAudioFiles } from "../../lib/tauriApi";
 import type { AudioFileMetadata } from "../../lib/types";
 
 interface DropZoneProps {
-  onUploadSuccess: (metadata: AudioFileMetadata) => void;
+  onUploadSuccess: (metadata: AudioFileMetadata[]) => void;
   onUploadStateChange?: (isUploading: boolean) => void;
   disabled?: boolean;
 }
@@ -24,20 +24,46 @@ export default function DropZone({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFilePath = async (filePath: string) => {
-    if (disabled || isProcessing) {
+  const handleFilePaths = async (filePaths: string[]) => {
+    const uniquePaths = Array.from(new Set(filePaths)).filter((path) => path.trim().length > 0);
+    if (disabled || isProcessing || uniquePaths.length === 0) {
       return;
     }
 
     setError(null);
     setIsProcessing(true);
-    setUploadProgress(8);
+    setUploadProgress(0);
     onUploadStateChange?.(true);
 
+    const imported: AudioFileMetadata[] = [];
+    const failures: string[] = [];
+
     try {
-      const metadata = await acceptAudioFile(filePath);
-      setUploadProgress(100);
-      onUploadSuccess(metadata);
+      for (let index = 0; index < uniquePaths.length; index += 1) {
+        const path = uniquePaths[index];
+        try {
+          const metadata = await acceptAudioFile(path);
+          imported.push(metadata);
+        } catch (uploadError) {
+          failures.push(formatError(uploadError));
+        } finally {
+          setUploadProgress(Math.round(((index + 1) / uniquePaths.length) * 100));
+        }
+      }
+
+      if (imported.length > 0) {
+        onUploadSuccess(imported);
+      }
+
+      if (failures.length > 0) {
+        if (imported.length > 0) {
+          setError(
+            `Imported ${imported.length} of ${uniquePaths.length} files. First error: ${failures[0]}`,
+          );
+        } else {
+          setError(failures[0]);
+        }
+      }
     } catch (uploadError) {
       setError(formatError(uploadError));
     } finally {
@@ -54,11 +80,11 @@ export default function DropZone({
 
     setError(null);
     try {
-      const selectedPath = await pickAudioFile();
-      if (!selectedPath) {
+      const selectedPaths = await pickAudioFiles();
+      if (selectedPaths.length === 0) {
         return;
       }
-      await handleFilePath(selectedPath);
+      await handleFilePaths(selectedPaths);
     } catch (pickError) {
       setError(formatError(pickError));
     }
@@ -89,9 +115,9 @@ export default function DropZone({
         }
 
         if (event.payload.type === "drop") {
-          const [filePath] = event.payload.paths;
-          if (filePath) {
-            void handleFilePath(filePath);
+          const droppedPaths = event.payload.paths;
+          if (droppedPaths.length > 0) {
+            void handleFilePaths(droppedPaths);
           } else {
             setIsDragActive(false);
           }
@@ -109,26 +135,6 @@ export default function DropZone({
     };
   }, [disabled, isProcessing]);
 
-  useEffect(() => {
-    if (!isProcessing) {
-      setUploadProgress(0);
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      setUploadProgress((current) => {
-        if (current >= 92) {
-          return current;
-        }
-        return Math.min(92, current + Math.max(2, Math.round((100 - current) / 12)));
-      });
-    }, 180);
-
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [isProcessing]);
-
   return (
     <div className="space-y-4">
       <div
@@ -139,7 +145,7 @@ export default function DropZone({
         }`}
       >
         <h3 className="text-lg font-semibold text-slate-100">
-          Drag and drop your lecture file
+          Drag and drop lecture files
         </h3>
         <p className="mt-2 text-sm text-slate-400">
           Supported: {SUPPORTED_AUDIO_EXTENSIONS.join(", ")}

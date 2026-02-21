@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   AudioFileMetadata,
   LectureSummary,
+  MergedFlashcardsResult,
   OllamaStatus,
   Paper,
   PipelineStageRecord,
@@ -75,6 +76,10 @@ export async function pickAudioFile(): Promise<string | null> {
   return invoke<string | null>("pick_audio_file");
 }
 
+export async function pickAudioFiles(): Promise<string[]> {
+  return invoke<string[]>("pick_audio_files");
+}
+
 export async function acceptAudioFile(path: string): Promise<AudioFileMetadata> {
   return invoke<AudioFileMetadata>("accept_audio_file", { path });
 }
@@ -144,6 +149,14 @@ export async function exportAllLectureData(
   outputDir: string,
 ): Promise<string> {
   return invoke<string>("export_all_lecture_data", { lectureId, outputDir });
+}
+
+export async function compareLectures(lectureIds: string[]): Promise<string> {
+  return invoke<string>("compare_lectures", { lectureIds });
+}
+
+export async function mergeFlashcards(lectureIds: string[]): Promise<MergedFlashcardsResult> {
+  return invoke<MergedFlashcardsResult>("merge_flashcards", { lectureIds });
 }
 
 // ─── Pipeline Commands ────────────────────────────────────────────────────────

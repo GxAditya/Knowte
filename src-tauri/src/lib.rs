@@ -9,8 +9,10 @@ use tauri::Manager;
 
 use audio_stream::AudioServerPort;
 use commands::audio::{
-    accept_audio_file, pick_audio_file, start_recording, stop_recording, RecordingState,
+    accept_audio_file, pick_audio_file, pick_audio_files, start_recording, stop_recording,
+    RecordingState,
 };
+use commands::compare::{compare_lectures, merge_flashcards};
 use commands::explain::{add_custom_flashcard, explain_text};
 use commands::library::{delete_lecture, export_all_lecture_data, list_lectures, search_lectures};
 use commands::llm::{check_llm_availability, generate_llm_response};
@@ -53,6 +55,7 @@ pub fn run() {
             get_settings,
             save_settings,
             pick_audio_file,
+            pick_audio_files,
             accept_audio_file,
             start_recording,
             stop_recording,
@@ -85,6 +88,8 @@ pub fn run() {
             search_lectures,
             delete_lecture,
             export_all_lecture_data,
+            compare_lectures,
+            merge_flashcards,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

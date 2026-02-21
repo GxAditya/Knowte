@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   AudioFileMetadata,
   OllamaStatus,
+  PipelineStageRecord,
   Settings,
   TranscriptUpdateResult,
   TranscriptionResult,
@@ -98,4 +99,42 @@ export async function updateTranscriptSegment(
 
 export async function getLectureAudioUrl(lectureId: string): Promise<string> {
   return invoke<string>("get_lecture_audio_url", { lectureId });
+}
+
+// ─── Pipeline Commands ────────────────────────────────────────────────────────
+
+/**
+ * Start the full processing pipeline for a lecture in a background task.
+ * Returns immediately; listen for `pipeline-stage` events for progress.
+ */
+export async function startPipeline(lectureId: string): Promise<void> {
+  return invoke("start_pipeline", { lectureId });
+}
+
+/**
+ * Get the current pipeline stage statuses for a lecture from the database.
+ * Useful for restoring UI state after navigation.
+ */
+export async function getPipelineStatus(lectureId: string): Promise<PipelineStageRecord[]> {
+  return invoke<PipelineStageRecord[]>("get_pipeline_status", { lectureId });
+}
+
+/** Retrieve structured notes JSON for a lecture (null if not yet generated). */
+export async function getNotes(lectureId: string): Promise<string | null> {
+  return invoke<string | null>("get_notes", { lectureId });
+}
+
+/** Retrieve quiz JSON for a lecture (null if not yet generated). */
+export async function getQuiz(lectureId: string): Promise<string | null> {
+  return invoke<string | null>("get_quiz", { lectureId });
+}
+
+/** Retrieve flashcards JSON for a lecture (null if not yet generated). */
+export async function getFlashcards(lectureId: string): Promise<string | null> {
+  return invoke<string | null>("get_flashcards", { lectureId });
+}
+
+/** Retrieve mind-map JSON for a lecture (null if not yet generated). */
+export async function getMindmap(lectureId: string): Promise<string | null> {
+  return invoke<string | null>("get_mindmap", { lectureId });
 }

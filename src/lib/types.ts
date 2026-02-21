@@ -135,6 +135,43 @@ export interface KeywordsOutput {
   keywords: string[];
 }
 
+// ─── Pipeline types ─────────────────────────────────────────────────────────
+
+/** Emitted as `pipeline-stage` Tauri event at the start/end of each stage */
+export interface PipelineStageEvent {
+  lecture_id: string;
+  /** e.g. "summary" | "notes" | "quiz" | "flashcards" | "mindmap" | "keywords" | "pipeline" */
+  stage: string;
+  /** "starting" | "complete" | "error" */
+  status: string;
+  preview?: string;
+  error?: string;
+  /** How many stages have been completed so far (0-6) */
+  stages_complete: number;
+}
+
+export type PipelineStageStatus = "pending" | "running" | "complete" | "error";
+
+export interface PipelineStage {
+  name: string;
+  label: string;
+  status: PipelineStageStatus;
+  preview?: string;
+  error?: string;
+}
+
+/** Matches the PipelineStageRecord from Rust */
+export interface PipelineStageRecord {
+  id: string;
+  lecture_id: string;
+  stage_name: string;
+  status: string;
+  result_preview?: string;
+  error?: string;
+  started_at?: string;
+  completed_at?: string;
+}
+
 export type LectureStatus =
   | "uploaded"
   | "transcribing"

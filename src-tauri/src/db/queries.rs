@@ -21,6 +21,18 @@ pub struct TranscriptRecord {
     pub created_at: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PipelineStageRecord {
+    pub id: String,
+    pub lecture_id: String,
+    pub stage_name: String,
+    pub status: String,
+    pub result_preview: Option<String>,
+    pub error: Option<String>,
+    pub started_at: Option<String>,
+    pub completed_at: Option<String>,
+}
+
 pub fn upsert_lecture(connection: &Connection, lecture: &LectureRecord) -> rusqlite::Result<()> {
     connection.execute(
         r#"
@@ -54,6 +66,30 @@ pub fn update_lecture_status(
     connection.execute(
         "UPDATE lectures SET status = ?1 WHERE id = ?2",
         params![status, lecture_id],
+    )?;
+    Ok(())
+}
+
+pub fn update_lecture_summary(
+    connection: &Connection,
+    lecture_id: &str,
+    summary: &str,
+) -> rusqlite::Result<()> {
+    connection.execute(
+        "UPDATE lectures SET summary = ?1 WHERE id = ?2",
+        params![summary, lecture_id],
+    )?;
+    Ok(())
+}
+
+pub fn update_lecture_keywords(
+    connection: &Connection,
+    lecture_id: &str,
+    keywords_json: &str,
+) -> rusqlite::Result<()> {
+    connection.execute(
+        "UPDATE lectures SET keywords_json = ?1 WHERE id = ?2",
+        params![keywords_json, lecture_id],
     )?;
     Ok(())
 }
@@ -116,6 +152,36 @@ pub fn upsert_transcript(
     Ok(())
 }
 
+pub fn get_transcript_by_lecture_id(
+    connection: &Connection,
+    lecture_id: &str,
+) -> rusqlite::Result<Option<TranscriptRecord>> {
+    let mut statement = connection.prepare(
+        r#"
+        SELECT id, lecture_id, full_text, segments_json, model_used, created_at
+        FROM transcripts
+        WHERE lecture_id = ?1
+        "#,
+    )?;
+
+    let result = statement.query_row(params![lecture_id], |row| {
+        Ok(TranscriptRecord {
+            id: row.get(0)?,
+            lecture_id: row.get(1)?,
+            full_text: row.get(2)?,
+            segments_json: row.get(3)?,
+            model_used: row.get(4)?,
+            created_at: row.get(5)?,
+        })
+    });
+
+    match result {
+        Ok(transcript) => Ok(Some(transcript)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(error) => Err(error),
+    }
+}
+
 pub fn get_transcript_by_id(
     connection: &Connection,
     transcript_id: &str,
@@ -163,3 +229,218 @@ pub fn update_transcript_content(
 
     Ok(())
 }
+
+// ─── Pipeline Stage Queries ───────────────────────────────────────────────────
+
+pub fn upsert_pipeline_stage(
+    connection: &Connection,
+    stage: &PipelineStageRecord,
+) -> rusqlite::Result<()> {
+    connection.execute(
+        r#"
+        INSERT INTO pipeline_stages
+            (id, lecture_id, stage_name, status, result_preview, error, started_at, completed_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+        ON CONFLICT(lecture_id, stage_name) DO UPDATE SET
+            id             = excluded.id,
+            status         = excluded.status,
+            result_preview = excluded.result_preview,
+            error          = excluded.error,
+            started_at     = excluded.started_at,
+            completed_at   = excluded.completed_at
+        "#,
+        params![
+            stage.id,
+            stage.lecture_id,
+            stage.stage_name,
+            stage.status,
+            stage.result_preview,
+            stage.error,
+            stage.started_at,
+            stage.completed_at,
+        ],
+    )?;
+    Ok(())
+}
+
+pub fn get_pipeline_stages(
+    connection: &Connection,
+    lecture_id: &str,
+) -> rusqlite::Result<Vec<PipelineStageRecord>> {
+    let mut statement = connection.prepare(
+        r#"
+        SELECT id, lecture_id, stage_name, status, result_preview, error, started_at, completed_at
+        FROM pipeline_stages
+        WHERE lecture_id = ?1
+        ORDER BY rowid ASC
+        "#,
+    )?;
+
+    let rows = statement.query_map(params![lecture_id], |row| {
+        Ok(PipelineStageRecord {
+            id: row.get(0)?,
+            lecture_id: row.get(1)?,
+            stage_name: row.get(2)?,
+            status: row.get(3)?,
+            result_preview: row.get(4)?,
+            error: row.get(5)?,
+            started_at: row.get(6)?,
+            completed_at: row.get(7)?,
+        })
+    })?;
+
+    rows.collect()
+}
+
+// ─── Notes Queries ────────────────────────────────────────────────────────────
+
+pub fn upsert_notes(
+    connection: &Connection,
+    lecture_id: &str,
+    notes_json: &str,
+) -> rusqlite::Result<()> {
+    let id = uuid::Uuid::new_v4().to_string();
+    let now = chrono::Utc::now().to_rfc3339();
+    connection.execute(
+        r#"
+        INSERT INTO notes (id, lecture_id, notes_json, created_at)
+        VALUES (?1, ?2, ?3, ?4)
+        ON CONFLICT(lecture_id) DO UPDATE SET
+            notes_json = excluded.notes_json,
+            created_at = excluded.created_at
+        "#,
+        params![id, lecture_id, notes_json, now],
+    )?;
+    Ok(())
+}
+
+pub fn get_notes(
+    connection: &Connection,
+    lecture_id: &str,
+) -> rusqlite::Result<Option<String>> {
+    let result = connection.query_row(
+        "SELECT notes_json FROM notes WHERE lecture_id = ?1",
+        params![lecture_id],
+        |row| row.get::<_, String>(0),
+    );
+    match result {
+        Ok(v) => Ok(Some(v)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e),
+    }
+}
+
+// ─── Quiz Queries ─────────────────────────────────────────────────────────────
+
+pub fn upsert_quiz(
+    connection: &Connection,
+    lecture_id: &str,
+    quiz_json: &str,
+) -> rusqlite::Result<()> {
+    let id = uuid::Uuid::new_v4().to_string();
+    let now = chrono::Utc::now().to_rfc3339();
+    connection.execute(
+        r#"
+        INSERT INTO quizzes (id, lecture_id, quiz_json, created_at)
+        VALUES (?1, ?2, ?3, ?4)
+        ON CONFLICT(lecture_id) DO UPDATE SET
+            quiz_json  = excluded.quiz_json,
+            created_at = excluded.created_at
+        "#,
+        params![id, lecture_id, quiz_json, now],
+    )?;
+    Ok(())
+}
+
+pub fn get_quiz(
+    connection: &Connection,
+    lecture_id: &str,
+) -> rusqlite::Result<Option<String>> {
+    let result = connection.query_row(
+        "SELECT quiz_json FROM quizzes WHERE lecture_id = ?1",
+        params![lecture_id],
+        |row| row.get::<_, String>(0),
+    );
+    match result {
+        Ok(v) => Ok(Some(v)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e),
+    }
+}
+
+// ─── Flashcards Queries ───────────────────────────────────────────────────────
+
+pub fn upsert_flashcards(
+    connection: &Connection,
+    lecture_id: &str,
+    cards_json: &str,
+) -> rusqlite::Result<()> {
+    let id = uuid::Uuid::new_v4().to_string();
+    let now = chrono::Utc::now().to_rfc3339();
+    connection.execute(
+        r#"
+        INSERT INTO flashcards_output (id, lecture_id, cards_json, created_at)
+        VALUES (?1, ?2, ?3, ?4)
+        ON CONFLICT(lecture_id) DO UPDATE SET
+            cards_json = excluded.cards_json,
+            created_at = excluded.created_at
+        "#,
+        params![id, lecture_id, cards_json, now],
+    )?;
+    Ok(())
+}
+
+pub fn get_flashcards(
+    connection: &Connection,
+    lecture_id: &str,
+) -> rusqlite::Result<Option<String>> {
+    let result = connection.query_row(
+        "SELECT cards_json FROM flashcards_output WHERE lecture_id = ?1",
+        params![lecture_id],
+        |row| row.get::<_, String>(0),
+    );
+    match result {
+        Ok(v) => Ok(Some(v)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e),
+    }
+}
+
+// ─── Mind Map Queries ─────────────────────────────────────────────────────────
+
+pub fn upsert_mindmap(
+    connection: &Connection,
+    lecture_id: &str,
+    mindmap_json: &str,
+) -> rusqlite::Result<()> {
+    let id = uuid::Uuid::new_v4().to_string();
+    let now = chrono::Utc::now().to_rfc3339();
+    connection.execute(
+        r#"
+        INSERT INTO mindmaps (id, lecture_id, mindmap_json, created_at)
+        VALUES (?1, ?2, ?3, ?4)
+        ON CONFLICT(lecture_id) DO UPDATE SET
+            mindmap_json = excluded.mindmap_json,
+            created_at   = excluded.created_at
+        "#,
+        params![id, lecture_id, mindmap_json, now],
+    )?;
+    Ok(())
+}
+
+pub fn get_mindmap(
+    connection: &Connection,
+    lecture_id: &str,
+) -> rusqlite::Result<Option<String>> {
+    let result = connection.query_row(
+        "SELECT mindmap_json FROM mindmaps WHERE lecture_id = ?1",
+        params![lecture_id],
+        |row| row.get::<_, String>(0),
+    );
+    match result {
+        Ok(v) => Ok(Some(v)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e),
+    }
+}
+

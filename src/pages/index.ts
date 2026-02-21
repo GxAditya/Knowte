@@ -1,5 +1,6 @@
 export { default as Upload } from "./Upload";
 export { default as Transcript } from "./Transcript";
+export { default as Pipeline } from "./Pipeline";
 export { default as Notes } from "./Notes";
 export { default as Quiz } from "./Quiz";
 export { default as Research } from "./Research";

@@ -1,6 +1,7 @@
 mod commands;
 mod db;
 mod models;
+pub mod pipeline;
 mod utils;
 
 use tauri::Manager;
@@ -13,6 +14,9 @@ use commands::llm::{check_llm_availability, generate_llm_response};
 use commands::transcribe::{
     check_whisper_models, download_whisper_model, get_lecture_audio_url, transcribe_audio,
     update_transcript_segment,
+};
+use commands::pipeline::{
+    get_flashcards, get_mindmap, get_notes, get_pipeline_status, get_quiz, start_pipeline,
 };
 use db::init_database;
 
@@ -40,7 +44,13 @@ pub fn run() {
             update_transcript_segment,
             get_lecture_audio_url,
             generate_llm_response,
-            check_llm_availability
+            check_llm_availability,
+            start_pipeline,
+            get_pipeline_status,
+            get_notes,
+            get_quiz,
+            get_flashcards,
+            get_mindmap,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

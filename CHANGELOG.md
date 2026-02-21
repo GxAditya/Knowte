@@ -2,6 +2,38 @@
 
 All notable changes to the Cognote project will be documented in this file.
 
+## [Task 3.2] - 2026-02-21
+- Added: `src-tauri/src/pipeline/orchestrator.rs` — `run_full_pipeline()` runs 6 AI stages sequentially (summary, notes, quiz, flashcards, mindmap, research keywords); emits `pipeline-stage` Tauri events at start/completion of each stage; handles long transcripts by chunking (~4 000 tokens per chunk) with intermediate summaries; failed stages log an error and continue
+- Added: `src-tauri/src/pipeline/mod.rs` — pipeline module root
+- Added: `src-tauri/src/commands/pipeline.rs` — Tauri commands: `start_pipeline` (spawns background task, returns immediately), `get_pipeline_status`, `get_notes`, `get_quiz`, `get_flashcards`, `get_mindmap`
+- Added: `src-tauri/src/models/mod.rs` — Rust structs with Serde derive for `StructuredNotes`, `NotesTopic`, `NotesTerm`, `Question`, `Quiz`, `Flashcard`, `FlashcardsOutput`, `MindMapNode`, `MindMapData`, `KeywordsOutput`
+- Changed: `src-tauri/src/db/schema.rs` — added tables: `pipeline_stages`, `notes`, `quizzes`, `flashcards_output`, `mindmaps`; added `summary` and `keywords_json` columns to `lectures`
+- Changed: `src-tauri/src/db/queries.rs` — added `PipelineStageRecord`, `get_transcript_by_lecture_id`, `upsert_pipeline_stage`, `get_pipeline_stages`, `upsert_notes`, `get_notes`, `upsert_quiz`, `get_quiz`, `upsert_flashcards`, `get_flashcards`, `upsert_mindmap`, `get_mindmap`, `update_lecture_summary`, `update_lecture_keywords`
+- Changed: `src/components/Pipeline/ProgressTracker.tsx` — rebuilt as full 6-stage pipeline progress view with per-stage status icons, live streaming token preview, result previews, and overall progress bar
+- Added: `src/pages/Pipeline.tsx` — dedicated pipeline progress page with navigation shortcuts to all result views
+- Changed: `src/components/Upload/AudioUploader.tsx` — "Process Lecture" now transcribes then calls `start_pipeline` and navigates to `/pipeline`
+- Changed: `src/App.tsx`, `src/pages/index.ts` — added `/pipeline` route
+- Changed: `src/components/Sidebar.tsx` — added Pipeline nav item
+- Changed: `src/lib/types.ts` — added `PipelineStageEvent`, `PipelineStageStatus`, `PipelineStage`, `PipelineStageRecord` interfaces
+- Changed: `src/lib/tauriApi.ts` — added `startPipeline`, `getPipelineStatus`, `getNotes`, `getQuiz`, `getFlashcards`, `getMindmap` wrappers
+- Files modified:
+  - src-tauri/src/pipeline/mod.rs (new)
+  - src-tauri/src/pipeline/orchestrator.rs (new)
+  - src-tauri/src/commands/pipeline.rs (new)
+  - src-tauri/src/models/mod.rs
+  - src-tauri/src/db/schema.rs
+  - src-tauri/src/db/queries.rs
+  - src-tauri/src/commands/mod.rs
+  - src-tauri/src/lib.rs
+  - src/pages/Pipeline.tsx (new)
+  - src/pages/index.ts
+  - src/App.tsx
+  - src/components/Sidebar.tsx
+  - src/components/Pipeline/ProgressTracker.tsx
+  - src/components/Upload/AudioUploader.tsx
+  - src/lib/types.ts
+  - src/lib/tauriApi.ts
+
 ## [Task 3.1] - 2026-02-21
 - Added: `src-tauri/src/utils/prompt_templates.rs` with six prompt builder functions: `summarize_prompt`, `structured_notes_prompt`, `quiz_prompt`, `flashcards_prompt`, `mindmap_prompt`, `extract_keywords_prompt` — each injects a personalization preamble based on the configured study level
 - Added: `src-tauri/src/commands/llm.rs` with `OllamaClient` struct providing `generate()` (streaming via `/api/generate`) and `is_available()` methods; custom `LlmError` thiserror enum; `parse_json_from_response()` helper that extracts JSON from markdown-wrapped responses

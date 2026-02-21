@@ -176,10 +176,10 @@ cognote/
 | 1.1 Tauri + React Scaffold | ✅ Complete |
 | 1.2 Settings + Ollama Health Check | ✅ Complete |
 | 1.3 Audio Upload + Mic Recording | 🔲 Pending |
-| 2.1 Whisper Integration | 🔲 Pending |
-| 2.2 Transcript Editing | 🔲 Pending |
+| 2.1 Whisper Integration | ✅ Complete |
+| 2.2 Transcript Editing | ✅ Complete |
 | 3.1 Prompt Templates + Ollama Client | ✅ Complete |
-| 3.2 Pipeline Orchestrator | 🔲 Pending |
+| 3.2 Pipeline Orchestrator | ✅ Complete |
 | 3.3 Semantic Scholar Integration | 🔲 Pending |
 | 4.x Output Views | 🔲 Pending |
 | 5.x Lecture Library | 🔲 Pending |

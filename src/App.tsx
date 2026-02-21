@@ -3,6 +3,7 @@ import { Sidebar } from "./components";
 import {
   Upload,
   Transcript,
+  Pipeline,
   Notes,
   Quiz,
   Research,
@@ -21,6 +22,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Upload />} />
             <Route path="/transcript" element={<Transcript />} />
+            <Route path="/pipeline" element={<Pipeline />} />
             <Route path="/notes" element={<Notes />} />
             <Route path="/quiz" element={<Quiz />} />
             <Route path="/research" element={<Research />} />

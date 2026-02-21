@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ProgressTracker from "../Pipeline/ProgressTracker";
-import { transcribeAudio } from "../../lib/tauriApi";
+import { transcribeAudio, startPipeline } from "../../lib/tauriApi";
 import { useLectureStore } from "../../stores";
 import type { AudioFileMetadata, Lecture } from "../../lib/types";
 import DropZone from "./DropZone";
@@ -92,8 +91,13 @@ export default function AudioUploader() {
         error: undefined,
       });
       setCurrentLecture(lectureId);
-      setProcessHint("Transcription complete.");
-      navigate("/transcript");
+      setProcessHint("Transcription complete. Starting AI pipeline...");
+
+      // Start the pipeline in the background
+      await startPipeline(lectureId);
+
+      // Navigate to the pipeline progress view
+      navigate("/pipeline");
     } catch (transcriptionError) {
       const message =
         transcriptionError instanceof Error
@@ -101,7 +105,7 @@ export default function AudioUploader() {
           : String(transcriptionError);
       updateLecture(lectureId, { status: "error", error: message });
       setError(message);
-      setProcessHint("Transcription failed. See error details above.");
+      setProcessHint("Processing failed. See error details above.");
     } finally {
       setProcessingLecture(false);
     }
@@ -164,7 +168,9 @@ export default function AudioUploader() {
       )}
 
       {isProcessingLecture && (
-        <ProgressTracker lectureId={latestMetadata?.id ?? null} />
+        <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-sm text-blue-200">
+          {processHint ?? "Processing…"}
+        </div>
       )}
 
       {error && (

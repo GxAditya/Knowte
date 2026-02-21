@@ -2,6 +2,7 @@ import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   estimatePipelineWork,
+  importYoutubeAudio,
   startPipelineWithOptions,
   transcribeAudio,
 } from "../../lib/tauriApi";
@@ -11,6 +12,7 @@ import type {
   LectureSourceType,
   PipelineStageEvent,
   TranscriptionProgress,
+  YoutubeImportProgress,
 } from "../../lib/types";
 import { useLectureStore, useToastStore } from "../../stores";
 import { ViewHeader } from "../Layout";
@@ -19,8 +21,11 @@ import LiveRecorder from "./LiveRecorder";
 
 type UploadTab = "upload" | "record";
 type QueueStatus = "importing" | "waiting" | "processing" | "complete" | "error";
+type QueueOrigin = "local" | "youtube";
 type QueueStage =
   | "uploading"
+  | "validating url"
+  | "downloading"
   | "extracting audio"
   | "waiting"
   | "transcribing"
@@ -35,6 +40,7 @@ interface QueueItem {
   filename: string;
   sourcePath: string;
   sourceType: LectureSourceType;
+  origin: QueueOrigin;
   status: QueueStatus;
   stage: QueueStage;
   error?: string;
@@ -90,7 +96,10 @@ function statusBadgeClass(status: QueueStatus): string {
   return "border-slate-500/40 bg-slate-500/15 text-slate-200";
 }
 
-function sourceBadgeClass(sourceType: LectureSourceType): string {
+function sourceBadgeClass(origin: QueueOrigin, sourceType: LectureSourceType): string {
+  if (origin === "youtube") {
+    return "border-red-500/40 bg-red-500/15 text-red-200";
+  }
   if (sourceType === "video") {
     return "border-violet-500/40 bg-violet-500/15 text-violet-200";
   }
@@ -98,11 +107,16 @@ function sourceBadgeClass(sourceType: LectureSourceType): string {
   return "border-cyan-500/40 bg-cyan-500/15 text-cyan-200";
 }
 
-function sourceLabel(sourceType: LectureSourceType): string {
+function sourceLabel(origin: QueueOrigin, sourceType: LectureSourceType): string {
+  if (origin === "youtube") {
+    return "YouTube";
+  }
   return sourceType === "video" ? "Video" : "Audio";
 }
 
 function stageLabel(stage: QueueStage): string {
+  if (stage === "validating url") return "Validating URL";
+  if (stage === "downloading") return "Downloading";
   if (stage === "extracting audio") return "Extracting Audio";
   if (stage === "transcribing") return "Transcribing";
   if (stage === "processing") return "Processing";
@@ -110,6 +124,36 @@ function stageLabel(stage: QueueStage): string {
   if (stage === "waiting") return "Waiting";
   if (stage === "complete") return "Complete";
   return "Error";
+}
+
+function isValidYouTubeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url.trim());
+    if (!["https:", "http:"].includes(parsed.protocol)) {
+      return false;
+    }
+
+    const host = parsed.hostname.toLowerCase();
+    const isYouTubeHost =
+      host === "youtu.be" || host === "youtube.com" || host.endsWith(".youtube.com");
+    if (!isYouTubeHost) {
+      return false;
+    }
+
+    if (host === "youtu.be") {
+      return parsed.pathname.replace(/\//g, "").trim().length > 0;
+    }
+
+    return (
+      parsed.searchParams.has("v") ||
+      parsed.pathname.startsWith("/shorts/") ||
+      parsed.pathname.startsWith("/live/") ||
+      parsed.pathname.startsWith("/embed/") ||
+      parsed.pathname.startsWith("/watch")
+    );
+  } catch {
+    return false;
+  }
 }
 
 export default function AudioUploader() {
@@ -121,6 +165,9 @@ export default function AudioUploader() {
   const [transcriptionProgress, setTranscriptionProgress] = useState<
     Record<string, TranscriptionProgress>
   >({});
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [youtubeError, setYoutubeError] = useState<string | null>(null);
+  const [isYoutubeImporting, setIsYoutubeImporting] = useState(false);
   const pushToast = useToastStore((state) => state.pushToast);
 
   const {
@@ -150,6 +197,55 @@ export default function AudioUploader() {
         ...current,
         [payload.lecture_id]: payload,
       }));
+    })
+      .then((unsubscribe) => {
+        unlisten = unsubscribe;
+      })
+      .catch(() => {});
+
+    return () => {
+      if (unlisten) {
+        unlisten();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    void listen<YoutubeImportProgress>("youtube-import-progress", (event) => {
+      const payload = event.payload;
+      const stage =
+        payload.stage === "validating_url"
+          ? "validating url"
+          : payload.stage === "downloading"
+            ? "downloading"
+            : payload.stage === "extracting_audio"
+              ? "extracting audio"
+              : payload.stage === "ready"
+                ? "waiting"
+                : "error";
+
+      setQueueItems((current) => {
+        const index = current.findIndex(
+          (item) =>
+            item.origin === "youtube" &&
+            item.status === "importing" &&
+            item.sourcePath === payload.url,
+        );
+        if (index < 0) {
+          return current;
+        }
+
+        const next = [...current];
+        const existing = next[index];
+        next[index] = {
+          ...existing,
+          stage,
+          status: stage === "error" ? "error" : existing.status,
+          error: stage === "error" ? payload.message ?? existing.error : undefined,
+        };
+        return next;
+      });
     })
       .then((unsubscribe) => {
         unlisten = unsubscribe;
@@ -241,6 +337,7 @@ export default function AudioUploader() {
               filename: update.filename,
               sourcePath: update.filePath,
               sourceType: update.sourceType,
+              origin: "local" as QueueOrigin,
               status: "importing" as QueueStatus,
               stage: "uploading" as QueueStage,
             };
@@ -251,6 +348,7 @@ export default function AudioUploader() {
       let filename = existing.filename;
       let sourcePath = existing.sourcePath;
       let sourceType = existing.sourceType;
+      let origin = existing.origin;
       let status = existing.status;
       let stage = existing.stage;
       let errorMessage = update.error;
@@ -261,6 +359,7 @@ export default function AudioUploader() {
         filename = update.filename;
         sourcePath = update.filePath;
         sourceType = update.sourceType;
+        origin = "local";
       } else if (update.stage === "extracting_audio") {
         status = "importing";
         stage = "extracting audio";
@@ -286,6 +385,7 @@ export default function AudioUploader() {
         filename,
         sourcePath,
         sourceType,
+        origin,
         status,
         stage,
         error: errorMessage,
@@ -329,6 +429,7 @@ export default function AudioUploader() {
             filename: metadata.filename,
             sourcePath: metadata.path,
             sourceType: metadata.source_type,
+            origin: "local",
             status: "waiting",
             stage: "waiting",
           });
@@ -347,6 +448,103 @@ export default function AudioUploader() {
           : `Imported ${batch.length} files to the processing queue.`,
     });
   };
+
+  const updateYoutubeQueueItem = useCallback(
+    (
+      queueId: string,
+      updates: Partial<
+        Pick<
+          QueueItem,
+          "queueId" | "status" | "stage" | "error" | "lectureId" | "metadata" | "filename" | "sourcePath"
+        >
+      >,
+    ) => {
+      setQueueItems((current) =>
+        current.map((item) =>
+          item.queueId === queueId
+            ? {
+                ...item,
+                ...updates,
+              }
+            : item,
+        ),
+      );
+    },
+    [],
+  );
+
+  const handleYoutubeImport = useCallback(async () => {
+    const url = youtubeUrl.trim();
+    if (!isValidYouTubeUrl(url)) {
+      setYoutubeError("Enter a valid YouTube URL (youtube.com or youtu.be).");
+      return;
+    }
+
+    if (isUploading || isRecording || isProcessingLecture || isYoutubeImporting) {
+      return;
+    }
+
+    const queueId = `youtube:${Date.now()}`;
+    setYoutubeError(null);
+    setError(null);
+    setIsYoutubeImporting(true);
+    setUploading(true);
+    setQueueItems((current) => [
+      ...current,
+      {
+        queueId,
+        filename: url,
+        sourcePath: url,
+        sourceType: "audio",
+        origin: "youtube",
+        status: "importing",
+        stage: "validating url",
+      },
+    ]);
+
+    try {
+      const metadata = await importYoutubeAudio(url);
+      updateYoutubeQueueItem(queueId, {
+        queueId: metadata.id,
+        lectureId: metadata.id,
+        metadata,
+        filename: metadata.filename,
+        sourcePath: metadata.path,
+        status: "waiting",
+        stage: "waiting",
+        error: undefined,
+      });
+      handleAudioSuccess([metadata]);
+      setYoutubeUrl("");
+    } catch (importError) {
+      const message = importError instanceof Error ? importError.message : String(importError);
+      updateYoutubeQueueItem(queueId, {
+        status: "error",
+        stage: "error",
+        error: message,
+      });
+      setYoutubeError(message);
+      setError(message);
+      pushToast({
+        kind: "error",
+        message,
+      });
+    } finally {
+      setIsYoutubeImporting(false);
+      setUploading(false);
+    }
+  }, [
+    handleAudioSuccess,
+    isProcessingLecture,
+    isRecording,
+    isUploading,
+    isYoutubeImporting,
+    pushToast,
+    setError,
+    setUploading,
+    updateYoutubeQueueItem,
+    youtubeUrl,
+  ]);
 
   const removeQueueItem = (queueId: string) => {
     if (isBatchRunning) {
@@ -461,7 +659,7 @@ export default function AudioUploader() {
     <div className="mx-auto max-w-[900px] space-y-6">
       <ViewHeader
         title="Lecture Input"
-        description="Upload audio/video lecture files or record directly from your microphone."
+        description="Upload audio/video files, import from YouTube, or record directly from your microphone."
       />
 
       <div
@@ -508,12 +706,55 @@ export default function AudioUploader() {
         className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm"
       >
         {activeTab === "upload" ? (
-          <DropZone
-            onUploadSuccess={handleAudioSuccess}
-            onUploadStageChange={handleUploadStageChange}
-            onUploadStateChange={setUploading}
-            disabled={isRecording || isProcessingLecture}
-          />
+          <div className="space-y-5">
+            <DropZone
+              onUploadSuccess={handleAudioSuccess}
+              onUploadStageChange={handleUploadStageChange}
+              onUploadStateChange={setUploading}
+              disabled={isRecording || isProcessingLecture || isYoutubeImporting}
+            />
+
+            <section className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/50 p-4">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-100">Import from YouTube</h3>
+                <p className="text-xs text-slate-400">
+                  Paste a public YouTube URL to download audio and add it to the queue.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 md:flex-row">
+                <input
+                  type="url"
+                  value={youtubeUrl}
+                  onChange={(event) => {
+                    setYoutubeUrl(event.target.value);
+                    if (youtubeError) {
+                      setYoutubeError(null);
+                    }
+                  }}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  disabled={isUploading || isRecording || isProcessingLecture || isYoutubeImporting}
+                  className="w-full rounded-md border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleYoutubeImport()}
+                  disabled={
+                    isUploading ||
+                    isRecording ||
+                    isProcessingLecture ||
+                    isYoutubeImporting ||
+                    youtubeUrl.trim().length === 0
+                  }
+                  className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isYoutubeImporting ? "Importing..." : "Add to Queue"}
+                </button>
+              </div>
+
+              {youtubeError && <p className="text-xs text-red-300">{youtubeError}</p>}
+            </section>
+          </div>
         ) : (
           <LiveRecorder
             onRecordingSaved={(metadata) => handleAudioSuccess([metadata])}
@@ -525,7 +766,11 @@ export default function AudioUploader() {
 
       {(isUploading || isRecording) && (
         <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-sm text-blue-200">
-          {isUploading ? "Importing lecture files..." : "Recording in progress..."}
+          {isUploading
+            ? isYoutubeImporting
+              ? "Importing from YouTube..."
+              : "Importing lecture files..."
+            : "Recording in progress..."}
         </div>
       )}
 
@@ -578,9 +823,9 @@ export default function AudioUploader() {
 
                       <div className="flex flex-wrap items-center gap-2">
                         <span
-                          className={`rounded-full border px-2 py-0.5 text-xs font-medium ${sourceBadgeClass(item.sourceType)}`}
+                          className={`rounded-full border px-2 py-0.5 text-xs font-medium ${sourceBadgeClass(item.origin, item.sourceType)}`}
                         >
-                          {sourceLabel(item.sourceType)}
+                          {sourceLabel(item.origin, item.sourceType)}
                         </span>
                         <span className="text-xs text-slate-400">{stageLabel(item.stage)}</span>
                       </div>
@@ -592,9 +837,13 @@ export default function AudioUploader() {
                         </p>
                       ) : (
                         <p className="text-xs text-slate-400">
-                          {item.stage === "extracting audio"
-                            ? "Extracting 16kHz mono WAV from video..."
-                            : "Preparing import..."}
+                          {item.stage === "validating url"
+                            ? "Validating YouTube URL..."
+                            : item.stage === "downloading"
+                              ? "Downloading audio stream from YouTube..."
+                              : item.stage === "extracting audio"
+                                ? "Extracting 16kHz mono WAV..."
+                                : "Preparing import..."}
                         </p>
                       )}
 

@@ -9,8 +9,8 @@ use tauri::Manager;
 
 use audio_stream::AudioServerPort;
 use commands::audio::{
-    accept_audio_file, pick_audio_file, pick_audio_files, start_recording, stop_recording,
-    RecordingState,
+    accept_audio_file, import_youtube_audio, pick_audio_file, pick_audio_files, start_recording,
+    stop_recording, RecordingState,
 };
 use commands::compare::{compare_lectures, merge_flashcards};
 use commands::explain::{add_custom_flashcard, explain_text};
@@ -61,6 +61,7 @@ pub fn run() {
             pick_audio_file,
             pick_audio_files,
             accept_audio_file,
+            import_youtube_audio,
             start_recording,
             stop_recording,
             download_whisper_model,

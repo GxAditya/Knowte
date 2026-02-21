@@ -34,7 +34,10 @@
     "resources": [
       "resources/ffmpeg/linux",
       "resources/ffmpeg/macos",
-      "resources/ffmpeg/windows"
+      "resources/ffmpeg/windows",
+      "resources/yt-dlp/linux",
+      "resources/yt-dlp/macos",
+      "resources/yt-dlp/windows"
     ],
     "icon": [
       "icons/32x32.png",

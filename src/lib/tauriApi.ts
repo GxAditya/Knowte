@@ -90,6 +90,10 @@ export async function acceptAudioFile(path: string): Promise<AudioFileMetadata> 
   return invoke<AudioFileMetadata>("accept_audio_file", { path });
 }
 
+export async function importYoutubeAudio(url: string): Promise<AudioFileMetadata> {
+  return invoke<AudioFileMetadata>("import_youtube_audio", { url });
+}
+
 export async function startRecording(): Promise<string> {
   return invoke<string>("start_recording");
 }

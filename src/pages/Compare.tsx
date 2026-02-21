@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { FlashcardViewer } from "../components/Flashcards";
 import { ViewHeader } from "../components/Layout";
 import { MindMapCanvas } from "../components/MindMap";
+import { parseMindMapJson } from "../lib/mindmap";
 import {
   compareLectures,
   getMindmap,
@@ -267,7 +268,7 @@ export default function Compare() {
         try {
           const parsed = {
             lectureId,
-            data: JSON.parse(raw) as MindMapData,
+            data: parseMindMapJson(raw),
           };
           return parsed;
         } catch {

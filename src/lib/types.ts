@@ -30,6 +30,12 @@ export interface AudioFileMetadata {
   source_type: LectureSourceType;
 }
 
+export interface YoutubeImportProgress {
+  url: string;
+  stage: "validating_url" | "downloading" | "extracting_audio" | "ready" | "error";
+  message?: string | null;
+}
+
 export interface WhisperDownloadProgress {
   percent: number;
   model_size: string;

@@ -2,6 +2,28 @@
 
 All notable changes to the Cognote project will be documented in this file.
 
+## [Task 8.3] - 2026-02-21
+- Added: Backend Tauri command `import_youtube_audio(url)` to validate YouTube links, download source audio via `yt-dlp`, normalize to 16kHz mono WAV with ffmpeg, persist lecture metadata, and return standard `AudioFileMetadata`.
+- Added: YouTube import progress events (`youtube-import-progress`) with queue stages (`validating_url`, `downloading`, `extracting_audio`, `ready`, `error`) for frontend status updates.
+- Added: Frontend Upload workflow section "Import from YouTube" with URL validation, queue integration, staged progress, and clear missing/private/unavailable error handling.
+- Added: Bundled `yt-dlp` runtime resolver/provisioning utility following the existing packaged-binary pattern used for ffmpeg, with Tauri bundle resources for Linux/macOS/Windows.
+- Added: Resource scaffold/documentation for platform `yt-dlp` binaries under `src-tauri/resources/yt-dlp/*`.
+- Changed: Upload queue source badges now distinguish YouTube imports from local Audio/Video file imports.
+- Files modified:
+  - src-tauri/src/commands/audio.rs
+  - src-tauri/src/lib.rs
+  - src-tauri/src/utils/mod.rs
+  - src-tauri/src/utils/ytdlp.rs (new)
+  - src-tauri/tauri.conf.json
+  - src-tauri/resources/yt-dlp/README.md (new)
+  - src-tauri/resources/yt-dlp/linux/.gitkeep (new)
+  - src-tauri/resources/yt-dlp/macos/.gitkeep (new)
+  - src-tauri/resources/yt-dlp/windows/.gitkeep (new)
+  - src/components/Upload/AudioUploader.tsx
+  - src/lib/tauriApi.ts
+  - src/lib/types.ts
+  - CHANGELOG.md
+
 ## [Task 8.4] - 2026-02-21
 - Added: Bundled ffmpeg runtime resolution utility that prefers app-bundled binaries from Tauri resources and falls back to system `PATH`.
 - Added: Startup ffmpeg provisioning step (`setup`) that installs ffmpeg into app-data (`tools/ffmpeg`) before opening the app UI.

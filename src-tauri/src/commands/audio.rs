@@ -1,14 +1,16 @@
 use crate::db::queries::{upsert_lecture, LectureRecord};
 use crate::db::AppDatabase;
 use crate::utils::ffmpeg::resolve_ffmpeg_path;
+use crate::utils::ytdlp::ensure_ytdlp_installed;
 use chrono::Utc;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use fs2::available_space;
-use serde::Serialize;
+use reqwest::Url;
+use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
-use std::io::BufWriter;
+use std::io::{BufRead, BufReader, BufWriter};
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
@@ -29,6 +31,7 @@ const SUPPORTED_EXTENSIONS: [&str; 10] = [
 ];
 const MIN_RECORDING_FREE_SPACE_BYTES: u64 = 64 * 1024 * 1024;
 const MIN_VIDEO_IMPORT_FREE_SPACE_BYTES: u64 = 256 * 1024 * 1024;
+const MIN_YOUTUBE_IMPORT_FREE_SPACE_BYTES: u64 = 512 * 1024 * 1024;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum SourceType {
@@ -61,6 +64,19 @@ struct RecordingLevelEvent {
     level: u8,
 }
 
+#[derive(Debug, Clone, Serialize)]
+struct YoutubeImportProgressEvent {
+    url: String,
+    stage: String,
+    message: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct YtDlpVideoMetadata {
+    title: Option<String>,
+    id: Option<String>,
+}
+
 #[derive(Debug, Clone, Error)]
 enum AudioError {
     #[error("The selected file does not exist.")]
@@ -91,6 +107,20 @@ enum AudioError {
         "Video conversion failed. Convert the video to MP4 with AAC audio and try uploading again."
     )]
     VideoExtractionFailed,
+    #[error("Only YouTube URLs are supported. Use a youtube.com or youtu.be link.")]
+    InvalidYouTubeUrl,
+    #[error(
+        "Unable to find yt-dlp. Reinstall Cognote (bundled yt-dlp) or install yt-dlp on your system."
+    )]
+    YtDlpMissing,
+    #[error(
+        "Unable to access this YouTube video. It may be private, removed, blocked, or age-restricted."
+    )]
+    YouTubeUnavailable,
+    #[error("Unable to validate the YouTube URL. Confirm the link is public and reachable.")]
+    YouTubeValidationFailed,
+    #[error("Unable to download YouTube audio. Try another video or update yt-dlp.")]
+    YouTubeDownloadFailed,
     #[error("Unable to read audio metadata. The file may be corrupt or unsupported.")]
     MetadataReadFailed,
     #[error("No readable audio track was found. The file may be corrupt or unsupported.")]
@@ -176,6 +206,24 @@ pub async fn accept_audio_file(
 }
 
 #[tauri::command]
+pub async fn import_youtube_audio(
+    app: AppHandle,
+    database: State<'_, AppDatabase>,
+    url: String,
+) -> Result<AudioFileMetadata, String> {
+    let app_handle = app.clone();
+    let database_handle = database.inner().clone();
+    let worker_url = url.clone();
+
+    tauri::async_runtime::spawn_blocking(move || {
+        import_youtube_audio_impl(&app_handle, &database_handle, &worker_url)
+    })
+    .await
+    .map_err(|_| AudioError::BackgroundTaskFailed)?
+    .map_err(Into::into)
+}
+
+#[tauri::command]
 pub fn start_recording(app: AppHandle, state: State<'_, RecordingState>) -> Result<String, String> {
     start_recording_impl(&app, state.inner()).map_err(Into::into)
 }
@@ -238,6 +286,353 @@ fn accept_audio_file_impl(
     let metadata = build_audio_metadata(id, filename, &destination_path, source_type)?;
     persist_lecture_metadata(database, &metadata)?;
     Ok(metadata)
+}
+
+fn import_youtube_audio_impl(
+    app: &AppHandle,
+    database: &AppDatabase,
+    url: &str,
+) -> Result<AudioFileMetadata, AudioError> {
+    let event_url = url.trim().to_string();
+    emit_youtube_import_progress(app, &event_url, "validating_url", None);
+
+    let result = import_youtube_audio_inner(app, database, url);
+    if let Err(error) = &result {
+        emit_youtube_import_progress(app, &event_url, "error", Some(error.to_string()));
+    }
+
+    result
+}
+
+fn import_youtube_audio_inner(
+    app: &AppHandle,
+    database: &AppDatabase,
+    url: &str,
+) -> Result<AudioFileMetadata, AudioError> {
+    let normalized_url = validate_youtube_url(url)?;
+    let lectures_dir = get_lectures_dir(app)?;
+    ensure_available_space(&lectures_dir, MIN_YOUTUBE_IMPORT_FREE_SPACE_BYTES)?;
+
+    let yt_dlp_path = ensure_ytdlp_installed(app).map_err(|_| AudioError::YtDlpMissing)?;
+    let ffmpeg_path = resolve_ffmpeg_path(Some(app));
+    let video_title = fetch_youtube_title(&yt_dlp_path, &normalized_url)?;
+
+    let id = Uuid::new_v4().to_string();
+    let download_template = lectures_dir.join(format!("{id}.youtube.%(ext)s"));
+    let destination_path = lectures_dir.join(format!("{id}.wav"));
+
+    emit_youtube_import_progress(app, &normalized_url, "downloading", None);
+    if let Err(error) = run_ytdlp_download(
+        &yt_dlp_path,
+        &normalized_url,
+        &download_template,
+        &ffmpeg_path,
+    ) {
+        cleanup_youtube_temp_files(&lectures_dir, &id);
+        return Err(error);
+    }
+
+    let downloaded_path = find_downloaded_youtube_media(&lectures_dir, &id)?;
+    emit_youtube_import_progress(app, &normalized_url, "extracting_audio", None);
+    if let Err(error) =
+        normalize_downloaded_audio(&ffmpeg_path, &downloaded_path, &destination_path)
+    {
+        fs::remove_file(&downloaded_path).ok();
+        fs::remove_file(&destination_path).ok();
+        cleanup_youtube_temp_files(&lectures_dir, &id);
+        return Err(error);
+    }
+
+    fs::remove_file(&downloaded_path).ok();
+    cleanup_youtube_temp_files(&lectures_dir, &id);
+
+    let sanitized_title = sanitize_youtube_title(&video_title);
+    let filename = format!("{sanitized_title}.wav");
+    let metadata = build_audio_metadata(id, filename, &destination_path, SourceType::Audio)?;
+    persist_lecture_metadata(database, &metadata)?;
+    emit_youtube_import_progress(app, &normalized_url, "ready", None);
+    Ok(metadata)
+}
+
+fn validate_youtube_url(url: &str) -> Result<String, AudioError> {
+    let trimmed = url.trim();
+    if trimmed.is_empty() {
+        return Err(AudioError::InvalidYouTubeUrl);
+    }
+
+    let parsed = Url::parse(trimmed).map_err(|_| AudioError::InvalidYouTubeUrl)?;
+    if !matches!(parsed.scheme(), "http" | "https") {
+        return Err(AudioError::InvalidYouTubeUrl);
+    }
+
+    let host = parsed
+        .host_str()
+        .map(|value| value.to_ascii_lowercase())
+        .ok_or(AudioError::InvalidYouTubeUrl)?;
+    let is_youtube_host =
+        host == "youtu.be" || host == "youtube.com" || host.ends_with(".youtube.com");
+    if !is_youtube_host {
+        return Err(AudioError::InvalidYouTubeUrl);
+    }
+
+    if host == "youtu.be" {
+        if parsed.path().trim_matches('/').is_empty() {
+            return Err(AudioError::InvalidYouTubeUrl);
+        }
+    } else {
+        let has_video_hint = parsed.query_pairs().any(|(key, _)| key == "v")
+            || parsed.path().starts_with("/shorts/")
+            || parsed.path().starts_with("/live/")
+            || parsed.path().starts_with("/embed/")
+            || parsed.path().starts_with("/watch");
+        if !has_video_hint {
+            return Err(AudioError::YouTubeValidationFailed);
+        }
+    }
+
+    Ok(trimmed.to_string())
+}
+
+fn fetch_youtube_title(yt_dlp_path: &Path, url: &str) -> Result<String, AudioError> {
+    let output = Command::new(yt_dlp_path)
+        .arg("--skip-download")
+        .arg("--dump-single-json")
+        .arg("--no-playlist")
+        .arg("--no-warnings")
+        .arg(url)
+        .output();
+
+    let output = match output {
+        Ok(output) => output,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            return Err(AudioError::YtDlpMissing);
+        }
+        Err(_) => return Err(AudioError::YouTubeValidationFailed),
+    };
+
+    if !output.status.success() {
+        return Err(map_ytdlp_failure(&String::from_utf8_lossy(&output.stderr)));
+    }
+
+    let metadata = serde_json::from_slice::<YtDlpVideoMetadata>(&output.stdout)
+        .map_err(|_| AudioError::YouTubeValidationFailed)?;
+    Ok(metadata
+        .title
+        .or(metadata.id)
+        .unwrap_or_else(|| "YouTube Lecture".to_string()))
+}
+
+fn run_ytdlp_download(
+    yt_dlp_path: &Path,
+    url: &str,
+    output_template: &Path,
+    ffmpeg_path: &Path,
+) -> Result<(), AudioError> {
+    let child = Command::new(yt_dlp_path)
+        .arg("--no-playlist")
+        .arg("--no-warnings")
+        .arg("--ignore-config")
+        .arg("--newline")
+        .arg("-f")
+        .arg("bestaudio/best")
+        .arg("-o")
+        .arg(output_template.as_os_str())
+        .arg("--ffmpeg-location")
+        .arg(ffmpeg_path.as_os_str())
+        .arg(url)
+        .stdout(Stdio::null())
+        .stderr(Stdio::piped())
+        .spawn();
+
+    let mut child = match child {
+        Ok(child) => child,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            return Err(AudioError::YtDlpMissing);
+        }
+        Err(_) => return Err(AudioError::YouTubeDownloadFailed),
+    };
+
+    let mut stderr = String::new();
+    if let Some(stderr_pipe) = child.stderr.take() {
+        let reader = BufReader::new(stderr_pipe);
+        for line in reader.lines().map_while(Result::ok) {
+            if stderr.len() > 16_000 {
+                continue;
+            }
+            if !line.trim().is_empty() {
+                if !stderr.is_empty() {
+                    stderr.push('\n');
+                }
+                stderr.push_str(&line);
+            }
+        }
+    }
+
+    let status = child
+        .wait()
+        .map_err(|_| AudioError::YouTubeDownloadFailed)?;
+    if status.success() {
+        Ok(())
+    } else {
+        Err(map_ytdlp_failure(&stderr))
+    }
+}
+
+fn find_downloaded_youtube_media(lectures_dir: &Path, id: &str) -> Result<PathBuf, AudioError> {
+    let entries = fs::read_dir(lectures_dir).map_err(|_| AudioError::YouTubeDownloadFailed)?;
+    let prefix = format!("{id}.youtube.");
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+
+        let Some(name) = path.file_name().and_then(|value| value.to_str()) else {
+            continue;
+        };
+
+        if name.starts_with(&prefix) {
+            return Ok(path);
+        }
+    }
+
+    Err(AudioError::YouTubeDownloadFailed)
+}
+
+fn normalize_downloaded_audio(
+    ffmpeg_path: &Path,
+    source_path: &Path,
+    target_path: &Path,
+) -> Result<(), AudioError> {
+    let temp_output = target_path.with_extension("tmp.wav");
+    let ffmpeg_output = Command::new(ffmpeg_path)
+        .arg("-y")
+        .arg("-hide_banner")
+        .arg("-loglevel")
+        .arg("error")
+        .arg("-i")
+        .arg(source_path.as_os_str())
+        .arg("-vn")
+        .arg("-ac")
+        .arg("1")
+        .arg("-ar")
+        .arg("16000")
+        .arg("-f")
+        .arg("wav")
+        .arg(temp_output.as_os_str())
+        .output();
+
+    match ffmpeg_output {
+        Ok(output) if output.status.success() => {
+            fs::rename(&temp_output, target_path).map_err(|_| {
+                fs::remove_file(&temp_output).ok();
+                AudioError::SaveFailed
+            })?;
+            Ok(())
+        }
+        Ok(_) => {
+            fs::remove_file(&temp_output).ok();
+            Err(AudioError::YouTubeDownloadFailed)
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            fs::remove_file(&temp_output).ok();
+            Err(AudioError::FfmpegMissing)
+        }
+        Err(_) => {
+            fs::remove_file(&temp_output).ok();
+            Err(AudioError::YouTubeDownloadFailed)
+        }
+    }
+}
+
+fn sanitize_youtube_title(raw_title: &str) -> String {
+    let mut cleaned = String::new();
+    for character in raw_title.chars() {
+        if character.is_ascii_alphanumeric()
+            || character == ' '
+            || character == '-'
+            || character == '_'
+        {
+            cleaned.push(character);
+        } else {
+            cleaned.push(' ');
+        }
+    }
+
+    let collapsed = cleaned.split_whitespace().collect::<Vec<_>>().join(" ");
+    let truncated: String = collapsed.chars().take(80).collect();
+    let final_title = truncated.trim();
+    if final_title.is_empty() {
+        "YouTube Lecture".to_string()
+    } else {
+        final_title.to_string()
+    }
+}
+
+fn cleanup_youtube_temp_files(lectures_dir: &Path, id: &str) {
+    let Ok(entries) = fs::read_dir(lectures_dir) else {
+        return;
+    };
+    let prefix = format!("{id}.youtube.");
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+        let Some(name) = path.file_name().and_then(|value| value.to_str()) else {
+            continue;
+        };
+        if name.starts_with(&prefix) {
+            let _ = fs::remove_file(path);
+        }
+    }
+}
+
+fn map_ytdlp_failure(stderr: &str) -> AudioError {
+    let normalized = stderr.to_ascii_lowercase();
+
+    if normalized.contains("unsupported url")
+        || normalized.contains("is not a valid url")
+        || normalized.contains("invalid url")
+    {
+        return AudioError::InvalidYouTubeUrl;
+    }
+
+    if normalized.contains("private video")
+        || normalized.contains("video unavailable")
+        || normalized.contains("this video is unavailable")
+        || normalized.contains("this video is private")
+        || normalized.contains("members-only")
+        || normalized.contains("age-restricted")
+        || normalized.contains("sign in to confirm your age")
+        || normalized.contains("not available in your country")
+        || normalized.contains("http error 403")
+        || normalized.contains("http error 404")
+    {
+        return AudioError::YouTubeUnavailable;
+    }
+
+    if normalized.contains("temporary failure in name resolution")
+        || normalized.contains("name or service not known")
+        || normalized.contains("connection refused")
+        || normalized.contains("timed out")
+    {
+        return AudioError::YouTubeValidationFailed;
+    }
+
+    AudioError::YouTubeDownloadFailed
+}
+
+fn emit_youtube_import_progress(app: &AppHandle, url: &str, stage: &str, message: Option<String>) {
+    let _ = app.emit(
+        "youtube-import-progress",
+        YoutubeImportProgressEvent {
+            url: url.to_string(),
+            stage: stage.to_string(),
+            message,
+        },
+    );
 }
 
 fn start_recording_impl(app: &AppHandle, state: &RecordingState) -> Result<String, AudioError> {

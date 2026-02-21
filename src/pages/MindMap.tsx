@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { MindMapSkeleton } from "../components/Skeletons";
 import { MindMapCanvas } from "../components/MindMap";
 import { ViewHeader } from "../components/Layout";
+import { parseMindMapJson } from "../lib/mindmap";
 import { getMindmap, regenerateMindmap } from "../lib/tauriApi";
 import type { MindMapData } from "../lib/types";
 import { useLectureStore, useToastStore } from "../stores";
@@ -107,7 +108,7 @@ export default function MindMap() {
       .then((json) => {
         if (json) {
           try {
-            setMindmapData(JSON.parse(json) as MindMapData);
+            setMindmapData(parseMindMapJson(json));
           } catch {
             setError("Could not parse mind map data.");
           }
@@ -128,7 +129,7 @@ export default function MindMap() {
     try {
       const json = await regenerateMindmap(currentLectureId);
       if (json) {
-        setMindmapData(JSON.parse(json) as MindMapData);
+        setMindmapData(parseMindMapJson(json));
         pushToast({ kind: "success", message: "Mind map regenerated successfully." });
       } else {
         pushToast({ kind: "warning", message: "Mind map regeneration returned no data." });

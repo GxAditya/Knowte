@@ -11,6 +11,7 @@ use audio_stream::AudioServerPort;
 use commands::audio::{
     accept_audio_file, pick_audio_file, start_recording, stop_recording, RecordingState,
 };
+use commands::explain::{add_custom_flashcard, explain_text};
 use commands::library::{delete_lecture, export_all_lecture_data, list_lectures, search_lectures};
 use commands::llm::{check_llm_availability, generate_llm_response};
 use commands::pipeline::{
@@ -63,6 +64,8 @@ pub fn run() {
             get_lecture_transcript,
             generate_llm_response,
             check_llm_availability,
+            explain_text,
+            add_custom_flashcard,
             start_pipeline,
             get_pipeline_status,
             get_notes,

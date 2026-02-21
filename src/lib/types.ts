@@ -67,6 +67,23 @@ export interface LlmStreamEvent {
   done: boolean;
 }
 
+/** Emitted as `explain-stream` while contextual explanation is generated */
+export interface ExplainStreamEvent {
+  token: string;
+  done: boolean;
+}
+
+export interface ExplainHistoryEntry {
+  id: string;
+  selectedText: string;
+  context: string;
+  explanation: string;
+  level: string;
+  createdAt: number;
+  isStreaming: boolean;
+  error?: string;
+}
+
 // Structured Notes (matches prompt schema)
 export interface NotesTopic {
   heading: string;

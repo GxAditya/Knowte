@@ -47,6 +47,18 @@ export async function checkLlmAvailability(): Promise<boolean> {
   return invoke<boolean>("check_llm_availability");
 }
 
+/**
+ * Generate a contextual explanation for selected text.
+ * Emits `explain-stream` events while tokens are produced.
+ */
+export async function explainText(
+  text: string,
+  context: string,
+  level: string,
+): Promise<string> {
+  return invoke<string>("explain_text", { text, context, level });
+}
+
 export async function checkOllamaStatus(ollamaUrl: string): Promise<OllamaStatus> {
   return invoke<OllamaStatus>("check_ollama_status", { ollamaUrl });
 }
@@ -165,6 +177,15 @@ export async function getQuiz(lectureId: string): Promise<string | null> {
 /** Retrieve flashcards JSON for a lecture (null if not yet generated). */
 export async function getFlashcards(lectureId: string): Promise<string | null> {
   return invoke<string | null>("get_flashcards", { lectureId });
+}
+
+/** Append a user-created flashcard to a lecture's flashcard set. */
+export async function addCustomFlashcard(
+  lectureId: string,
+  front: string,
+  back: string,
+): Promise<void> {
+  return invoke("add_custom_flashcard", { lectureId, front, back });
 }
 
 /** Retrieve mind-map JSON for a lecture (null if not yet generated). */

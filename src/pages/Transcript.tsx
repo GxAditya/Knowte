@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ExplainableTextView,
   TranscriptAudioPlayer,
   TranscriptEditor,
   TranscriptViewer,
@@ -291,18 +292,20 @@ export default function Transcript() {
         </div>
       )}
 
-      {isEditing ? (
-        <TranscriptEditor
-          activeSegmentIndex={activeSegmentIndex}
-          onSegmentClick={handleSegmentSeek}
-        />
-      ) : (
-        <TranscriptViewer
-          showHeader={false}
-          activeSegmentIndex={activeSegmentIndex}
-          onSegmentClick={handleSegmentSeek}
-        />
-      )}
+      <ExplainableTextView lectureId={lecture.id}>
+        {isEditing ? (
+          <TranscriptEditor
+            activeSegmentIndex={activeSegmentIndex}
+            onSegmentClick={handleSegmentSeek}
+          />
+        ) : (
+          <TranscriptViewer
+            showHeader={false}
+            activeSegmentIndex={activeSegmentIndex}
+            onSegmentClick={handleSegmentSeek}
+          />
+        )}
+      </ExplainableTextView>
 
       <audio ref={audioRef} src={audioUrl ?? undefined} preload="metadata" className="hidden" />
 

@@ -157,6 +157,67 @@ Transcript: {}"#,
     )
 }
 
+/// Prompt 7 — Explain a selected excerpt in context (plain text output)
+#[allow(dead_code)]
+pub fn explain_text_prompt(selected_text: &str, context: &str, level: &str) -> String {
+    let context_block = if context.trim().is_empty() {
+        "No additional surrounding context provided.".to_string()
+    } else {
+        context.to_string()
+    };
+
+    format!(
+        r#"{}Explain the selected excerpt from a lecture for the target learner level.
+
+Requirements:
+- Keep the explanation clear, accurate, and concise.
+- Clarify jargon and implicit assumptions.
+- Include 1 short real-world analogy when useful.
+- End with one short "why this matters" sentence.
+- Output plain text only (no markdown headings or code fences).
+
+Selected excerpt:
+{}
+
+Surrounding context:
+{}"#,
+        personalization_preamble(level),
+        selected_text,
+        context_block,
+    )
+}
+
+/// Prompt 8 — Generate a concise flashcard back from selected text (plain text)
+#[allow(dead_code)]
+pub fn custom_flashcard_back_prompt(front: &str, context: &str, level: &str) -> String {
+    let context_block = if context.trim().is_empty() {
+        "No additional surrounding context provided.".to_string()
+    } else {
+        context.to_string()
+    };
+
+    format!(
+        r#"{}You are creating one high-quality study flashcard.
+
+Given the flashcard front and surrounding lecture context, produce a single flashcard back.
+
+Requirements:
+- 1-3 sentences maximum.
+- Directly answer or explain the front text.
+- Keep language aligned with the learner level.
+- Output plain text only.
+
+Front:
+{}
+
+Context:
+{}"#,
+        personalization_preamble(level),
+        front,
+        context_block,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -220,5 +281,29 @@ mod tests {
         let prompt = extract_keywords_prompt("machine learning and neural networks");
         assert!(prompt.contains("keywords"));
         assert!(prompt.contains("machine learning and neural networks"));
+    }
+
+    #[test]
+    fn test_explain_text_prompt_contains_excerpt_and_context() {
+        let prompt = explain_text_prompt(
+            "Backpropagation updates weights.",
+            "This follows the chain rule discussion.",
+            "undergraduate_2nd_year",
+        );
+        assert!(prompt.contains("Backpropagation updates weights."));
+        assert!(prompt.contains("This follows the chain rule discussion."));
+        assert!(prompt.contains("second-year university student"));
+    }
+
+    #[test]
+    fn test_custom_flashcard_back_prompt_contains_front_and_level() {
+        let prompt = custom_flashcard_back_prompt(
+            "What is gradient descent?",
+            "The lecture compares batch and stochastic methods.",
+            "high_school",
+        );
+        assert!(prompt.contains("What is gradient descent?"));
+        assert!(prompt.contains("batch and stochastic"));
+        assert!(prompt.contains("high school student"));
     }
 }

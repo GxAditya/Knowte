@@ -2,6 +2,33 @@
 
 All notable changes to the Cognote project will be documented in this file.
 
+## [Task 7.1] - 2026-02-21
+- Added: Contextual "Explain This" workflow for transcript and notes text selection with a floating action toolbar (`Explain`, `Add to Flashcards`, `Copy`)
+- Added: Slide-in explain panel with explanation history, streaming token display, close/reopen behavior, and one-step `Explain simpler` / `Explain deeper` controls
+- Added: Right-click explain shortcut on selected text inside explainable views
+- Fixed: Floating selection toolbar positioning by rendering explain overlays via `document.body` portal to avoid transformed-parent offset issues
+- Changed: Right-click on selected text now opens the action toolbar at cursor position instead of immediately triggering explanation
+- Added: Backend Tauri command `explain_text(text, context, level)` with streamed `explain-stream` events and full explanation return payload
+- Added: Backend Tauri command `add_custom_flashcard(lecture_id, front, back)` to append user-created flashcards into persisted lecture flashcard sets
+- Added: Prompt templates for contextual explanation and custom flashcard back generation
+- Changed: Transcript segment rows now keep text selectable while preserving segment seek controls
+- Files modified:
+  - src-tauri/src/commands/mod.rs
+  - src-tauri/src/commands/explain.rs (new)
+  - src-tauri/src/lib.rs
+  - src-tauri/src/utils/prompt_templates.rs
+  - src/components/Explain/ExplainPanel.tsx (new)
+  - src/components/Explain/TextSelectionToolbar.tsx (new)
+  - src/components/Explain/ExplainableTextView.tsx (new)
+  - src/components/Explain/index.ts (new)
+  - src/components/Transcript/TranscriptViewer.tsx
+  - src/components/index.ts
+  - src/lib/tauriApi.ts
+  - src/lib/types.ts
+  - src/pages/Notes.tsx
+  - src/pages/Transcript.tsx
+  - CHANGELOG.md
+
 ## [Task 6.3] - 2026-02-21
 - Added: Custom app title bar with route context, window controls (minimize/maximize/close), and a sun/moon theme toggle
 - Added: Theme persistence support end-to-end via new `theme` setting (`dark`/`light`) in frontend types and Rust settings defaults

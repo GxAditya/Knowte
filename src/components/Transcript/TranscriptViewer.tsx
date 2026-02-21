@@ -108,22 +108,26 @@ export default function TranscriptViewer({
         {filteredSegments.length > 0 ? (
           <div className="space-y-3">
             {filteredSegments.map(({ segment, index }) => (
-              <button
+              <article
                 key={`${segment.start}-${segment.end}-${index}`}
-                type="button"
-                onClick={() => onSegmentClick?.(index)}
                 className={`block w-full rounded-md border bg-slate-900/60 px-4 py-3 text-left transition-colors ${
                   activeSegmentIndex === index
                     ? "border-blue-500 ring-1 ring-blue-500/70"
                     : "border-slate-700 hover:border-slate-500"
                 }`}
-                title="Click to seek audio playback to this segment"
               >
-                <p className="text-xs text-blue-300">
+                <button
+                  type="button"
+                  onClick={() => onSegmentClick?.(index)}
+                  className="rounded-md bg-slate-800 px-2 py-1 text-xs text-blue-300 transition-colors hover:bg-slate-700"
+                  title="Seek audio playback to this segment"
+                >
                   {formatTimestamp(segment.start)} - {formatTimestamp(segment.end)}
+                </button>
+                <p className="mt-2 select-text text-sm text-slate-200" data-selection-context>
+                  {segment.text}
                 </p>
-                <p className="mt-1 text-sm text-slate-200">{segment.text}</p>
-              </button>
+              </article>
             ))}
           </div>
         ) : (

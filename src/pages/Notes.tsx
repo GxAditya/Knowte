@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { ExplainableTextView } from "../components";
 import { NotesSkeleton } from "../components/Skeletons";
 import { NotesExport, StructuredNotesView } from "../components/Notes";
 import { ViewHeader } from "../components/Layout";
@@ -337,7 +338,9 @@ export default function Notes() {
           />
 
           {/* Notes document */}
-          <StructuredNotesView notes={notes} summary={currentLecture.summary} />
+          <ExplainableTextView lectureId={currentLectureId}>
+            <StructuredNotesView notes={notes} summary={currentLecture.summary} />
+          </ExplainableTextView>
         </div>
       </div>
     </div>

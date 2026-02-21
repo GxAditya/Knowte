@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { PaperSkeleton } from "../components/Skeletons";
 import { PaperList } from "../components/Research";
+import { ViewHeader } from "../components/Layout";
 import { getLecturePapers, searchRelatedPapers } from "../lib/tauriApi";
 import type { Paper } from "../lib/types";
 import { useLectureStore, useSettingsStore, useToastStore } from "../stores";
@@ -79,10 +80,16 @@ export default function Research() {
   // ── No lecture selected ────────────────────────────────────────────────────
   if (!currentLectureId || !currentLecture) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-slate-500 space-y-2">
-        <span className="text-4xl">🔬</span>
-        <p className="text-sm">No lecture selected.</p>
-        <p className="text-xs">Upload and process a lecture to find related papers.</p>
+      <div className="mx-auto max-w-[900px] space-y-6">
+        <ViewHeader
+          title="Related Research"
+          description="Find relevant papers from Semantic Scholar."
+        />
+        <div className="flex h-64 flex-col items-center justify-center space-y-2 text-slate-500">
+          <span className="text-4xl">🔬</span>
+          <p className="text-sm">No lecture selected.</p>
+          <p className="text-xs">Upload and process a lecture to find related papers.</p>
+        </div>
       </div>
     );
   }
@@ -90,9 +97,12 @@ export default function Research() {
   // ── Research disabled in settings ──────────────────────────────────────────
   if (settings && !settings.enable_research) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-slate-100">Related Research</h1>
-        <div className="flex flex-col items-center justify-center h-48 bg-slate-800 rounded-lg border border-slate-700 space-y-3 text-slate-500">
+      <div className="mx-auto max-w-[900px] space-y-6">
+        <ViewHeader
+          title="Related Research"
+          description="Find relevant papers from Semantic Scholar."
+        />
+        <div className="flex h-48 flex-col items-center justify-center space-y-3 rounded-lg border border-slate-700 bg-slate-800 text-slate-500 shadow-sm">
           <span className="text-3xl">📡</span>
           <p className="text-sm font-medium text-slate-300">Research paper search is disabled.</p>
           <p className="text-xs">
@@ -106,17 +116,21 @@ export default function Research() {
 
   // ── Main view ──────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-100">Related Research</h1>
-          <p className="text-sm text-slate-400 mt-0.5">
-            Papers related to{" "}
-            <span className="text-slate-300 font-medium">{currentLecture.filename}</span>
-            {" "}via Semantic Scholar
-          </p>
-        </div>
-      </div>
+    <div className="mx-auto max-w-[900px] space-y-5">
+      <ViewHeader
+        title="Related Research"
+        description={`Papers related to ${currentLecture.filename} via Semantic Scholar`}
+        actions={
+          <button
+            type="button"
+            onClick={() => void handleSearch()}
+            disabled={isLoading}
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isLoading ? "Searching..." : "Search Papers"}
+          </button>
+        }
+      />
 
       {/* Error banner */}
       {error && (
@@ -138,7 +152,7 @@ export default function Research() {
 
       {/* Empty state — no papers yet */}
       {hasLoaded && papers.length === 0 && !isLoading && !error && (
-        <div className="flex flex-col items-center justify-center h-56 bg-slate-800 rounded-lg border border-slate-700 border-dashed space-y-4">
+        <div className="flex flex-col items-center justify-center h-56 bg-slate-800 rounded-lg border border-slate-700 border-dashed space-y-4 shadow-sm">
           <span className="text-4xl">📚</span>
           <div className="text-center space-y-1">
             <p className="text-sm font-medium text-slate-300">No papers found yet.</p>

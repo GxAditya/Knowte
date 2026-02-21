@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { NotesSkeleton } from "../components/Skeletons";
 import { NotesExport, StructuredNotesView } from "../components/Notes";
+import { ViewHeader } from "../components/Layout";
 import { getNotes, regenerateNotes } from "../lib/tauriApi";
 import type { StructuredNotes } from "../lib/types";
-import { useLectureStore, useToastStore } from "../stores";
+import { useLectureStore, useToastStore, useUiStore } from "../stores";
 
 // ─── Table of Contents ────────────────────────────────────────────────────────
 
@@ -127,12 +128,14 @@ function EmptyState({ reason }: { reason: "no-lecture" | "no-notes" }) {
 
 export default function Notes() {
   const { currentLectureId, lectures } = useLectureStore();
+  const isSidebarCollapsed = useUiStore((state) => state.isSidebarCollapsed);
   const pushToast = useToastStore((state) => state.pushToast);
   const currentLecture = lectures.find((l) => l.id === currentLectureId) ?? null;
 
   const [notes, setNotes] = useState<StructuredNotes | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isOutlineOpen, setIsOutlineOpen] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadNotes = useCallback(async () => {
@@ -195,17 +198,34 @@ export default function Notes() {
   const tocItems = notes ? buildToc(notes, Boolean(currentLecture?.summary)) : [];
   const tocIds = tocItems.map((item) => item.id);
   const activeId = useActiveSection(tocIds);
+  const notesContainerClass = isSidebarCollapsed
+    ? "mx-auto w-full max-w-[1240px] space-y-6"
+    : "mx-auto w-full max-w-[900px] space-y-6";
+
+  useEffect(() => {
+    if (isSidebarCollapsed) {
+      setIsOutlineOpen(false);
+    }
+  }, [isSidebarCollapsed]);
 
   // ── No lecture ──────────────────────────────────────────────────────────────
   if (!currentLectureId || !currentLecture) {
-    return <EmptyState reason="no-lecture" />;
+    return (
+      <div className={notesContainerClass}>
+        <ViewHeader
+          title="Lecture Notes"
+          description="Structured summaries, key concepts, and takeaways."
+        />
+        <EmptyState reason="no-lecture" />
+      </div>
+    );
   }
 
   // ── Loading ─────────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="space-y-3">
-        <h1 className="text-2xl font-bold text-slate-100">Lecture Notes</h1>
+      <div className={notesContainerClass}>
+        <ViewHeader title="Lecture Notes" description={currentLecture.filename} />
         <NotesSkeleton />
       </div>
     );
@@ -214,8 +234,8 @@ export default function Notes() {
   // ── Error ───────────────────────────────────────────────────────────────────
   if (error) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-slate-100">Lecture Notes</h1>
+      <div className={notesContainerClass}>
+        <ViewHeader title="Lecture Notes" description={currentLecture.filename} />
         <div className="bg-red-950/40 border border-red-700/50 rounded-lg p-4 text-red-300 text-sm">
           {error}
         </div>
@@ -233,24 +253,27 @@ export default function Notes() {
   // ── No notes yet ────────────────────────────────────────────────────────────
   if (!notes) {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-slate-100">Lecture Notes</h1>
-          <button
-            onClick={handleRegenerate}
-            disabled={isRegenerating}
-            className="flex items-center gap-2 px-4 py-2 bg-violet-700 hover:bg-violet-600 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition-colors"
-          >
-            {isRegenerating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Generating…
-              </>
-            ) : (
-              <>✨ Generate Notes</>
-            )}
-          </button>
-        </div>
+      <div className={notesContainerClass}>
+        <ViewHeader
+          title="Lecture Notes"
+          description={currentLecture.filename}
+          actions={
+            <button
+              onClick={handleRegenerate}
+              disabled={isRegenerating}
+              className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-blue-700"
+            >
+              {isRegenerating ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Generating…
+                </>
+              ) : (
+                "Generate Notes"
+              )}
+            </button>
+          }
+        />
         <EmptyState reason="no-notes" />
       </div>
     );
@@ -258,53 +281,64 @@ export default function Notes() {
 
   // ── Main view ───────────────────────────────────────────────────────────────
   return (
-    <div className="flex gap-6 h-full relative">
-      {/* ── Sticky ToC sidebar ────────────────────────────────────────────── */}
-      <aside className="hidden lg:block w-56 flex-shrink-0">
-        <div className="sticky top-6">
+    <div className={notesContainerClass}>
+      <ViewHeader
+        title="Lecture Notes"
+        description={currentLecture.filename}
+        actions={
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsOutlineOpen((previous) => !previous)}
+              className="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700"
+            >
+              {isOutlineOpen ? "Hide Outline" : "Show Outline"}
+            </button>
+            <button
+              onClick={handleRegenerate}
+              disabled={isRegenerating}
+              className="flex items-center gap-2 rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-600 disabled:opacity-60"
+            >
+              {isRegenerating ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
+                  Regenerating…
+                </>
+              ) : (
+                "Regenerate"
+              )}
+            </button>
+          </div>
+        }
+      />
+
+      {isOutlineOpen && (
+        <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-4 shadow-sm lg:hidden">
           <TableOfContents items={tocItems} activeId={activeId} />
         </div>
-      </aside>
+      )}
 
-      {/* ── Main document area ─────────────────────────────────────────────── */}
-      <div className="flex-1 min-w-0 space-y-5">
-        {/* Page header */}
-        <div className="flex items-start gap-4 flex-wrap">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-slate-100">Lecture Notes</h1>
-            <p className="text-sm text-slate-400 mt-0.5 truncate">
-              {currentLecture.filename}
-            </p>
-          </div>
+      <div className="relative flex h-full gap-6">
+        {isOutlineOpen && (
+          <aside className="hidden w-56 flex-shrink-0 lg:block">
+            <div className="sticky top-6 rounded-lg border border-slate-700 bg-slate-800/60 p-3 shadow-sm">
+              <TableOfContents items={tocItems} activeId={activeId} />
+            </div>
+          </aside>
+        )}
 
-          <button
-            onClick={handleRegenerate}
-            disabled={isRegenerating}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-60 text-slate-200 rounded-lg text-sm font-medium transition-colors flex-shrink-0"
-          >
-            {isRegenerating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
-                Regenerating…
-              </>
-            ) : (
-              <>🔄 Regenerate</>
-            )}
-          </button>
+        {/* ── Main document area ─────────────────────────────────────────────── */}
+        <div className="flex-1 min-w-0 space-y-5">
+          {/* Export bar */}
+          <NotesExport
+            lectureId={currentLectureId}
+            notes={notes}
+            summary={currentLecture.summary}
+          />
+
+          {/* Notes document */}
+          <StructuredNotesView notes={notes} summary={currentLecture.summary} />
         </div>
-
-        {/* Export bar */}
-        <NotesExport
-          lectureId={currentLectureId}
-          notes={notes}
-          summary={currentLecture.summary}
-        />
-
-        {/* Divider */}
-        <div className="border-t border-slate-700" />
-
-        {/* Notes document */}
-        <StructuredNotesView notes={notes} summary={currentLecture.summary} />
       </div>
     </div>
   );

@@ -1,3 +1,5 @@
+export type ThemeMode = "dark" | "light";
+
 export interface Settings {
   ollama_url: string;
   whisper_model: string;
@@ -7,6 +9,7 @@ export interface Settings {
   language: string;
   export_path: string;
   enable_research: boolean;
+  theme: ThemeMode;
 }
 
 export interface OllamaStatus {
@@ -244,4 +247,5 @@ export const DEFAULT_SETTINGS: Settings = {
   language: "en",
   export_path: "",
   enable_research: true,
+  theme: "dark",
 };

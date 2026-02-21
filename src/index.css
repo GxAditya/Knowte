@@ -1,13 +1,61 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family:
+    "Inter",
+    "Segoe UI",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html:not(.dark) {
+  --color-slate-900: #f8fafc;
+  --color-slate-800: #f1f5f9;
+  --color-slate-700: #e2e8f0;
+  --color-slate-600: #cbd5e1;
+  --color-slate-500: #64748b;
+  --color-slate-400: #475569;
+  --color-slate-300: #334155;
+  --color-slate-200: #1e293b;
+  --color-slate-100: #0f172a;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: radial-gradient(circle at 10% 10%, rgb(147 197 253 / 0.25), transparent 35%),
+    radial-gradient(circle at 85% 15%, rgb(37 99 235 / 0.2), transparent 40%),
+    rgb(248 250 252);
+}
+
+html.dark body {
+  background: radial-gradient(circle at 10% 10%, rgb(30 64 175 / 0.25), transparent 35%),
+    radial-gradient(circle at 85% 15%, rgb(15 23 42 / 0.8), transparent 45%),
+    rgb(2 6 23);
+}
+
+a,
+button,
+input,
+select,
+textarea,
+[role="button"],
+[role="tab"] {
+  transition-duration: 200ms;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 button:focus-visible,
@@ -18,7 +66,49 @@ textarea:focus-visible,
 [role="button"]:focus-visible,
 [role="tab"]:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid rgb(59 130 246) !important;
+  outline: 2px solid rgb(37 99 235) !important;
   outline-offset: 2px !important;
   box-shadow: 0 0 0 2px rgb(59 130 246 / 0.35);
+}
+
+@keyframes view-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-view-in {
+  animation: view-fade-in 220ms ease-out both;
+}
+
+@keyframes dropzone-dash-pulse {
+  0% {
+    border-color: rgb(37 99 235 / 0.5);
+  }
+  50% {
+    border-color: rgb(59 130 246);
+  }
+  100% {
+    border-color: rgb(37 99 235 / 0.5);
+  }
+}
+
+.dropzone-drag-active {
+  animation: dropzone-dash-pulse 900ms linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

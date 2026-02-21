@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { transcribeAudio, startPipeline } from "../../lib/tauriApi";
 import { useLectureStore, useToastStore } from "../../stores";
 import type { AudioFileMetadata, Lecture } from "../../lib/types";
+import { ViewHeader } from "../Layout";
 import DropZone from "./DropZone";
 import LiveRecorder from "./LiveRecorder";
 
@@ -117,16 +118,14 @@ export default function AudioUploader() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-bold text-slate-100">Audio Input</h1>
-        <p className="text-sm text-slate-400">
-          Upload a lecture file or record directly from your microphone.
-        </p>
-      </header>
+    <div className="mx-auto max-w-[900px] space-y-6">
+      <ViewHeader
+        title="Audio Input"
+        description="Upload a lecture file or record directly from your microphone."
+      />
 
       <div
-        className="inline-flex rounded-lg border border-slate-700 bg-slate-800 p-1"
+        className="inline-flex rounded-lg border border-slate-700 bg-slate-800 p-1 shadow-sm"
         role="tablist"
         aria-label="Audio input modes"
       >
@@ -166,7 +165,7 @@ export default function AudioUploader() {
         id="audio-input-panel"
         role="tabpanel"
         aria-labelledby={activeTab === "upload" ? "upload-tab" : "record-tab"}
-        className="rounded-xl border border-slate-700 bg-slate-800/70 p-6"
+        className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm"
       >
         {activeTab === "upload" ? (
           <DropZone
@@ -202,7 +201,7 @@ export default function AudioUploader() {
       )}
 
       {latestMetadata && (
-        <section className="space-y-4 rounded-xl border border-slate-700 bg-slate-800 p-6">
+        <section className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-100">Lecture Ready</h2>
           <div className="grid gap-4 text-sm text-slate-300 md:grid-cols-2">
             <div>

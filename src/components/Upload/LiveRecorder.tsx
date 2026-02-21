@@ -217,7 +217,15 @@ export default function LiveRecorder({
         )}
 
         <div>
-          <p className="text-sm text-slate-400">Elapsed</p>
+          <p className="flex items-center gap-2 text-sm text-slate-400">
+            <span
+              className={`h-2.5 w-2.5 rounded-full ${
+                isRecording ? "animate-pulse bg-red-500" : "bg-slate-500"
+              }`}
+              aria-hidden="true"
+            />
+            {isRecording ? "Recording" : "Elapsed"}
+          </p>
           <p className="text-2xl font-mono text-slate-100">{formatElapsed(elapsedSeconds)}</p>
         </div>
       </div>

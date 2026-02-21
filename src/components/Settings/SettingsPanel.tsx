@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { GLOBAL_SHORTCUTS, LECTURE_VIEW_SHORTCUTS } from "../../lib/hotkeys";
 import { useSettingsStore, useToastStore } from "../../stores";
+import { ViewHeader } from "../Layout";
 import ModelSelector from "./ModelSelector";
 import PersonalizationConfig from "./PersonalizationConfig";
 import type { Settings } from "../../lib/types";
@@ -68,13 +69,14 @@ export default function SettingsPanel() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-100">Settings</h1>
-      </div>
+    <div className="mx-auto max-w-[900px] space-y-6">
+      <ViewHeader
+        title="Settings"
+        description="Configure local models, personalization, and export defaults."
+      />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="p-6 bg-slate-800 rounded-lg border border-slate-700 space-y-4">
+        <div className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-200">Ollama Connection</h2>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-slate-300">
@@ -118,7 +120,7 @@ export default function SettingsPanel() {
           </div>
         </div>
 
-        <div className="p-6 bg-slate-800 rounded-lg border border-slate-700 space-y-4">
+        <div className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-200">Personalization</h2>
           <PersonalizationConfig
             value={formData.personalization_level}
@@ -126,7 +128,7 @@ export default function SettingsPanel() {
           />
         </div>
 
-        <div className="p-6 bg-slate-800 rounded-lg border border-slate-700 space-y-4">
+        <div className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-200">Export Settings</h2>
           <div className="space-y-2">
             <label className="block text-sm font-medium text-slate-300">
@@ -145,7 +147,7 @@ export default function SettingsPanel() {
           </div>
         </div>
 
-        <div className="p-6 bg-slate-800 rounded-lg border border-slate-700 space-y-4">
+        <div className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-200">Research</h2>
           <label className="flex items-start gap-3 cursor-pointer">
             <div className="relative mt-0.5">
@@ -181,7 +183,7 @@ export default function SettingsPanel() {
           </label>
         </div>
 
-        <div className="p-6 bg-slate-800 rounded-lg border border-slate-700 space-y-4">
+        <div className="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm">
           <div className="space-y-1">
             <h2 className="text-lg font-semibold text-slate-200">Keyboard Shortcuts</h2>
             <p className="text-xs text-slate-400">
@@ -222,7 +224,7 @@ export default function SettingsPanel() {
           <button
             type="submit"
             disabled={isSaving}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSaving ? "Saving..." : "Save Settings"}
           </button>

@@ -61,7 +61,7 @@ export default function TranscriptViewer({
 
   if (!lecture) {
     return (
-      <div className="mx-auto max-w-4xl rounded-xl border border-slate-700 bg-slate-800/70 p-6">
+      <div className="mx-auto max-w-[900px] rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm">
         <h1 className="text-xl font-semibold text-slate-100">Transcript</h1>
         <p className="mt-2 text-sm text-slate-400">
           Process a lecture from the Upload page to generate a transcript.
@@ -71,7 +71,7 @@ export default function TranscriptViewer({
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-[900px] space-y-6">
       {showHeader && (
         <header className="space-y-1">
           <h1 className="text-2xl font-bold text-slate-100">Transcript</h1>
@@ -79,7 +79,7 @@ export default function TranscriptViewer({
         </header>
       )}
 
-      <section className="rounded-xl border border-slate-700 bg-slate-800/70 p-4">
+      <section className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex-1">
             <label htmlFor="transcript-search" className="sr-only">
@@ -104,7 +104,7 @@ export default function TranscriptViewer({
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-700 bg-slate-800/70 p-4">
+      <section className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm">
         {filteredSegments.length > 0 ? (
           <div className="space-y-3">
             {filteredSegments.map(({ segment, index }) => (

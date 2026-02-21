@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { MindMapSkeleton } from "../components/Skeletons";
 import { MindMapCanvas } from "../components/MindMap";
+import { ViewHeader } from "../components/Layout";
 import { getMindmap, regenerateMindmap } from "../lib/tauriApi";
 import type { MindMapData } from "../lib/types";
 import { useLectureStore, useToastStore } from "../stores";
@@ -48,7 +49,7 @@ function EmptyState({ isGenerating, error, onGenerate }: EmptyStateProps) {
       <button
         onClick={onGenerate}
         disabled={isGenerating}
-        className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm rounded-xl transition-colors flex items-center gap-2"
+        className="flex items-center gap-2 rounded-md bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isGenerating ? (
           <>
@@ -144,11 +145,13 @@ export default function MindMap() {
 
   if (!currentLectureId) {
     return (
-      <div className="flex flex-col h-full bg-slate-900">
-        <header className="px-6 py-4 border-b border-slate-700/50 shrink-0">
-          <h1 className="text-xl font-semibold text-slate-100">Mind Map</h1>
-          <p className="text-sm text-slate-400 mt-0.5">Visual overview of lecture concepts</p>
-        </header>
+      <div className="flex h-full flex-col">
+        <div className="px-6 pt-6">
+          <ViewHeader
+            title="Mind Map"
+            description="Visual overview of lecture concepts"
+          />
+        </div>
         <div className="flex-1 min-h-0">
           <NoLecture />
         </div>
@@ -157,34 +160,35 @@ export default function MindMap() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-900">
-      {/* Header */}
-      <header className="px-6 py-4 border-b border-slate-700/50 shrink-0 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-100">Mind Map</h1>
-          <p className="text-sm text-slate-400 mt-0.5">
-            {mindmapData
+    <div className="flex h-full flex-col">
+      <div className="px-6 pt-6">
+        <ViewHeader
+          title="Mind Map"
+          description={
+            mindmapData
               ? "Zoom, pan, and click nodes to explore branches"
-              : "Visual overview of lecture concepts"}
-          </p>
-        </div>
-        {mindmapData && (
-          <button
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            className="px-4 py-2 text-sm font-medium bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-slate-200 rounded-lg border border-slate-600 transition-colors flex items-center gap-2"
-          >
-            {isGenerating ? (
-              <>
-                <span className="animate-spin inline-block w-3.5 h-3.5 border-2 border-slate-300 border-t-transparent rounded-full" />
-                Regenerating…
-              </>
-            ) : (
-              "↺ Regenerate"
-            )}
-          </button>
-        )}
-      </header>
+              : "Visual overview of lecture concepts"
+          }
+          actions={
+            mindmapData ? (
+              <button
+                onClick={handleGenerate}
+                disabled={isGenerating}
+                className="flex items-center gap-2 rounded-md border border-slate-600 bg-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isGenerating ? (
+                  <>
+                    <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-300 border-t-transparent" />
+                    Regenerating…
+                  </>
+                ) : (
+                  "Regenerate"
+                )}
+              </button>
+            ) : null
+          }
+        />
+      </div>
 
       {/* Main content */}
       <div className="flex-1 min-h-0">

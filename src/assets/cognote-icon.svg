@@ -1,0 +1,13 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bookGradient" x1="32" y1="32" x2="224" y2="224" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect x="28" y="44" width="200" height="168" rx="28" fill="#0f172a"/>
+  <path d="M56 64h62c18 0 34 8 44 20 10-12 26-20 44-20h14v120h-14c-18 0-34 8-44 20-10-12-26-20-44-20H56z" fill="url(#bookGradient)"/>
+  <path d="M128 84v120" stroke="#93c5fd" stroke-width="10" stroke-linecap="round"/>
+  <path d="M92 32l36-16 36 16-36 16z" fill="#60a5fa"/>
+  <path d="M92 32v28l36 16 36-16V32" fill="none" stroke="#bfdbfe" stroke-width="8" stroke-linejoin="round"/>
+</svg>

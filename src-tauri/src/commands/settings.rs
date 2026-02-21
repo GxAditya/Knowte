@@ -16,6 +16,8 @@ pub struct Settings {
     pub export_path: String,
     #[serde(default = "Settings::default_enable_research")]
     pub enable_research: bool,
+    #[serde(default = "Settings::default_theme")]
+    pub theme: String,
 }
 
 impl Default for Settings {
@@ -34,6 +36,7 @@ impl Default for Settings {
             language: "en".to_string(),
             export_path,
             enable_research: true,
+            theme: Self::default_theme(),
         }
     }
 }
@@ -45,6 +48,10 @@ impl Settings {
 
     fn default_llm_timeout_seconds() -> u64 {
         300
+    }
+
+    fn default_theme() -> String {
+        "dark".to_string()
     }
 }
 

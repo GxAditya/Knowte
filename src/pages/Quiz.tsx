@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { QuizSkeleton } from "../components/Skeletons";
 import { QuizPlayer, QuizResults } from "../components/Quiz";
+import { ViewHeader } from "../components/Layout";
 import type { UserAnswers } from "../components/Quiz";
 import { getQuiz, regenerateQuiz, saveQuizAttempt } from "../lib/tauriApi";
 import type { Quiz } from "../lib/types";
@@ -132,13 +133,24 @@ export default function Quiz() {
 
   // ── Guards ────────────────────────────────────────────────────────────────
   if (!currentLectureId) {
-    return <EmptyState reason="no-lecture" />;
+    return (
+      <div className="mx-auto max-w-[900px] space-y-6">
+        <ViewHeader
+          title="Interactive Quiz"
+          description="Practice key concepts from your lecture."
+        />
+        <EmptyState reason="no-lecture" />
+      </div>
+    );
   }
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
-        <h1 className="text-2xl font-bold text-slate-100">Interactive Quiz</h1>
+      <div className="mx-auto max-w-[900px] space-y-6">
+        <ViewHeader
+          title="Interactive Quiz"
+          description="Practice key concepts from your lecture."
+        />
         <QuizSkeleton />
       </div>
     );
@@ -146,8 +158,11 @@ export default function Quiz() {
 
   if (error) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-slate-100">Interactive Quiz</h1>
+      <div className="mx-auto max-w-[900px] space-y-6">
+        <ViewHeader
+          title="Interactive Quiz"
+          description="Practice key concepts from your lecture."
+        />
         <div className="bg-red-950/40 border border-red-700/50 rounded-lg p-4 text-red-300 text-sm">
           {error}
         </div>
@@ -164,24 +179,27 @@ export default function Quiz() {
 
   if (!quiz) {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-slate-100">Interactive Quiz</h1>
-          <button
-            onClick={handleRegenerateQuiz}
-            disabled={isRegenerating}
-            className="flex items-center gap-2 px-4 py-2 bg-violet-700 hover:bg-violet-600 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition-colors"
-          >
-            {isRegenerating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Generating…
-              </>
-            ) : (
-              <>✨ Generate Quiz</>
-            )}
-          </button>
-        </div>
+      <div className="mx-auto max-w-[900px] space-y-6">
+        <ViewHeader
+          title="Interactive Quiz"
+          description="Practice key concepts from your lecture."
+          actions={
+            <button
+              onClick={handleRegenerateQuiz}
+              disabled={isRegenerating}
+              className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-blue-700"
+            >
+              {isRegenerating ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Generating…
+                </>
+              ) : (
+                "Generate Quiz"
+              )}
+            </button>
+          }
+        />
         <EmptyState reason="no-quiz" />
       </div>
     );
@@ -189,34 +207,29 @@ export default function Quiz() {
 
   // ── Main view ─────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-100">Interactive Quiz</h1>
-          <p className="text-sm text-slate-400 mt-0.5">
-            {quiz.questions.length} question{quiz.questions.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-        {!showResults && (
-          <button
-            onClick={handleRegenerateQuiz}
-            disabled={isRegenerating}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-60 text-slate-200 rounded-lg text-sm font-medium transition-colors"
-          >
-            {isRegenerating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
-                Regenerating…
-              </>
-            ) : (
-              <>🔄 Regenerate</>
-            )}
-          </button>
-        )}
-      </div>
-
-      <div className="border-t border-slate-700" />
+    <div className="mx-auto max-w-[900px] space-y-6">
+      <ViewHeader
+        title="Interactive Quiz"
+        description={`${quiz.questions.length} question${quiz.questions.length !== 1 ? "s" : ""}`}
+        actions={
+          !showResults ? (
+            <button
+              onClick={handleRegenerateQuiz}
+              disabled={isRegenerating}
+              className="flex items-center gap-2 rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-slate-200 disabled:opacity-60 hover:bg-slate-600"
+            >
+              {isRegenerating ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
+                  Regenerating…
+                </>
+              ) : (
+                "Regenerate"
+              )}
+            </button>
+          ) : null
+        }
+      />
 
       {/* Quiz player or results */}
       {showResults ? (

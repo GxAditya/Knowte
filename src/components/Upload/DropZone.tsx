@@ -21,6 +21,7 @@ export default function DropZone({
 }: DropZoneProps) {
   const [isDragActive, setIsDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const handleFilePath = async (filePath: string) => {
@@ -30,10 +31,12 @@ export default function DropZone({
 
     setError(null);
     setIsProcessing(true);
+    setUploadProgress(8);
     onUploadStateChange?.(true);
 
     try {
       const metadata = await acceptAudioFile(filePath);
+      setUploadProgress(100);
       onUploadSuccess(metadata);
     } catch (uploadError) {
       setError(formatError(uploadError));
@@ -106,12 +109,32 @@ export default function DropZone({
     };
   }, [disabled, isProcessing]);
 
+  useEffect(() => {
+    if (!isProcessing) {
+      setUploadProgress(0);
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setUploadProgress((current) => {
+        if (current >= 92) {
+          return current;
+        }
+        return Math.min(92, current + Math.max(2, Math.round((100 - current) / 12)));
+      });
+    }, 180);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [isProcessing]);
+
   return (
     <div className="space-y-4">
       <div
-        className={`rounded-xl border-2 border-dashed p-10 text-center transition-colors ${
+        className={`rounded-lg border-2 border-dashed p-10 text-center shadow-sm ${
           isDragActive
-            ? "border-blue-400 bg-blue-500/10"
+            ? "dropzone-drag-active border-blue-500 bg-blue-500/10"
             : "border-slate-600 bg-slate-800/40"
         }`}
       >
@@ -125,10 +148,19 @@ export default function DropZone({
           type="button"
           onClick={() => void handleBrowseClick()}
           disabled={disabled || isProcessing}
-          className="mt-6 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-6 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isProcessing ? "Importing..." : "Browse files"}
         </button>
+
+        {isProcessing && (
+          <div className="mt-5 space-y-1">
+            <div className="h-2 overflow-hidden rounded-md bg-slate-700/70">
+              <div className="h-full bg-blue-500" style={{ width: `${uploadProgress}%` }} />
+            </div>
+            <p className="text-xs text-slate-400">{Math.round(uploadProgress)}%</p>
+          </div>
+        )}
       </div>
 
       {error && <p className="text-sm text-red-400">{error}</p>}

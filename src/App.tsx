@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isTauri } from "@tauri-apps/api/core";
 import {
   BrowserRouter,
   Navigate,
@@ -7,12 +8,12 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { KeyboardShortcutsModal, Sidebar } from "./components";
+import { KeyboardShortcutsModal, Sidebar, TitleBar } from "./components";
 import { ToastViewport } from "./components/Toast";
 import { useHotkeys } from "./hooks";
 import { HOTKEY_EVENT_NAMES, LECTURE_VIEW_SHORTCUTS } from "./lib/hotkeys";
 import { listLectures } from "./lib/tauriApi";
-import type { Lecture, LectureSummary } from "./lib/types";
+import type { Lecture, LectureSummary, ThemeMode } from "./lib/types";
 import {
   Flashcards,
   Library,
@@ -25,7 +26,7 @@ import {
   Transcript,
   Upload,
 } from "./pages";
-import { useLectureStore, useToastStore } from "./stores";
+import { useLectureStore, useSettingsStore, useToastStore, useUiStore } from "./stores";
 import "./index.css";
 
 const LECTURE_ROUTE_LABELS: Record<string, string> = Object.fromEntries(
@@ -92,6 +93,7 @@ function isElementDisabled(element: HTMLElement): boolean {
 }
 
 function AppLayout() {
+  const isDesktop = isTauri();
   const location = useLocation();
   const navigate = useNavigate();
   const mainContentRef = useRef<HTMLElement | null>(null);
@@ -102,14 +104,51 @@ function AppLayout() {
     setLectures,
     setCurrentLecture,
   } = useLectureStore();
+  const {
+    settings,
+    loadSettings,
+    saveSettings,
+  } = useSettingsStore();
+  const {
+    isSidebarCollapsed,
+    toggleSidebarCollapsed,
+  } = useUiStore();
   const pushToast = useToastStore((state) => state.pushToast);
 
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [routeAnnouncement, setRouteAnnouncement] = useState("");
+  const [theme, setTheme] = useState<ThemeMode>("dark");
+  const [isThemeSaving, setIsThemeSaving] = useState(false);
 
   useEffect(() => {
     setCurrentLecture(extractLectureId(location.pathname));
   }, [location.pathname, setCurrentLecture]);
+
+  useEffect(() => {
+    if (!isDesktop) {
+      return;
+    }
+    void loadSettings({ includeDiagnostics: false });
+  }, [isDesktop, loadSettings]);
+
+  useEffect(() => {
+    if (settings?.theme === "dark" || settings?.theme === "light") {
+      setTheme(settings.theme);
+    }
+  }, [settings?.theme]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("dark", theme === "dark");
+    root.classList.toggle("light", theme === "light");
+  }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--app-sidebar-width",
+      isSidebarCollapsed ? "4rem" : "16rem",
+    );
+  }, [isSidebarCollapsed]);
 
   useEffect(() => {
     let cancelled = false;
@@ -265,6 +304,30 @@ function AppLayout() {
     return true;
   }, [pushToast]);
 
+  const handleToggleTheme = useCallback(async () => {
+    if (isThemeSaving) {
+      return;
+    }
+
+    const nextTheme: ThemeMode = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+
+    if (!isDesktop || !settings) {
+      return;
+    }
+
+    setIsThemeSaving(true);
+    const success = await saveSettings({ ...settings, theme: nextTheme });
+    if (!success) {
+      setTheme(theme);
+      pushToast({
+        kind: "error",
+        message: "Unable to save theme preference.",
+      });
+    }
+    setIsThemeSaving(false);
+  }, [isDesktop, isThemeSaving, pushToast, saveSettings, settings, theme]);
+
   useHotkeys({
     onNewLecture: goToUpload,
     onNavigateLectureView: goToLectureView,
@@ -279,31 +342,46 @@ function AppLayout() {
   });
 
   return (
-    <div className="flex h-screen bg-slate-900 text-slate-100">
-      <Sidebar />
-      <main
-        ref={mainContentRef}
-        id="main-content"
-        tabIndex={-1}
-        className="flex-1 overflow-auto p-6"
-      >
-        <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-          {routeAnnouncement}
-        </p>
-        <Routes>
-          <Route path="/" element={<Library />} />
-          <Route path="/upload" element={<Upload />} />
-          <Route path="/lecture/:id/transcript" element={<Transcript />} />
-          <Route path="/lecture/:id/pipeline" element={<Pipeline />} />
-          <Route path="/lecture/:id/notes" element={<Notes />} />
-          <Route path="/lecture/:id/quiz" element={<Quiz />} />
-          <Route path="/lecture/:id/research" element={<Research />} />
-          <Route path="/lecture/:id/mindmap" element={<MindMap />} />
-          <Route path="/lecture/:id/flashcards" element={<Flashcards />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
+    <div className="flex h-screen flex-col bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <TitleBar
+        currentViewLabel={viewLabelFromPath(location.pathname)}
+        theme={theme}
+        onToggleTheme={() => void handleToggleTheme()}
+      />
+
+      <div className="flex min-h-0 flex-1">
+        <Sidebar
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={toggleSidebarCollapsed}
+        />
+
+        <main
+          ref={mainContentRef}
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 overflow-auto bg-slate-100/90 p-6 dark:bg-slate-950/50"
+        >
+          <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+            {routeAnnouncement}
+          </p>
+          <div key={location.pathname} className="h-full animate-view-in">
+            <Routes>
+              <Route path="/" element={<Library />} />
+              <Route path="/upload" element={<Upload />} />
+              <Route path="/lecture/:id/transcript" element={<Transcript />} />
+              <Route path="/lecture/:id/pipeline" element={<Pipeline />} />
+              <Route path="/lecture/:id/notes" element={<Notes />} />
+              <Route path="/lecture/:id/quiz" element={<Quiz />} />
+              <Route path="/lecture/:id/research" element={<Research />} />
+              <Route path="/lecture/:id/mindmap" element={<MindMap />} />
+              <Route path="/lecture/:id/flashcards" element={<Flashcards />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+        </main>
+      </div>
+
       <KeyboardShortcutsModal isOpen={isShortcutsOpen} onClose={closeShortcutsModal} />
     </div>
   );

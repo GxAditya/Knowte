@@ -4,6 +4,7 @@ import {
   TranscriptEditor,
   TranscriptViewer,
 } from "../components";
+import { ViewHeader } from "../components/Layout";
 import { HOTKEY_EVENT_NAMES } from "../lib/hotkeys";
 import { getAudioServerPort, getLectureTranscript } from "../lib/tauriApi";
 import { useLectureStore } from "../stores";
@@ -268,25 +269,24 @@ export default function Transcript() {
   }
 
   return (
-    <div className="pb-36">
-      <header className="mx-auto mb-4 flex max-w-5xl items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-100">Transcript</h1>
-          <p className="text-sm text-slate-400">{lecture.filename}</p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setIsEditing((previous) => !previous)}
-          disabled={!lecture.transcriptSegments || lecture.transcriptSegments.length === 0}
-          className="rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isEditing ? "View Transcript" : "Edit Transcript"}
-        </button>
-      </header>
+    <div className="mx-auto max-w-[900px] space-y-4 pb-36">
+      <ViewHeader
+        title="Transcript"
+        description={lecture.filename}
+        actions={
+          <button
+            type="button"
+            onClick={() => setIsEditing((previous) => !previous)}
+            disabled={!lecture.transcriptSegments || lecture.transcriptSegments.length === 0}
+            className="rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isEditing ? "View Transcript" : "Edit Transcript"}
+          </button>
+        }
+      />
 
       {audioError && (
-        <div className="mx-auto mb-4 max-w-5xl rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200 shadow-sm">
           {audioError}
         </div>
       )}

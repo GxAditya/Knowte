@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { FlashcardSkeleton } from "../components/Skeletons";
 import { AnkiExport, FlashcardViewer } from "../components/Flashcards";
+import { ViewHeader } from "../components/Layout";
 import { getFlashcards } from "../lib/tauriApi";
 import type { Flashcard, FlashcardsOutput } from "../lib/types";
 import { useLectureStore } from "../stores";
@@ -63,7 +64,11 @@ export default function Flashcards() {
 
   if (!currentLectureId) {
     return (
-      <div className="p-6">
+      <div className="mx-auto max-w-[900px] space-y-6">
+        <ViewHeader
+          title="Flashcards"
+          description="Review key terms using active recall cards."
+        />
         <EmptyState reason="no-lecture" />
       </div>
     );
@@ -71,7 +76,11 @@ export default function Flashcards() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
+      <div className="mx-auto max-w-[900px] space-y-6">
+        <ViewHeader
+          title="Flashcards"
+          description="Review key terms using active recall cards."
+        />
         <FlashcardSkeleton />
       </div>
     );
@@ -79,8 +88,12 @@ export default function Flashcards() {
 
   if (error) {
     return (
-      <div className="p-6">
-        <div className="bg-red-900/20 border border-red-800/40 rounded-xl p-4 text-sm text-red-300">
+      <div className="mx-auto max-w-[900px] space-y-6">
+        <ViewHeader
+          title="Flashcards"
+          description="Review key terms using active recall cards."
+        />
+        <div className="bg-red-900/20 border border-red-800/40 rounded-lg p-4 text-sm text-red-300 shadow-sm">
           {error}
         </div>
         <button
@@ -96,21 +109,22 @@ export default function Flashcards() {
 
   if (cards.length === 0) {
     return (
-      <div className="p-6">
+      <div className="mx-auto max-w-[900px] space-y-6">
+        <ViewHeader
+          title="Flashcards"
+          description="Review key terms using active recall cards."
+        />
         <EmptyState reason="no-flashcards" />
       </div>
     );
   }
 
   return (
-    <div className="p-6 flex flex-col gap-6 max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-100">Flashcards</h1>
-          <p className="text-xs text-slate-500 mt-0.5">{cards.length} cards generated</p>
-        </div>
-      </div>
+    <div className="mx-auto flex max-w-[900px] flex-col gap-6">
+      <ViewHeader
+        title="Flashcards"
+        description={`${cards.length} cards generated`}
+      />
 
       {/* Card Viewer */}
       <FlashcardViewer cards={cards} />

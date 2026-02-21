@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import ProgressTracker from "../components/Pipeline/ProgressTracker";
+import { ViewHeader } from "../components/Layout";
 import { useLectureStore } from "../stores";
 
 export default function Pipeline() {
@@ -15,15 +16,15 @@ export default function Pipeline() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-bold text-slate-100">Processing Lecture</h1>
-        <p className="text-sm text-slate-400">
-          {currentLecture
+    <div className="mx-auto max-w-[900px] space-y-6">
+      <ViewHeader
+        title="Processing Lecture"
+        description={
+          currentLecture
             ? `Generating AI content for "${currentLecture.filename}"…`
-            : "Running AI pipeline…"}
-        </p>
-      </header>
+            : "Running AI pipeline…"
+        }
+      />
 
       {currentLectureId ? (
         <ProgressTracker
@@ -31,7 +32,7 @@ export default function Pipeline() {
           onPipelineComplete={handlePipelineComplete}
         />
       ) : (
-        <div className="rounded-lg border border-slate-700 bg-slate-800 px-6 py-10 text-center text-slate-400">
+        <div className="rounded-lg border border-slate-700 bg-slate-800 px-6 py-10 text-center text-slate-400 shadow-sm">
           No lecture selected. Please upload and process a lecture first.
         </div>
       )}

@@ -9,6 +9,7 @@ import {
 } from "../../lib/tauriApi";
 import type { Lecture, LectureStatus, LectureSummary } from "../../lib/types";
 import { useLectureStore, useSettingsStore } from "../../stores";
+import { ViewHeader } from "../Layout";
 import EmptyState from "./EmptyState";
 
 type SortOption = "newest" | "oldest" | "alphabetical";
@@ -252,24 +253,22 @@ export default function LectureLibrary() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-100">Your Lectures</h1>
-          <p className="mt-1 text-sm text-slate-400">
-            Browse, search, and manage your lecture history.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate("/upload")}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-        >
-          New Lecture
-        </button>
-      </header>
+    <div className="mx-auto max-w-[900px] space-y-6">
+      <ViewHeader
+        title="Your Lectures"
+        description="Browse, search, and manage your lecture history."
+        actions={
+          <button
+            type="button"
+            onClick={() => navigate("/upload")}
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            New Lecture
+          </button>
+        }
+      />
 
-      <section className="grid gap-3 rounded-xl border border-slate-700 bg-slate-800/70 p-4 md:grid-cols-[1fr_auto_auto]">
+      <section className="grid gap-3 rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm md:grid-cols-[1fr_auto_auto]">
         <label className="block">
           <span className="sr-only">Search lectures</span>
           <input
@@ -325,11 +324,11 @@ export default function LectureLibrary() {
       ) : lectureSummaries.length === 0 ? (
         <EmptyState />
       ) : filteredLectures.length === 0 ? (
-        <div className="rounded-xl border border-slate-700 bg-slate-800/60 px-6 py-10 text-center text-sm text-slate-400">
+        <div className="rounded-lg border border-slate-700 bg-slate-800/60 px-6 py-10 text-center text-sm text-slate-400 shadow-sm">
           No lectures match your filters.
         </div>
       ) : (
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <section className="grid gap-4 sm:grid-cols-2">
           {filteredLectures.map((lecture) => {
             const isBusy = busyLectureId === lecture.id;
             const progress = processingPercent(lecture);
@@ -338,7 +337,7 @@ export default function LectureLibrary() {
             return (
               <article
                 key={lecture.id}
-                className="relative rounded-xl border border-slate-700 bg-slate-800 p-4 transition-colors hover:border-slate-500"
+                className="relative rounded-lg border border-slate-700 bg-slate-800 p-4 shadow-sm hover:border-slate-500"
               >
                 <button
                   type="button"
@@ -391,7 +390,7 @@ export default function LectureLibrary() {
 
                   {activeMenuLectureId === lecture.id && (
                     <div
-                      className="absolute right-0 z-20 mt-2 w-44 rounded-md border border-slate-600 bg-slate-900 p-1 shadow-xl"
+                      className="absolute right-0 z-20 mt-2 w-44 rounded-md border border-slate-600 bg-slate-900 p-1 shadow-md"
                       onClick={(event) => event.stopPropagation()}
                     >
                       <button

@@ -2,6 +2,47 @@
 
 All notable changes to the Cognote project will be documented in this file.
 
+## [Task 6.3] - 2026-02-21
+- Added: Custom app title bar with route context, window controls (minimize/maximize/close), and a sun/moon theme toggle
+- Added: Theme persistence support end-to-end via new `theme` setting (`dark`/`light`) in frontend types and Rust settings defaults
+- Added: New shared UI primitives: `ViewHeader` for consistent view headers/dividers and a custom SVG app icon asset
+- Changed: Sidebar UX and styling with 256px/64px collapse modes, collapse toggle, blue active nav states, slate hover states, truncated lecture title, and a Library lecture-count badge
+- Changed: Upload/recording polish with drag-over dashed border animation, inline upload progress bar, and pulsing red recording indicator next to timer
+- Changed: Cross-view visual consistency pass across Upload, Library, Transcript, Pipeline, Notes, Quiz, Research, Flashcards, Settings, and Mind Map pages (header structure + max-width alignment)
+- Changed: Global styling with Inter font, class-based dark mode variant wiring, route fade-in animation, uniform interactive transitions, and reduced-motion safeguards
+- Changed: Tauri desktop window configuration to use a custom title bar by disabling native window decorations
+- Files modified:
+  - src-tauri/src/commands/settings.rs
+  - src-tauri/tauri.conf.json
+  - src/App.tsx
+  - src/components/KeyboardShortcuts/KeyboardShortcutsModal.tsx
+  - src/components/Library/EmptyState.tsx
+  - src/components/Library/LectureLibrary.tsx
+  - src/components/Settings/SettingsPanel.tsx
+  - src/components/Sidebar.tsx
+  - src/components/Transcript/TranscriptEditor.tsx
+  - src/components/Transcript/TranscriptViewer.tsx
+  - src/components/Upload/AudioUploader.tsx
+  - src/components/Upload/DropZone.tsx
+  - src/components/Upload/LiveRecorder.tsx
+  - src/components/index.ts
+  - src/index.css
+  - src/lib/types.ts
+  - src/main.tsx
+  - src/pages/Flashcards.tsx
+  - src/pages/MindMap.tsx
+  - src/pages/Notes.tsx
+  - src/pages/Pipeline.tsx
+  - src/pages/Quiz.tsx
+  - src/pages/Research.tsx
+  - src/pages/Transcript.tsx
+  - src/stores/settingsStore.ts
+  - src/assets/cognote-icon.svg (new)
+  - src/components/Layout/ViewHeader.tsx (new)
+  - src/components/Layout/index.ts (new)
+  - src/components/Window/TitleBar.tsx (new)
+  - src/components/Window/index.ts (new)
+
 ## [Task 6.2] - 2026-02-21
 - Added: Global keyboard shortcut system via `useHotkeys` with support for `Ctrl+N`, `Ctrl+1..7`, `Ctrl+,`, `Ctrl+H`, `Ctrl+Shift+E`, `?`, `Escape`, `Space`, and arrow navigation
 - Added: `KeyboardShortcutsModal` dialog with grouped shortcut reference grid, focus-on-open behavior, and overlay dismissal

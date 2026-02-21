@@ -51,7 +51,7 @@ export default function KeyboardShortcutsModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="keyboard-shortcuts-title"
-        className="w-full max-w-3xl rounded-xl border border-slate-600 bg-slate-900 p-6 shadow-2xl"
+        className="w-full max-w-3xl rounded-lg border border-slate-600 bg-slate-900 p-6 shadow-md"
         onClick={(event) => event.stopPropagation()}
       >
         <header className="mb-5 flex items-center justify-between gap-3">

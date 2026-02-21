@@ -1,3 +1,5 @@
+import { createPortal } from "react-dom";
+
 interface TranscriptAudioPlayerProps {
   lectureFilename: string;
   sourceUrl: string | null;
@@ -39,8 +41,15 @@ export default function TranscriptAudioPlayer({
   const safeDuration = Number.isFinite(duration) && duration > 0 ? duration : 0;
   const safeCurrentTime = Math.min(Math.max(currentTime, 0), safeDuration || currentTime || 0);
 
-  return (
-    <footer className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-700 bg-slate-900/95 backdrop-blur md:left-64">
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(
+    <footer
+      className="fixed bottom-0 right-0 z-40 border-t border-slate-700 bg-slate-900/95 backdrop-blur"
+      style={{ left: "var(--app-sidebar-width, 16rem)" }}
+    >
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -103,6 +112,7 @@ export default function TranscriptAudioPlayer({
           </p>
         )}
       </div>
-    </footer>
+    </footer>,
+    document.body,
   );
 }

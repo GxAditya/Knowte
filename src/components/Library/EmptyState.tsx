@@ -4,8 +4,8 @@ export default function EmptyState() {
   const navigate = useNavigate();
 
   return (
-    <div className="rounded-2xl border border-slate-700 bg-slate-800/70 px-6 py-12 text-center">
-      <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl border border-slate-600 bg-slate-900/80">
+    <div className="rounded-lg border border-slate-700 bg-slate-800/70 px-6 py-12 text-center shadow-sm">
+      <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-lg border border-slate-600 bg-slate-900/80">
         <svg
           aria-hidden="true"
           className="h-10 w-10 text-slate-400"

@@ -20,7 +20,7 @@ interface SettingsState {
   isSaving: boolean;
   error: string | null;
 
-  loadSettings: () => Promise<void>;
+  loadSettings: (options?: { includeDiagnostics?: boolean }) => Promise<void>;
   saveSettings: (settings: Settings) => Promise<boolean>;
   checkOllama: (ollamaUrl: string) => Promise<void>;
   loadWhisperModels: () => Promise<void>;
@@ -41,15 +41,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   isSaving: false,
   error: null,
 
-  loadSettings: async () => {
+  loadSettings: async (options) => {
+    const includeDiagnostics = options?.includeDiagnostics ?? true;
     set({ isLoading: true, error: null });
     try {
       const settings = await apiGetSettings();
       set({ settings, isLoading: false });
-      await Promise.all([
-        get().checkOllama(settings.ollama_url),
-        get().loadWhisperModels(),
-      ]);
+      if (includeDiagnostics) {
+        await Promise.all([
+          get().checkOllama(settings.ollama_url),
+          get().loadWhisperModels(),
+        ]);
+      }
     } catch (error) {
       set({ error: formatError(error), isLoading: false });
     }

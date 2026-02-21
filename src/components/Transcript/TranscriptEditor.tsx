@@ -177,7 +177,7 @@ export default function TranscriptEditor({
 
   if (!lecture) {
     return (
-      <div className="rounded-xl border border-slate-700 bg-slate-800/70 p-6">
+      <div className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm">
         <h1 className="text-xl font-semibold text-slate-100">Transcript Editor</h1>
         <p className="mt-2 text-sm text-slate-400">
           Process a lecture from the Upload page to edit transcript segments.
@@ -188,7 +188,7 @@ export default function TranscriptEditor({
 
   if (!lecture.transcriptId) {
     return (
-      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-6">
+      <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 shadow-sm">
         <h1 className="text-xl font-semibold text-amber-100">Transcript Editor</h1>
         <p className="mt-2 text-sm text-amber-200">
           Transcript editing is unavailable for this lecture. Re-process the lecture
@@ -200,7 +200,7 @@ export default function TranscriptEditor({
 
   return (
     <div className="space-y-4">
-      <section className="rounded-xl border border-slate-700 bg-slate-800/70 p-4">
+      <section className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex-1">
             <label htmlFor="transcript-editor-search" className="sr-only">
@@ -220,7 +220,7 @@ export default function TranscriptEditor({
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-700 bg-slate-800/70 p-4">
+      <section className="rounded-lg border border-slate-700 bg-slate-800/70 p-4 shadow-sm">
         {filteredSegments.length === 0 ? (
           <p className="text-sm text-slate-400">
             {query

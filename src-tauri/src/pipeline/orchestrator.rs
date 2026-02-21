@@ -73,6 +73,140 @@ fn make_preview(raw: &str) -> String {
     }
 }
 
+fn find_first_index(haystack: &str, needles: &[&str]) -> Option<usize> {
+    needles
+        .iter()
+        .filter_map(|needle| haystack.find(needle))
+        .min()
+}
+
+fn collapse_blank_lines(text: &str) -> String {
+    let mut lines = Vec::new();
+    let mut previous_blank = true;
+
+    for line in text.lines() {
+        let trimmed_end = line.trim_end();
+        let is_blank = trimmed_end.trim().is_empty();
+        if is_blank {
+            if previous_blank {
+                continue;
+            }
+            lines.push(String::new());
+            previous_blank = true;
+        } else {
+            lines.push(trimmed_end.to_string());
+            previous_blank = false;
+        }
+    }
+
+    while lines.last().is_some_and(|line| line.is_empty()) {
+        lines.pop();
+    }
+
+    lines.join("\n")
+}
+
+fn sanitize_summary_text(raw: &str) -> String {
+    let fallback = raw.trim();
+    if fallback.is_empty() {
+        return String::new();
+    }
+
+    let mut text = raw
+        .replace("\r\n", "\n")
+        .replace('\r', "\n")
+        .lines()
+        .filter(|line| !line.trim_start().starts_with("```"))
+        .collect::<Vec<_>>()
+        .join("\n")
+        .trim()
+        .to_string();
+
+    if text.is_empty() {
+        return fallback.to_string();
+    }
+
+    // Remove known "extra assistant" sections that should not be in final notes.
+    let lower = text.to_ascii_lowercase();
+    if let Some(cut_at) = find_first_index(
+        &lower,
+        &[
+            "\n**rationale",
+            "\nrationale for language",
+            "\nrationale:",
+            "\nwould you like",
+            "\nlet me know if you'd like",
+            "\ni can also",
+            "\nif you'd like",
+        ],
+    ) {
+        text = text[..cut_at].trim_end().to_string();
+    }
+
+    // If the model appended a follow-up prompt inline, trim it from the tail.
+    let lower = text.to_ascii_lowercase();
+    for marker in [
+        "would you like",
+        "let me know if you'd like",
+        "if you'd like,",
+        "i can also",
+    ] {
+        if let Some(idx) = lower.find(marker) {
+            if idx >= lower.len() / 2 {
+                text = text[..idx].trim_end().to_string();
+                break;
+            }
+        }
+    }
+
+    // If there's a conversational preface before a clear content marker,
+    // discard the preface and keep the actual summary body.
+    let lower = text.to_ascii_lowercase();
+    let mut content_markers: Vec<usize> = Vec::new();
+    for marker in ["**thesis:**", "thesis:", "## ", "### ", "#### "] {
+        if let Some(idx) = lower.find(marker) {
+            content_markers.push(idx);
+        }
+    }
+    for marker in ["- ", "* ", "1. ", "1) "] {
+        if lower.starts_with(marker) {
+            content_markers.push(0);
+        }
+        let line_start_marker = format!("\n{marker}");
+        if let Some(idx) = lower.find(&line_start_marker) {
+            content_markers.push(idx + 1);
+        }
+    }
+
+    if let Some(start_idx) = content_markers.into_iter().min() {
+        if start_idx > 0 && start_idx < 700 {
+            let prefix = lower[..start_idx].trim();
+            let likely_preface = prefix.starts_with("okay")
+                || prefix.starts_with("sure")
+                || prefix.starts_with("certainly")
+                || prefix.starts_with("of course")
+                || prefix.contains("here's")
+                || prefix.contains("here is")
+                || prefix.contains("here’s")
+                || prefix.contains("summary");
+            if likely_preface {
+                text = text[start_idx..].trim_start().to_string();
+            }
+        }
+    }
+
+    let text = collapse_blank_lines(
+        text.trim_end_matches(|ch: char| ch == '-' || ch.is_whitespace())
+            .trim_end(),
+    );
+
+    if text.is_empty() {
+        fallback.to_string()
+    } else {
+        text
+    }
+}
+
 // ─── Stage executor ───────────────────────────────────────────────────────────
 
 /// Execute a single LLM stage.  
@@ -314,13 +448,14 @@ pub async fn run_full_pipeline(lecture_id: String, app: AppHandle) {
 
     let summary_text = match summary_result {
         Ok(text) => {
-            let preview = make_preview(&text);
+            let cleaned_summary = sanitize_summary_text(&text);
+            let preview = make_preview(&cleaned_summary);
             mark_stage_complete(&db, &lecture_id, stage, &preview);
             emit_stage(&app, &lecture_id, stage, "complete", Some(preview), None, 1);
             if let Ok(conn) = db.connect() {
-                let _ = queries::update_lecture_summary(&conn, &lecture_id, &text);
+                let _ = queries::update_lecture_summary(&conn, &lecture_id, &cleaned_summary);
             }
-            text
+            cleaned_summary
         }
         Err(e) => {
             mark_stage_error(&db, &lecture_id, stage, &e);
@@ -519,4 +654,29 @@ pub async fn run_full_pipeline(lecture_id: String, app: AppHandle) {
 
     // Emit overall completion event
     emit_stage(&app, &lecture_id, "pipeline", "complete", None, None, 6);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::sanitize_summary_text;
+
+    #[test]
+    fn sanitize_summary_removes_conversational_wrapper_and_tail() {
+        let raw = "Okay, here's a concise summary of the lecture: **Thesis:** Prioritize \
+functionality before visual shell.\n\n---\n**Rationale for Language & Tone:** ...\n\
+Would you like me to expand on these points?";
+
+        let cleaned = sanitize_summary_text(raw);
+        let cleaned_lower = cleaned.to_ascii_lowercase();
+
+        assert!(cleaned.starts_with("**Thesis:**"));
+        assert!(!cleaned_lower.contains("rationale for language"));
+        assert!(!cleaned_lower.contains("would you like"));
+    }
+
+    #[test]
+    fn sanitize_summary_keeps_regular_summary_content() {
+        let raw = "## Summary\n\n- Main point one\n- Main point two";
+        assert_eq!(sanitize_summary_text(raw), raw);
+    }
 }

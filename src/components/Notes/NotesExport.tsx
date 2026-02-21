@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { StructuredNotes } from "../../lib/types";
 import { exportNotesMarkdown } from "../../lib/tauriApi";
 import { useToastStore } from "../../stores";
+import { sanitizeSummaryText } from "./summaryFormatting";
 
 // ─── HTML for Print / PDF ─────────────────────────────────────────────────────
 
@@ -18,11 +19,12 @@ function buildPrintBodyHtml(notes: StructuredNotes, summary?: string): string {
   const topics = notes.topics ?? [];
   const keyTerms = notes.key_terms ?? [];
   const takeaways = notes.takeaways ?? [];
+  const cleanedSummary = sanitizeSummaryText(summary);
 
   let html = `<h1>${escape(notes.title)}</h1>\n`;
 
-  if (summary) {
-    html += `<h2>Summary</h2>\n<p>${escape(summary)}</p>\n`;
+  if (cleanedSummary) {
+    html += `<h2>Summary</h2>\n<p>${escape(cleanedSummary).replace(/\n/g, "<br/>")}</p>\n`;
   }
 
   for (const topic of topics) {
@@ -149,11 +151,12 @@ const PRINT_CSS = `
 
 function notesToMarkdown(notes: StructuredNotes, summary?: string): string {
   const lines: string[] = [];
+  const cleanedSummary = sanitizeSummaryText(summary);
 
   lines.push(`# ${notes.title}`, "");
 
-  if (summary) {
-    lines.push("## Summary", "", summary, "");
+  if (cleanedSummary) {
+    lines.push("## Summary", "", cleanedSummary, "");
   }
 
   for (const topic of notes.topics ?? []) {

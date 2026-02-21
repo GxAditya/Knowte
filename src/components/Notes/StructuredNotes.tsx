@@ -1,5 +1,89 @@
-import { useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import type { NotesTerm, NotesTopic, StructuredNotes } from "../../lib/types";
+import { parseSummaryBlocks, type SummaryBlock } from "./summaryFormatting";
+
+function renderInlineMarkdown(text: string): ReactNode[] {
+  const parts: ReactNode[] = [];
+  const pattern = /(\*\*[^*]+\*\*|__[^_]+__|\*[^*\n]+\*|_[^_\n]+_)/g;
+  let cursor = 0;
+  let token = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > cursor) {
+      parts.push(text.slice(cursor, match.index));
+    }
+
+    const raw = match[0];
+    const content = raw.slice(2, -2).trim();
+    if (raw.startsWith("**") || raw.startsWith("__")) {
+      parts.push(<strong key={`s-${token}`}>{content}</strong>);
+    } else {
+      const italicContent = raw.slice(1, -1).trim();
+      parts.push(<em key={`e-${token}`}>{italicContent}</em>);
+    }
+
+    cursor = pattern.lastIndex;
+    token += 1;
+  }
+
+  if (cursor < text.length) {
+    parts.push(text.slice(cursor));
+  }
+
+  return parts.length > 0 ? parts : [text];
+}
+
+function renderSummaryBlock(block: SummaryBlock, index: number) {
+  if (block.type === "heading") {
+    return (
+      <h3
+        key={index}
+        className={
+          block.level === 2
+            ? "text-lg font-semibold text-violet-300"
+            : "text-base font-semibold text-slate-100"
+        }
+      >
+        {renderInlineMarkdown(block.text)}
+      </h3>
+    );
+  }
+
+  if (block.type === "paragraph") {
+    return (
+      <p key={index} className="text-slate-300 leading-7">
+        {renderInlineMarkdown(block.text)}
+      </p>
+    );
+  }
+
+  if (block.type === "unordered_list") {
+    return (
+      <ul key={index} className="space-y-2">
+        {block.items.map((item, itemIndex) => (
+          <li key={itemIndex} className="flex items-start gap-3">
+            <span className="mt-2 flex-shrink-0 w-2 h-2 rounded-full bg-violet-500" />
+            <span className="text-slate-200 leading-7">{renderInlineMarkdown(item)}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  return (
+    <ol key={index} className="space-y-3">
+      {block.items.map((item, itemIndex) => (
+        <li key={itemIndex} className="flex items-start gap-3">
+          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-800/60 text-blue-200 text-sm font-semibold flex items-center justify-center">
+            {itemIndex + 1}
+          </span>
+          <span className="text-slate-200 leading-7">{renderInlineMarkdown(item)}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
 
 // ─── Collapsible Topic Section ────────────────────────────────────────────────
 
@@ -149,6 +233,7 @@ export function StructuredNotesView({ notes, summary }: StructuredNotesProps) {
   const topics = notes.topics ?? [];
   const keyTerms = notes.key_terms ?? [];
   const takeaways = notes.takeaways ?? [];
+  const summaryBlocks = useMemo(() => parseSummaryBlocks(summary), [summary]);
 
   return (
     <article className="space-y-2">
@@ -158,10 +243,12 @@ export function StructuredNotesView({ notes, summary }: StructuredNotesProps) {
       </header>
 
       {/* Summary Section */}
-      {summary && (
+      {summaryBlocks.length > 0 && (
         <section id="summary" className="mb-8">
           <h2 className="text-xl font-semibold text-slate-100 mb-3">Summary</h2>
-          <p className="text-slate-300 leading-7">{summary}</p>
+          <div className="rounded-xl border border-slate-700/80 bg-slate-800/35 p-5 space-y-4">
+            {summaryBlocks.map((block, index) => renderSummaryBlock(block, index))}
+          </div>
         </section>
       )}
 

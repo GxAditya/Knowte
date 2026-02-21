@@ -24,8 +24,14 @@ fn personalization_preamble(level: &str) -> String {
 #[allow(dead_code)]
 pub fn summarize_prompt(transcript: &str, level: &str) -> String {
     format!(
-        "{}Create a concise summary of this lecture in 3-5 paragraphs. \
+        "{}Create a concise summary of this lecture in 3-5 short paragraphs.\n\
 Highlight the main thesis, key arguments, and conclusions.\n\
+Output requirements:\n\
+- Output ONLY the summary content.\n\
+- Do NOT include conversational lead-ins like \"Here is the summary\".\n\
+- Do NOT include follow-up questions like \"Would you like...\".\n\
+- Do NOT include rationale/tone notes or self-referential commentary.\n\
+- You may use Markdown headings and bullet points when helpful.\n\
 Lecture transcript: {}",
         personalization_preamble(level),
         transcript
@@ -174,7 +180,8 @@ mod tests {
         let prompt = summarize_prompt("This is the transcript.", "graduate");
         assert!(prompt.contains("This is the transcript."));
         assert!(prompt.contains("graduate/masters student"));
-        assert!(prompt.contains("3-5 paragraphs"));
+        assert!(prompt.contains("3-5 short paragraphs"));
+        assert!(prompt.contains("Output ONLY the summary content."));
     }
 
     #[test]

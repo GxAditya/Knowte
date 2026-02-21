@@ -11,7 +11,13 @@ All notable changes to the Cognote project will be documented in this file.
 - Changed: Cross-view visual consistency pass across Upload, Library, Transcript, Pipeline, Notes, Quiz, Research, Flashcards, Settings, and Mind Map pages (header structure + max-width alignment)
 - Changed: Global styling with Inter font, class-based dark mode variant wiring, route fade-in animation, uniform interactive transitions, and reduced-motion safeguards
 - Changed: Tauri desktop window configuration to use a custom title bar by disabling native window decorations
+- Changed: Summary prompt constraints to discourage conversational wrappers, follow-up questions, and meta commentary in generated summaries
+- Fixed: Summary stage now sanitizes model output before persistence so notes context and stored summaries exclude chatty prefixes/suffixes
+- Changed: Notes summary UI now parses markdown-like structure (headings, bullets, numbered lists, inline emphasis) instead of rendering a single plain paragraph
+- Changed: Notes export paths now apply the same summary sanitization used in Notes display
 - Files modified:
+  - src-tauri/src/pipeline/orchestrator.rs
+  - src-tauri/src/utils/prompt_templates.rs
   - src-tauri/src/commands/settings.rs
   - src-tauri/tauri.conf.json
   - src/App.tsx
@@ -25,6 +31,9 @@ All notable changes to the Cognote project will be documented in this file.
   - src/components/Upload/AudioUploader.tsx
   - src/components/Upload/DropZone.tsx
   - src/components/Upload/LiveRecorder.tsx
+  - src/components/Notes/StructuredNotes.tsx
+  - src/components/Notes/NotesExport.tsx
+  - src/components/Notes/summaryFormatting.ts (new)
   - src/components/index.ts
   - src/index.css
   - src/lib/types.ts

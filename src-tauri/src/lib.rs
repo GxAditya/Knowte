@@ -16,7 +16,8 @@ use commands::transcribe::{
     update_transcript_segment,
 };
 use commands::pipeline::{
-    get_flashcards, get_mindmap, get_notes, get_pipeline_status, get_quiz, start_pipeline,
+    export_notes_markdown, get_flashcards, get_mindmap, get_notes, get_pipeline_status, get_quiz,
+    regenerate_notes, start_pipeline,
 };
 use commands::research::{get_lecture_papers, search_related_papers};
 use db::init_database;
@@ -54,6 +55,8 @@ pub fn run() {
             get_mindmap,
             search_related_papers,
             get_lecture_papers,
+            regenerate_notes,
+            export_notes_markdown,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

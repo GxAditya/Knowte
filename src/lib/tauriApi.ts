@@ -157,3 +157,21 @@ export async function searchRelatedPapers(lectureId: string): Promise<Paper[]> {
 export async function getLecturePapers(lectureId: string): Promise<Paper[] | null> {
   return invoke<Paper[] | null>("get_lecture_papers", { lectureId });
 }
+
+// ─── Notes Commands ───────────────────────────────────────────────────────────
+
+/**
+ * Re-run the structured notes stage for a lecture using the current LLM
+ * settings.  Returns the new notes JSON string, or null on error.
+ */
+export async function regenerateNotes(lectureId: string): Promise<string | null> {
+  return invoke<string | null>("regenerate_notes", { lectureId });
+}
+
+/**
+ * Convert the stored notes to Markdown, open a native save-file dialog, and
+ * write the file.  Returns the saved file path, or null if the user cancelled.
+ */
+export async function exportNotesMarkdown(lectureId: string): Promise<string | null> {
+  return invoke<string | null>("export_notes_markdown", { lectureId });
+}

@@ -444,6 +444,22 @@ pub fn get_mindmap(
     }
 }
 
+pub fn get_lecture_summary(
+    connection: &Connection,
+    lecture_id: &str,
+) -> rusqlite::Result<Option<String>> {
+    let result = connection.query_row(
+        "SELECT summary FROM lectures WHERE id = ?1",
+        params![lecture_id],
+        |row| row.get::<_, Option<String>>(0),
+    );
+    match result {
+        Ok(v) => Ok(v),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e),
+    }
+}
+
 // ─── Keywords Query ───────────────────────────────────────────────────────────
 
 pub fn get_lecture_keywords(

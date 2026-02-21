@@ -2,6 +2,17 @@
 
 All notable changes to the Cognote project will be documented in this file.
 
+## [Task 4.1] - 2026-02-21
+- Added: `src/components/Notes/StructuredNotes.tsx` — renders `StructuredNotes` JSON as a document: collapsible topic sections (h2 heading, coloured bullet key-points, details paragraph, styled example boxes), two-column alternating-row Key Terms table, numbered Takeaways highlight box
+- Added: `src/components/Notes/NotesExport.tsx` — export button row: "Copy as Markdown" (client-side conversion + clipboard), "Download as Markdown" (calls `export_notes_markdown` Rust command which shows native save dialog), "Download as PDF" (`window.print()` with print-hide CSS); toast notification on success/failure
+- Added: `src/components/Notes/index.ts` — barrel export for Notes components
+- Changed: `src/components/index.ts` — added `export * from "./Notes"`
+- Changed: `src/pages/Notes.tsx` — full Notes page with sticky Table of Contents sidebar (IntersectionObserver active-section tracking), export bar, "Regenerate Notes" button, loading/error/empty states; loads notes via `getNotes` on lecture change
+- Added: `src-tauri/src/commands/pipeline.rs` — `regenerate_notes` (async): loads transcript + summary from DB, builds context, calls LLM notes prompt with JSON retry, saves to DB, returns new JSON; `export_notes_markdown` (sync): reads notes from DB, converts to Markdown, opens `rfd` native save dialog, writes file, returns saved path; `NotesTopic`, `NotesTerm`, `StructuredNotesData` helper structs and `notes_to_markdown()` helper function
+- Changed: `src-tauri/src/db/queries.rs` — added `get_lecture_summary` query
+- Changed: `src-tauri/src/lib.rs` — registered `regenerate_notes` and `export_notes_markdown` in invoke handler
+- Changed: `src/lib/tauriApi.ts` — added `regenerateNotes` and `exportNotesMarkdown` typed wrappers
+
 ## [Task 3.3] - 2026-02-21
 - Added: `src-tauri/src/commands/research.rs` — Tauri commands `search_related_papers` and `get_lecture_papers`; `search_papers()` queries Semantic Scholar Academic Graph API (`/paper/search`) per keyword (limit 3 per keyword), deduplicates by `paperId`, sorts by citation count, returns top 10; handles HTTP 429 rate-limit with an automatic 3 s retry; `Paper` struct with `paper_id`, `title`, `abstract_text`, `year`, `authors`, `url`, `citation_count`, `venue`, `pdf_url`
 - Added: `src-tauri/src/db/schema.rs` — new `papers` table; `src-tauri/src/db/queries.rs` — `get_lecture_keywords`, `upsert_papers`, `get_papers` query helpers

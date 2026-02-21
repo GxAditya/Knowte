@@ -181,7 +181,8 @@ cognote/
 | 3.1 Prompt Templates + Ollama Client | ✅ Complete |
 | 3.2 Pipeline Orchestrator | ✅ Complete |
 | 3.3 Semantic Scholar Integration | ✅ Complete |
-| 4.x Output Views | 🔲 Pending |
+| 4.1 Structured Notes View | ✅ Complete |
+| 4.x Output Views (remaining) | 🔲 Pending |
 | 5.x Lecture Library | 🔲 Pending |
 | 6.x Polish | 🔲 Pending |
 | 7.x Advanced Features | 🔲 Pending |

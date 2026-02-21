@@ -79,3 +79,214 @@ pub async fn get_mindmap(app: AppHandle, lecture_id: String) -> Result<Option<St
     let conn = db.connect().map_err(|e| e.to_string())?;
     crate::db::queries::get_mindmap(&conn, &lecture_id).map_err(|e| e.to_string())
 }
+
+// ─── Notes Helpers ────────────────────────────────────────────────────────────
+
+/// Minimal structs used only for Markdown serialisation (deserialized from the
+/// stored notes JSON).
+#[derive(serde::Deserialize, Default)]
+struct NotesTopic {
+    heading: String,
+    #[serde(default)]
+    key_points: Vec<String>,
+    #[serde(default)]
+    details: String,
+    #[serde(default)]
+    examples: Vec<String>,
+}
+
+#[derive(serde::Deserialize)]
+struct NotesTerm {
+    term: String,
+    definition: String,
+}
+
+#[derive(serde::Deserialize, Default)]
+struct StructuredNotesData {
+    #[serde(default)]
+    title: String,
+    #[serde(default)]
+    topics: Vec<NotesTopic>,
+    #[serde(default)]
+    key_terms: Vec<NotesTerm>,
+    #[serde(default)]
+    takeaways: Vec<String>,
+}
+
+fn notes_to_markdown(notes: &StructuredNotesData) -> String {
+    let mut md = String::new();
+    md.push_str(&format!("# {}\n\n", notes.title));
+
+    for topic in &notes.topics {
+        md.push_str(&format!("## {}\n\n", topic.heading));
+
+        if !topic.key_points.is_empty() {
+            md.push_str("### Key Points\n\n");
+            for p in &topic.key_points {
+                md.push_str(&format!("- {}\n", p));
+            }
+            md.push('\n');
+        }
+
+        if !topic.details.is_empty() {
+            md.push_str(&format!("{}\n\n", topic.details));
+        }
+
+        if !topic.examples.is_empty() {
+            md.push_str("### Examples\n\n");
+            for ex in &topic.examples {
+                md.push_str(&format!("> {}\n\n", ex));
+            }
+        }
+    }
+
+    if !notes.key_terms.is_empty() {
+        md.push_str("## Key Terms\n\n");
+        md.push_str("| Term | Definition |\n");
+        md.push_str("|------|------------|\n");
+        for item in &notes.key_terms {
+            md.push_str(&format!("| **{}** | {} |\n", item.term, item.definition));
+        }
+        md.push('\n');
+    }
+
+    if !notes.takeaways.is_empty() {
+        md.push_str("## Key Takeaways\n\n");
+        for (i, t) in notes.takeaways.iter().enumerate() {
+            md.push_str(&format!("{}. {}\n", i + 1, t));
+        }
+        md.push('\n');
+    }
+
+    md
+}
+
+// ─── Regenerate Notes ─────────────────────────────────────────────────────────
+
+/// Re-run the structured notes stage for a lecture using the current LLM
+/// settings.  Returns the new notes JSON (or an error string).
+#[tauri::command]
+pub async fn regenerate_notes(
+    app: AppHandle,
+    lecture_id: String,
+) -> Result<Option<String>, String> {
+    use crate::commands::llm::{parse_json_from_response, OllamaClient};
+    use crate::utils::prompt_templates;
+
+    let db = app
+        .try_state::<AppDatabase>()
+        .ok_or_else(|| "Database not initialised".to_string())?;
+
+    // ── Load transcript ──────────────────────────────────────────────────────
+    let conn = db.connect().map_err(|e| e.to_string())?;
+    let transcript_rec =
+        crate::db::queries::get_transcript_by_lecture_id(&conn, &lecture_id)
+            .map_err(|e| e.to_string())?
+            .ok_or_else(|| "No transcript found for this lecture.".to_string())?;
+
+    let summary = crate::db::queries::get_lecture_summary(&conn, &lecture_id)
+        .map_err(|e| e.to_string())?
+        .unwrap_or_default();
+
+    drop(conn);
+
+    // ── Load settings ────────────────────────────────────────────────────────
+    let settings = crate::commands::settings::get_settings(app.clone())
+        .map_err(|e| e.to_string())?;
+
+    let model = settings.llm_model.clone();
+    let level = settings.personalization_level.clone();
+
+    // ── Build context (mirrors orchestrator logic) ───────────────────────────
+    const CHUNK_CHARS: usize = 16_000;
+    let context_text = if transcript_rec.full_text.len() > CHUNK_CHARS {
+        format!(
+            "LECTURE SUMMARY:\n{summary}\n\nFIRST SECTION OF TRANSCRIPT:\n{}\n\
+             (Note: this is a long lecture; the above is a representative excerpt.)",
+            &transcript_rec.full_text[..CHUNK_CHARS]
+        )
+    } else {
+        transcript_rec.full_text.clone()
+    };
+
+    let client = OllamaClient::new(settings.ollama_url.clone());
+    let prompt = prompt_templates::structured_notes_prompt(&context_text, &level);
+
+    // ── Call LLM ─────────────────────────────────────────────────────────────
+    let raw = client
+        .generate(&app, &model, &prompt, &lecture_id, "notes")
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let extracted = parse_json_from_response(&raw);
+
+    // Validate JSON, retry once on failure
+    let json = if serde_json::from_str::<serde_json::Value>(&extracted).is_ok() {
+        extracted
+    } else {
+        let retry_prompt = format!(
+            "{}\n\nIMPORTANT: Output ONLY valid JSON with no additional text or markdown fences.",
+            prompt
+        );
+        let retry_raw = client
+            .generate(&app, &model, &retry_prompt, &lecture_id, "notes_retry")
+            .await
+            .map_err(|e| e.to_string())?;
+        let retry_extracted = parse_json_from_response(&retry_raw);
+        if serde_json::from_str::<serde_json::Value>(&retry_extracted).is_ok() {
+            retry_extracted
+        } else {
+            return Err("LLM did not return valid JSON after retry.".to_string());
+        }
+    };
+
+    // ── Persist ──────────────────────────────────────────────────────────────
+    let conn = db.connect().map_err(|e| e.to_string())?;
+    crate::db::queries::upsert_notes(&conn, &lecture_id, &json)
+        .map_err(|e| e.to_string())?;
+
+    Ok(Some(json))
+}
+
+// ─── Export Notes as Markdown ─────────────────────────────────────────────────
+
+/// Read the stored notes JSON for a lecture, convert to Markdown, open a
+/// native save-file dialog, and write the file.
+///
+/// Returns the chosen file path, or `None` if the user cancelled the dialog.
+#[tauri::command]
+pub fn export_notes_markdown(
+    app: AppHandle,
+    lecture_id: String,
+) -> Result<Option<String>, String> {
+    let db = app
+        .try_state::<AppDatabase>()
+        .ok_or_else(|| "Database not initialised".to_string())?;
+
+    let conn = db.connect().map_err(|e| e.to_string())?;
+    let notes_json = crate::db::queries::get_notes(&conn, &lecture_id)
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| "No notes found for this lecture.".to_string())?;
+    drop(conn);
+
+    let notes: StructuredNotesData = serde_json::from_str(&notes_json)
+        .map_err(|e| format!("Failed to parse notes: {e}"))?;
+
+    let markdown = notes_to_markdown(&notes);
+
+    // Open native save-file dialog
+    let default_name = format!("{}-notes.md", notes.title.replace(' ', "-"));
+    let path = rfd::FileDialog::new()
+        .set_file_name(&default_name)
+        .add_filter("Markdown", &["md"])
+        .save_file();
+
+    let Some(path) = path else {
+        return Ok(None); // User cancelled
+    };
+
+    std::fs::write(&path, markdown.as_bytes())
+        .map_err(|e| format!("Failed to write file: {e}"))?;
+
+    Ok(Some(path.to_string_lossy().to_string()))
+}

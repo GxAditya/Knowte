@@ -247,7 +247,7 @@ export default function Notes() {
   return (
     <div className="flex gap-6 h-full relative">
       {/* ── Sticky ToC sidebar ────────────────────────────────────────────── */}
-      <aside className="hidden lg:block w-56 flex-shrink-0 no-print">
+      <aside className="hidden lg:block w-56 flex-shrink-0">
         <div className="sticky top-6">
           <TableOfContents items={tocItems} activeId={activeId} />
         </div>
@@ -256,7 +256,7 @@ export default function Notes() {
       {/* ── Main document area ─────────────────────────────────────────────── */}
       <div className="flex-1 min-w-0 space-y-5">
         {/* Page header */}
-        <div className="flex items-start gap-4 flex-wrap no-print">
+        <div className="flex items-start gap-4 flex-wrap">
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold text-slate-100">Lecture Notes</h1>
             <p className="text-sm text-slate-400 mt-0.5 truncate">

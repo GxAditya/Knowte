@@ -32,7 +32,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["deb", "rpm"],
+    "targets": "all",
     "resources": [
       "resources/ffmpeg/linux",
       "resources/ffmpeg/macos",

@@ -83,6 +83,6 @@
     "shortDescription": "Transform lecture audio into structured learning materials",
     "longDescription": "Knowte transforms lecture audio and video into structured notes, quizzes, flashcards, and mind maps using local AI — completely private, fully offline.",
     "copyright": "Copyright © 2026 Knowte Contributors",
-    "license": "MIT"
+    "license": "GPL-3.0"
   }
 }

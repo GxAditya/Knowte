@@ -1,4 +1,4 @@
-# Cognote — AI Agent Development Plan
+# Knowte — AI Agent Development Plan
 
 ## Architecture Decision Record
 
@@ -17,7 +17,7 @@ Export formats:  Anki (.apkg), Markdown, JSON, HTML mind-map
 ## Project File Structure (Target End-State)
 
 ```
-cognote/
+knowte/
 ├── src-tauri/
 │   ├── src/
 │   │   ├── main.rs                  # Tauri entry point
@@ -126,7 +126,7 @@ PROMPT FOR AGENT:
 Create a Tauri v2 desktop app with React + TypeScript + Vite frontend.
 
 Requirements:
-- Tauri v2 with default config, window title "LectureToLearn"
+- Tauri v2 with default config, window title "Knowte"
 - Window size 1200x800, resizable, centered on launch
 - React 18 with TypeScript strict mode
 - Tailwind CSS v3 configured
@@ -172,7 +172,7 @@ BACKEND (src-tauri/src/commands/settings.rs):
     "llm_model": "llama3.1:8b",     // from Ollama
     "personalization_level": "undergraduate_2nd_year",
     "language": "en",
-    "export_path": ""               // default to ~/Documents/LectureToLearn
+    "export_path": ""               // default to ~/Documents/Knowte
   }
 - Create a Tauri command `save_settings` that writes to the same file
 - If settings file doesn't exist, create it with defaults on first read
@@ -921,7 +921,7 @@ Implement .apkg generation:
 - Create a SQLite database in memory with Anki schema:
   Tables: col, notes, cards, revlog, graves
 - col table: single row with models JSON (Basic model), 
-  decks JSON (deck named "LectureToLearn::{lecture_title}"), 
+  decks JSON (deck named "Knowte::{lecture_title}"), 
   and other required Anki metadata
 - For each flashcard, insert into notes table:
   - id: timestamp-based unique id
@@ -1395,7 +1395,7 @@ UX + RELIABILITY:
 PROMPT FOR AGENT:
 ─────────────────
 Add a "YouTube Import" workflow that downloads lecture audio from a YouTube URL
-using yt-dlp + ffmpeg, then runs the standard Cognote processing pipeline.
+using yt-dlp + ffmpeg, then runs the standard Knowte processing pipeline.
 
 FRONTEND:
 - Add "Import from YouTube" section on Upload page:
@@ -1448,8 +1448,8 @@ PROMPT FOR AGENT:
 Configure build and distribution for Windows, macOS, and Linux.
 
 TAURI BUILD CONFIG (tauri.conf.json):
-- App name: "Cognote"
-- Identifier: "com.cognote.app"
+- App name: "Knowte"
+- Identifier: "com.knowte.app"
 - Version from package.json
 - Configure bundling:
   - Windows: .msi installer + .exe
@@ -1478,7 +1478,7 @@ README.md:
 - Prerequisites: Ollama installed + a model pulled
 - Build instructions
 - Tech stack description
-- License (MIT)
+- License (GPL 3.0)
 
 Create a CONTRIBUTING.md with development setup instructions.
 ```
@@ -1517,7 +1517,7 @@ Theme file schema (JSON):
 {
   "id": "monokai-dark",
   "name": "Monokai Dark",
-  "author": "Cognote Team",
+  "author": "Knowte Team",
   "version": "1.0.0",
   "base": "dark",                    // "dark" | "light" — determines Tailwind dark: prefix
   "variables": {
@@ -1634,8 +1634,8 @@ TYPES (src/lib/types.ts — add):
 BUILT-IN THEMES (src/lib/themes.ts):
 Create at minimum these 7 themes as TypeScript constants:
 
-1. "cognote-dark" (current dark — extract from index.css)
-2. "cognote-light" (current light — extract from index.css)
+1. "knowte-dark" (current dark — extract from index.css)
+2. "knowte-light" (current light — extract from index.css)
 3. "nord" — Nord color palette, dark base
 4. "dracula" — Dracula theme colors, dark base
 5. "solarized-light" — Solarized light palette
@@ -1650,10 +1650,10 @@ SETTINGS UPDATES:
 
 Backend (settings.rs):
 - Change the `theme` field semantics: it now stores a theme ID
-  string (e.g., "cognote-dark", "nord", "my-custom-theme")
+  string (e.g., "knowte-dark", "nord", "my-custom-theme")
   instead of just "dark"/"light"
 - Add `custom_theme_ids: Vec<String>` field to track user themes
-- Default theme remains "cognote-dark"
+- Default theme remains "knowte-dark"
 
 Frontend (types.ts):
 - Change ThemeMode to: type ThemeMode = string
@@ -1669,7 +1669,7 @@ Frontend (settingsStore.ts):
 APP STARTUP (App.tsx / main.tsx):
 - On boot, read theme id from localStorage (for instant apply)
 - Load settings → apply the saved theme via themeEngine
-- If theme id not found, fall back to "cognote-dark"
+- If theme id not found, fall back to "knowte-dark"
 
 CSS CHANGES (index.css):
 - Keep the existing :root and html.dark blocks as the DEFAULT
@@ -1822,7 +1822,7 @@ Tauri commands:
   Creates the themes/ directory if it doesn't exist
 - `delete_custom_theme(theme_id: String)` → Result<(), String>
   Deletes the JSON file. Refuses to delete built-in themes.
-  If deleted theme was active, reverts to "cognote-dark"
+  If deleted theme was active, reverts to "knowte-dark"
 - `import_theme_file(source_path: String)` → Result<ThemeDefinition, String>
   Reads file, validates, copies to themes directory
 - `export_theme_file(theme_id: String, destination_path: String)` → Result<(), String>
@@ -1849,7 +1849,7 @@ PERMISSIONS (capabilities/default.json):
 ```
 PROMPT FOR AGENT:
 ─────────────────
-Create a developer workflow for adding new themes to Cognote releases.
+Create a developer workflow for adding new themes to Knowte releases.
 
 THEME AUTHORING WORKFLOW:
 

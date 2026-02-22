@@ -1,21 +1,23 @@
-# Cognote
+# Knowte
+
+![Knowte Logo](Knowte.png)
 
 **Transform lecture audio into structured learning materials — completely private, fully offline.**
 
-Cognote is a desktop application that turns lecture recordings into structured notes, interactive quizzes, flashcards, mind maps, and related research papers. All processing happens locally on your machine using [Ollama](https://ollama.ai) for LLM inference and [Whisper](https://github.com/openai/whisper) for transcription. No data ever leaves your device.
+Knowte is a desktop application that turns lecture recordings into structured notes, interactive quizzes, flashcards, mind maps, and related research papers. All processing happens locally on your machine using [Ollama](https://ollama.ai) for LLM inference and [Whisper](https://github.com/openai/whisper) for transcription. No data ever leaves your device.
 
 ---
 
 ## Screenshots
 
-> _Screenshots coming soon. Run `bun run tauri dev` to see the app._
+> _Screenshots coming soon. Run `bun run tauri dev` to see Knowte in action._
 
 ---
 
 ## Features
 
 - 🎙️ **Audio & Video Input** — Upload audio/video files or record directly from your microphone. Supports MP3, WAV, M4A, OGG, WebM, MP4, MKV, and more.
-- 📺 **YouTube Import** — Paste a YouTube URL and Cognote downloads and transcribes the audio using `yt-dlp`.
+- 📺 **YouTube Import** — Paste a YouTube URL and Knowte downloads and transcribes the audio using `yt-dlp`.
 - 📝 **Transcription** — Local speech-to-text using [Whisper.cpp](https://github.com/ggerganov/whisper.cpp) with model sizes from tiny (~75 MB) to large (~3 GB).
 - 📖 **Structured Notes** — LLM-generated notes organised into topics, key points, examples, key terms, and takeaways.
 - ✅ **Interactive Quiz** — Auto-generated multiple choice, true/false, and short-answer questions with explanations and score tracking.
@@ -50,21 +52,21 @@ curl http://localhost:11434/api/tags
 
 ### 2. ffmpeg
 
-Cognote bundles platform-specific `ffmpeg` and `yt-dlp` binaries. For development see [CONTRIBUTING.md](CONTRIBUTING.md).
+Knowte bundles platform-specific `ffmpeg` and `yt-dlp` binaries. For development see [CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 ---
 
 ## Quick Start
 
 1. **Install prerequisites** (Ollama + a model — see above)
-2. **Download Cognote** from the [Releases](../../releases) page and install it
+2. **Download Knowte** from the [Releases](../../releases) page and install it
 3. **On first launch**, the setup wizard guides you through:
    - Verifying Ollama is running
    - Choosing a language model
    - Downloading a Whisper transcription model
    - Setting your academic level for personalised outputs
 4. **Upload a lecture** — drag and drop an audio/video file, or paste a YouTube URL
-5. **Click "Process Lecture"** — Cognote transcribes and generates all materials automatically
+5. **Click "Process Knowte"** — Knowte transcribes and generates all materials automatically
 
 ---
 
@@ -82,8 +84,8 @@ Cognote bundles platform-specific `ffmpeg` and `yt-dlp` binaries. For developmen
 ### Development
 
 ```bash
-git clone https://github.com/your-username/cognote.git
-cd cognote
+git clone https://github.com/your-username/knowte.git
+cd knowte
 bun install
 bun run tauri dev
 ```
@@ -129,9 +131,9 @@ All user data — audio files, transcripts, notes, quizzes, flashcards — lives
 
 | Platform | Path |
 |----------|------|
-| Linux | `~/.local/share/com.cognote.app/` |
-| macOS | `~/Library/Application Support/com.cognote.app/` |
-| Windows | `%APPDATA%\com.cognote.app\` |
+| Linux | `~/.local/share/com.knowte.app/` |
+| macOS | `~/Library/Application Support/com.knowte.app/` |
+| Windows | `%APPDATA%\com.knowte.app\` |
 
 The **only** optional external network call is to [Semantic Scholar](https://www.semanticscholar.org/product/api) for related paper search (disable in Settings → Research).
 
@@ -139,10 +141,10 @@ The **only** optional external network call is to [Semantic Scholar](https://www
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+GPL 3.0 License — see [LICENSE](docs/LICENSE) for details.
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code conventions, and how to submit changes.
+See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for development setup, code conventions, and how to submit changes.

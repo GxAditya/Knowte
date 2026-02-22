@@ -1,10 +1,10 @@
 # AGENTS.md - AI Agent Instructions
 
-This document provides guidance for AI coding agents working on the Cognote (LectureToLearn) codebase.
+This document provides guidance for AI coding agents working on the Knowte codebase.
 
 ## Project Overview
 
-Cognote is a desktop application that transforms lecture audio into structured learning materials using AI. It's built with Tauri v2 (Rust backend + React frontend) and uses Ollama for local LLM processing.
+Knowte is a desktop application that transforms lecture audio into structured learning materials using AI. It's built with Tauri v2 (Rust backend + React frontend) and uses Ollama for local LLM processing.
 
 ## Tech Stack
 
@@ -45,7 +45,7 @@ cd src-tauri && cargo test
 ## Project Structure
 
 ```
-cognote/
+knowte/
 ├── src/                          # Frontend React code
 │   ├── App.tsx                   # Main app component with routing
 │   ├── main.tsx                  # React entry point
@@ -85,8 +85,11 @@ cognote/
 │   ├── Cargo.toml                # Rust dependencies
 │   └── tauri.conf.json           # Tauri configuration
 │
-├── plan.md                       # Detailed development plan
-├── CHANGELOG.md                  # Task completion log
+├── docs/
+│   ├── plan.md                   # Detailed development plan
+│   ├── CHANGELOG.md              # Task completion log
+│   ├── CONTRIBUTING.md           # Contribution guidelines
+│   └── LICENSE                   # GPL 3.0 license
 └── AGENTS.md                     # This file
 ```
 
@@ -191,7 +194,7 @@ cognote/
 | 8.x Distribution | ✅ Complete |
 | 9.x Custom Theming System | 🔲 Pending |
 
-See `plan.md` for detailed task specifications and `CHANGELOG.md` for completed work.
+See `docs/plan.md` for detailed task specifications and `docs/CHANGELOG.md` for completed work.
 
 ## Important Notes
 
@@ -203,7 +206,7 @@ See `plan.md` for detailed task specifications and `CHANGELOG.md` for completed 
 
 ## Changelog Documentation
 
-After completing each task, document the changes in `CHANGELOG.md` using this format:
+After completing each task, document the changes in `docs/CHANGELOG.md` using this format:
 
 ```markdown
 ## [Task X.Y] - YYYY-MM-DD
@@ -215,7 +218,7 @@ After completing each task, document the changes in `CHANGELOG.md` using this fo
   - path/to/file2.rs
 ```
 
-- Use the task number from `plan.md` (e.g., Task 1.1, Task 1.2)
+- Use the task number from `docs/plan.md` (e.g., Task 1.1, Task 1.2)
 - List all features/changes as bullet points with `Added`, `Fixed`, `Changed`, or `Removed` prefixes
 - Include all files that were created or modified
 - Keep entries concise but informative

@@ -6,7 +6,7 @@ Place platform-specific yt-dlp binaries in these paths before creating release b
 - `src-tauri/resources/yt-dlp/macos/yt-dlp`
 - `src-tauri/resources/yt-dlp/windows/yt-dlp.exe`
 
-Runtime resolution order in Cognote:
+Runtime resolution order in Knowte:
 
 1. Installed yt-dlp in app data: `<app_data>/tools/yt-dlp/`
 2. Bundled yt-dlp in the app's `resources/yt-dlp/<platform>/` directory

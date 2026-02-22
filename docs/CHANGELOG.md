@@ -1,9 +1,22 @@
 # Changelog
 
-All notable changes to the Cognote project will be documented in this file.
+All notable changes to the Knowte project will be documented in this file.
+
+## File Organization - 2026-02-22
+- Moved: CONTRIBUTING.md, CHANGELOG.md, plan.md, LICENSE to docs/ folder
+- Updated: All references to these files in README.md, AGENTS.md, .github/workflows/release.yml, and docs/CONTRIBUTING.md
+
+## License Update - 2026-02-22
+- Changed: Project license from MIT to GPL 3.0
+- Files modified:
+  - docs/LICENSE
+  - src-tauri/tauri.conf.json
+  - README.md
+  - docs/plan.md
+  - docs/CHANGELOG.md
 
 ## [Task 8.4] - 2025-07-28
-- Added: Comprehensive `tauri.conf.json` bundle configuration — productName "Cognote", identifier "com.cognote.app", minWidth/minHeight 800×600, audio/video file associations, Windows NSIS+WiX, macOS, Linux deb/AppImage/rpm, category "Education", copyright, MIT license
+- Added: Comprehensive `tauri.conf.json` bundle configuration — productName "Cognote", identifier "com.cognote.app", minWidth/minHeight 800×600, audio/video file associations, Windows NSIS+WiX, macOS, Linux deb/AppImage/rpm, category "Education", copyright, GPL 3.0 license
 - Added: `setup_complete: bool` field to Rust `Settings` struct in `settings.rs` with `serde(default)` for backward compatibility
 - Added: `setup_complete: boolean` to TypeScript `Settings` interface and `DEFAULT_SETTINGS` in `types.ts`
 - Added: `src/components/Setup/SetupWizard.tsx` — 6-step first-run setup wizard (welcome, Ollama check, model selection, Whisper download, personalization level, ready) rendered as fixed full-screen overlay at z-50

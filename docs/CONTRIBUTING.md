@@ -1,4 +1,4 @@
-# Contributing to Cognote
+# Contributing to Knowte
 
 Thank you for your interest in contributing! This guide covers setting up a development environment, code conventions, and the process for submitting changes.
 
@@ -19,14 +19,14 @@ Thank you for your interest in contributing! This guide covers setting up a deve
 ### 2. Clone and Install
 
 ```bash
-git clone https://github.com/your-username/cognote.git
-cd cognote
+git clone https://github.com/your-username/knowte.git
+cd knowte
 bun install
 ```
 
 ### 3. Bundled Binaries for Development
 
-Cognote bundles `ffmpeg` and `yt-dlp` for audio/video processing. These are included in `src-tauri/resources/` for each platform:
+Knowte bundles `ffmpeg` and `yt-dlp` for audio/video processing. These are included in `src-tauri/resources/` for each platform:
 
 ```
 src-tauri/resources/
@@ -70,7 +70,7 @@ Opens the frontend in a browser at `http://localhost:1420`. Most UI work can be 
 ## Project Structure
 
 ```
-cognote/
+knowte/
 ├── src/                          # React frontend (TypeScript)
 │   ├── App.tsx                   # Root component, routing, layout
 │   ├── components/               # Reusable UI components (grouped by feature)
@@ -128,9 +128,12 @@ cognote/
 │   ├── Cargo.toml
 │   └── tauri.conf.json
 │
+├── docs/
+│   ├── CHANGELOG.md              # Task completion log
+│   ├── CONTRIBUTING.md           # This file
+│   ├── LICENSE                   # GPL 3.0 license
+│   └── plan.md                   # Detailed development plan with all tasks
 ├── AGENTS.md                     # AI agent instructions and task status
-├── CHANGELOG.md                  # Task completion log
-├── plan.md                       # Detailed development plan with all tasks
 └── README.md
 ```
 
@@ -259,7 +262,7 @@ chore: bump @xyflow/react to 12.10.1
 
 Please open a GitHub Issue with:
 
-- Cognote version / build date
+- Knowte version / build date
 - Operating system and version
 - Ollama version and model name
 - Steps to reproduce

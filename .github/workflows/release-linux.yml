@@ -1,4 +1,4 @@
-name: Release
+name: Release (Linux)
 
 on:
   push:
@@ -12,20 +12,10 @@ on:
         default: true
 
 jobs:
-  build:
+  build-linux:
     permissions:
       contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: windows-latest
-            args: ''
-          - platform: macos-latest
-            args: ''
-            cmakeToolchainFile: cmake/apple-silicon.cmake
-
-    runs-on: ${{ matrix.platform }}
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
@@ -41,34 +31,41 @@ jobs:
       - name: Install Bun
         uses: oven-sh/setup-bun@v2
 
+      - name: Remove Mono (prevents 'build' assembly error)
+        run: sudo apt-get remove -y --allow-remove-essential mono-complete mono-devel msbuild 2>/dev/null || true
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo dpkg --remove --force-depends libappindicator3-dev libappindicator3-1 gir1.2-appindicator3-0.1 2>/dev/null || true
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            libgtk-3-dev \
+            libasound2-dev \
+            cmake \
+            clang \
+            libclang-dev \
+            pkg-config
+
+      - name: Set LIBCLANG_PATH
+        run: echo "LIBCLANG_PATH=$(llvm-config --libdir 2>/dev/null || echo /usr/lib/llvm-14/lib)" >> "$GITHUB_ENV"
+
+      - name: Set WHISPER_DONT_GENERATE_BINDINGS
+        run: echo "WHISPER_DONT_GENERATE_BINDINGS=1" >> "$GITHUB_ENV"
+
       - name: Install frontend dependencies
         run: bun install
-
-      - name: Set cmake toolchain (macOS ARM)
-        if: matrix.platform == 'macos-latest'
-        run: |
-          echo "CMAKE_TOOLCHAIN_FILE_aarch64_apple_darwin=${{ github.workspace }}/src-tauri/${{ matrix.cmakeToolchainFile }}" >> "$GITHUB_ENV"
-
-      - name: Install LLVM (Windows)
-        if: matrix.platform == 'windows-latest'
-        run: |
-          choco install llvm -y
-          echo "LIBCLANG_PATH=C:\Program Files\LLVM\bin" >> $env:GITHUB_ENV
-
-      - name: Set WHISPER_DONT_GENERATE_BINDINGS (macOS)
-        if: matrix.platform == 'macos-latest'
-        shell: bash
-        run: echo "WHISPER_DONT_GENERATE_BINDINGS=1" >> "$GITHUB_ENV"
 
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MACOSX_DEPLOYMENT_TARGET: '11.0'
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'Knowte ${{ github.ref_name }}'
           releaseBody: 'See the [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/docs/CHANGELOG.md) for details.'
           releaseDraft: ${{ github.event.inputs.draft || 'true' }}
           prerelease: false
-          tauriScript: 'bunx @tauri-apps/cli'
-          args: ${{ matrix.args }}
+          tauriScript: 'bun run tauri'

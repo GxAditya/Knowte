@@ -50,7 +50,6 @@ jobs:
           sudo dpkg --remove --force-depends libappindicator3-dev libappindicator3-1 gir1.2-appindicator3-0.1 2>/dev/null || true
           sudo apt-get install -y \
             libwebkit2gtk-4.1-dev \
-            libappindicator3-dev \
             librsvg2-dev \
             patchelf \
             libssl-dev \
@@ -86,4 +85,5 @@ jobs:
           releaseBody: 'See the [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/docs/CHANGELOG.md) for details.'
           releaseDraft: ${{ github.event.inputs.draft || 'true' }}
           prerelease: false
+          tauriScript: 'bunx @tauri-apps/cli'
           args: ${{ matrix.args }}

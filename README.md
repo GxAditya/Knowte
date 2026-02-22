@@ -1,6 +1,8 @@
 # Knowte
 
-![Knowte Logo](public/Knowte.png)
+<div align="center">
+  <img src="public/Knowte.png" alt="Knowte Logo" width="200">
+</div>
 
 **Transform lecture audio into structured learning materials — completely private, fully offline.**
 

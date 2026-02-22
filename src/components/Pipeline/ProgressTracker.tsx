@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  getPipelineStatus,
   regenerateMindmap,
   regenerateNotes,
   regenerateQuiz,
   startPipeline,
+  startPipelineWithOptions,
 } from "../../lib/tauriApi";
 import type { PipelineStage } from "../../lib/types";
 import { useToastStore } from "../../stores";
@@ -171,10 +173,28 @@ export default function ProgressTracker({
   const lectureState = usePipelineStore(
     (state) => (lectureId ? (state.lectureStates[lectureId] ?? null) : null),
   );
-  const { updateStageStatus, bumpStagesComplete } = usePipelineStore.getState();
+  const { updateStageStatus, bumpStagesComplete, hydrateLecture } = usePipelineStore.getState();
 
   // Only local state: the in-flight retry/skip action name (pure UI concern).
   const [stageActionName, setStageActionName] = useState<string | null>(null);
+  const [isResuming, setIsResuming] = useState(false);
+
+  // ── Hydrate from DB on mount / lecture change ─────────────────────────────
+  // If there is no live in-memory state (e.g. after an app restart or
+  // navigation away from a running pipeline), load the persisted stage
+  // records from the database so the UI reflects the true state.
+  useEffect(() => {
+    if (!lectureId) return;
+    let cancelled = false;
+    getPipelineStatus(lectureId)
+      .then((records) => {
+        if (!cancelled && records.length > 0) {
+          hydrateLecture(lectureId, records);
+        }
+      })
+      .catch(() => { /* non-fatal – store stays at default pending */ });
+    return () => { cancelled = true; };
+  }, [lectureId, hydrateLecture]);
 
   // Derive display values; fall back to default pending state when the store
   // has no entry yet (e.g. very first render before any events arrive).
@@ -208,10 +228,39 @@ export default function ProgressTracker({
 
   const progressPercent = Math.round((stagesComplete / TOTAL_PIPELINE_STAGES) * 100);
 
+  // Detect an interrupted pipeline: at least one stage finished but some
+  // stages are errored/pending and there is no stage currently running.
+  const hasCompleted = stages.some((s) => s.status === "complete");
+  const hasErrors    = stages.some((s) => s.status === "error");
+  const isRunning    = stages.some((s) => s.status === "running");
+  const isInterrupted = hasCompleted && hasErrors && !isRunning && !isDone;
+
   const stageIndex = (stageName: string) =>
     PIPELINE_STAGE_DEFS.findIndex((s) => s.name === stageName);
 
-  // ── Retry ─────────────────────────────────────────────────────────────────
+  // ── Resume ─────────────────────────────────────────────────────────────────────
+  const handleResumePipeline = async () => {
+    if (!lectureId || isResuming) return;
+    setIsResuming(true);
+    // Reset any errored stages back to pending in the UI so the live events
+    // coming from the backend will paint them correctly.
+    stages.forEach((s) => {
+      if (s.status === "error") {
+        updateStageStatus(lectureId, s.name, "pending", undefined, undefined);
+      }
+    });
+    try {
+      await startPipelineWithOptions(lectureId, { useCache: true });
+      pushToast({ kind: "info", message: "Pipeline resumed. Already-completed stages will be skipped via cache." });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      pushToast({ kind: "error", message: `Failed to resume pipeline: ${message}` });
+    } finally {
+      setIsResuming(false);
+    }
+  };
+
+  // ── Retry ───────────────────────────────────────────────────────────────────────────
   const handleRetryStage = async (stageName: string) => {
     if (!lectureId || stageActionName) return;
 
@@ -264,6 +313,26 @@ export default function ProgressTracker({
       {pipelineWarning && (
         <div className="rounded-lg border border-[var(--color-warning-muted)] bg-[var(--color-warning)]/10 px-4 py-3 text-sm text-[var(--color-warning)]">
           {pipelineWarning}
+        </div>
+      )}
+
+      {/* Interrupted pipeline banner */}
+      {isInterrupted && (
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-[var(--color-warning-muted)] bg-[var(--color-warning)]/10 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-[var(--color-warning)]">Pipeline interrupted</p>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              {stagesComplete} of {TOTAL_PIPELINE_STAGES} stages completed. Resume to continue from where it left off.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void handleResumePipeline()}
+            disabled={isResuming}
+            className="flex-shrink-0 rounded-md bg-[var(--color-warning)] px-4 py-1.5 text-xs font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
+          >
+            {isResuming ? "Resuming…" : "Resume Pipeline"}
+          </button>
         </div>
       )}
 

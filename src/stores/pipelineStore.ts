@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { LlmStreamEvent, PipelineStage, PipelineStageEvent, PipelineStageStatus } from "../lib/types";
+import type { LlmStreamEvent, PipelineStage, PipelineStageEvent, PipelineStageStatus, PipelineStageRecord } from "../lib/types";
 
 // ─── Stage configuration (single source of truth) ────────────────────────────
 
@@ -57,6 +57,13 @@ interface PipelineStore {
 
   /** Ensure stagesComplete is at least `minimum` for the given lecture. */
   bumpStagesComplete: (lectureId: string, minimum: number) => void;
+
+  /**
+   * Seed the store from persisted DB records (e.g. after an interrupted pipeline).
+   * A stage whose DB status is "running" is treated as "error" (it was stuck).
+   * Only hydrates if the lecture has no live in-memory state yet.
+   */
+  hydrateLecture: (lectureId: string, records: PipelineStageRecord[]) => void;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -231,6 +238,60 @@ export const usePipelineStore = create<PipelineStore>((set) => ({
           [lectureId]: {
             ...current,
             stagesComplete: Math.max(current.stagesComplete, minimum),
+          },
+        },
+      };
+    }),
+
+  // ── hydrateLecture ─────────────────────────────────────────────────────────
+  hydrateLecture: (lectureId, records) =>
+    set((state) => {
+      // Don't overwrite a live session that already has events
+      const existing = state.lectureStates[lectureId];
+      if (existing) {
+        const hasLiveData = existing.stages.some(
+          (s) => s.status !== "pending",
+        );
+        if (hasLiveData) return state;
+      }
+
+      // Build a lookup from stage_name → record
+      const byName = new Map<string, PipelineStageRecord>();
+      for (const r of records) byName.set(r.stage_name, r);
+
+      const stages: PipelineStage[] = PIPELINE_STAGE_DEFS.map((def) => {
+        const rec = byName.get(def.name);
+        if (!rec) return { ...def, status: "pending" as const };
+
+        // A stage still marked "running" in the DB means the process died
+        const rawStatus = rec.status as PipelineStageStatus;
+        const status: PipelineStageStatus =
+          rawStatus === "running" ? "error" : rawStatus;
+
+        return {
+          ...def,
+          status,
+          preview: rec.result_preview ?? undefined,
+          error:
+            status === "error"
+              ? (rec.error ?? "Pipeline was interrupted before this stage finished.")
+              : undefined,
+        };
+      });
+
+      const stagesComplete = stages.filter((s) => s.status === "complete").length;
+      const isDone = stagesComplete === TOTAL_PIPELINE_STAGES;
+
+      return {
+        lectureStates: {
+          ...state.lectureStates,
+          [lectureId]: {
+            stages,
+            stagesComplete,
+            streamingTokens: {},
+            sectionProgress: {},
+            isDone,
+            pipelineWarning: null,
           },
         },
       };

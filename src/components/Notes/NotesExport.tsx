@@ -69,6 +69,12 @@ function buildPrintBodyHtml(notes: StructuredNotes, summary?: string): string {
 
 const PRINT_CSS = `
   @media print {
+    html, body {
+      background: #fff !important;
+      color: #111 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
     body > *:not(#__notes-print-portal__) { display: none !important; }
     #__notes-print-portal__ { display: block !important; }
   }
@@ -82,6 +88,8 @@ const PRINT_CSS = `
       line-height: 1.7;
       padding: 0;
       max-width: 100%;
+      position: relative;
+      z-index: 99999;
     }
     #__notes-print-portal__ h1 {
       font-size: 22pt;

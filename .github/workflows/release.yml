@@ -21,10 +21,18 @@ jobs:
         include:
           - os: ubuntu-22.04
             name: Linux
+            tauriScript: 'bun run tauri'
           - os: windows-latest
             name: Windows
+            tauriScript: 'bunx tauri'
           - os: macos-latest
             name: macOS
+            tauriScript: 'bun run tauri'
+            # Disable ggml native ARM feature probing — GitHub's Apple Silicon
+            # runners don't support i8mm at runtime, causing a compile error when
+            # ggml enables MATMUL_INT8 via its compile-time probe but then emits
+            # noi8mm cpu flags. GGML_NATIVE=OFF suppresses this detection entirely.
+            cmakeToolchainFile: cmake/apple-silicon.cmake
 
     name: Build (${{ matrix.name }})
     runs-on: ${{ matrix.os }}
@@ -58,7 +66,8 @@ jobs:
             patchelf \
             libssl-dev \
             libgtk-3-dev \
-            libayatana-appindicator3-dev
+            libayatana-appindicator3-dev \
+            libasound2-dev
 
       # ── Frontend dependencies ──────────────────────────────────────────────
       - name: Install frontend dependencies
@@ -66,13 +75,21 @@ jobs:
 
       # ── Make scripts executable ───────────────────────────────────────────
       - name: Make scripts executable
+        if: runner.os != 'Windows'
         run: chmod +x scripts/tauri-safe.sh
+
+      # ── macOS: configure cmake toolchain for Apple Silicon ─────────────────
+      - name: Set cmake toolchain (macOS ARM)
+        if: matrix.os == 'macos-latest' && matrix.cmakeToolchainFile != ''
+        run: |
+          echo "CMAKE_TOOLCHAIN_FILE_aarch64_apple_darwin=${{ github.workspace }}/src-tauri/${{ matrix.cmakeToolchainFile }}" >> "$GITHUB_ENV"
 
       # ── Build & package with Tauri ─────────────────────────────────────────
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WHISPER_DONT_GENERATE_BINDINGS: '1'
           # macOS code signing (optional — remove if not signing)
           # APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           # APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
@@ -85,5 +102,6 @@ jobs:
           releaseName: Knowte ${{ github.ref_name }}
           releaseBody: |
             See the [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/docs/CHANGELOG.md) for details.
+          tauriScript: ${{ matrix.tauriScript }}
           releaseDraft: ${{ github.event.inputs.draft || 'true' }}
           prerelease: false

@@ -15,7 +15,7 @@ const baseNavItems = [
 
 const lectureNavItems = [
   { segment: "transcript", label: "Transcript", icon: "transcript" },
-  { segment: "pipeline", label: "Pipeline", icon: "pipeline" },
+  { segment: "pipeline", label: "Processing", icon: "pipeline" },
   { segment: "notes", label: "Notes", icon: "notes" },
   { segment: "quiz", label: "Quiz", icon: "quiz" },
   { segment: "research", label: "Research", icon: "research" },
@@ -289,7 +289,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
             )}
 
             {lectureNavItems.map((item, i) => (
-              <li key={item.segment} className="animate-fade-in" style={{ animationDelay: `${i * 30}ms` }}>
+              <li key={item.segment} className="animate-nav-in" style={{ animationDelay: `${i * 35}ms` }}>
                 <NavLink
                   to={`/lecture/${currentLectureId}/${item.segment}`}
                   role="tab"
@@ -340,7 +340,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
         ) : (
           <ul className="space-y-0.5">
             {baseNavItems.map((item, i) => (
-              <li key={item.to} className="animate-fade-in" style={{ animationDelay: `${i * 40}ms` }}>
+              <li key={item.to} className="animate-nav-in" style={{ animationDelay: `${i * 45}ms` }}>
                 <NavLink
                   to={item.to}
                   end={item.to === "/"}

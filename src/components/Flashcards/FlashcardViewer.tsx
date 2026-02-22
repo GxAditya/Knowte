@@ -65,21 +65,25 @@ function FlashcardDisplay({
 }: FlashcardProps) {
   const containerStyle: CSSProperties = prefersReducedMotion
     ? {
-        minHeight: "280px",
+        minHeight: "300px",
+        height: "clamp(300px, 40vh, 480px)",
       }
     : {
         perspective: "1200px",
-        minHeight: "280px",
+        minHeight: "300px",
+        height: "clamp(300px, 40vh, 480px)",
       };
 
   const cardStyle: CSSProperties = prefersReducedMotion
     ? {
-        minHeight: "280px",
+        minHeight: "300px",
+        height: "100%",
       }
     : {
         transformStyle: "preserve-3d",
         transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
-        minHeight: "280px",
+        minHeight: "300px",
+        height: "100%",
       };
 
   return (
@@ -106,7 +110,7 @@ function FlashcardDisplay({
       >
         {/* Front */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-2xl p-8 shadow-xl"
+          className="absolute inset-0 flex flex-col items-center justify-start bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-2xl p-8 shadow-xl overflow-y-auto"
           style={
             prefersReducedMotion
               ? {
@@ -116,18 +120,18 @@ function FlashcardDisplay({
               : { backfaceVisibility: "hidden" }
           }
         >
-          <span className="text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-4">
+          <span className="text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-4 shrink-0">
             Front
           </span>
-          <p className="text-xl font-medium text-[var(--text-primary)] text-center leading-relaxed">
+          <p className="text-base font-medium text-[var(--text-primary)] text-center leading-relaxed w-full break-words">
             {card.front}
           </p>
-          <span className="mt-6 text-xs text-[var(--text-muted)]">Click to reveal answer</span>
+          <span className="mt-6 text-xs text-[var(--text-muted)] shrink-0">Click to reveal answer</span>
         </div>
 
         {/* Back */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--bg-elevated)] border border-[var(--accent-primary)]/40 rounded-2xl p-8 shadow-xl"
+          className="absolute inset-0 flex flex-col items-center justify-start bg-[var(--bg-elevated)] border border-[var(--accent-primary)]/40 rounded-2xl p-8 shadow-xl overflow-y-auto"
           style={{
             ...(prefersReducedMotion
               ? {
@@ -140,10 +144,10 @@ function FlashcardDisplay({
                 }),
           }}
         >
-          <span className="text-xs font-semibold uppercase tracking-widest text-[var(--accent-primary)] mb-4">
+          <span className="text-xs font-semibold uppercase tracking-widest text-[var(--accent-primary)] mb-4 shrink-0">
             Back
           </span>
-          <p className="text-xl font-medium text-[var(--text-primary)] text-center leading-relaxed">
+          <p className="text-base font-medium text-[var(--text-primary)] text-center leading-relaxed w-full break-words">
             {card.back}
           </p>
           {card.tags.length > 0 && (

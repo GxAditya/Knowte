@@ -356,7 +356,7 @@ export default function LectureLibrary() {
         </div>
       ) : (
         <section className="grid gap-4 sm:grid-cols-2">
-          {filteredLectures.map((lecture) => {
+          {filteredLectures.map((lecture, idx) => {
             const isBusy = busyLectureId === lecture.id;
             const progress = processingPercent(lecture);
             const showProgress = progress !== null;
@@ -364,8 +364,8 @@ export default function LectureLibrary() {
             return (
               <article
                 key={lecture.id}
-                className="card relative p-4 transition-all hover:shadow-lg"
-                style={{ cursor: "pointer" }}
+                className="card card-interactive relative p-4 transition-all hover:shadow-lg animate-card-in"
+                style={{ cursor: "pointer", animationDelay: `${Math.min(idx * 55, 400)}ms` }}
               >
                 <button
                   type="button"

@@ -10,3 +10,7 @@
 # so ggml won't generate conflicting -mcpu+noi8mm flags or enable MATMUL_INT8.
 
 set(GGML_NATIVE OFF CACHE BOOL "Disable native CPU detection for CI builds" FORCE)
+
+# Ensure macOS deployment target is at least 11.0 (required for
+# std::filesystem used by ggml-backend-reg.cpp, and for Apple Silicon).
+set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS version" FORCE)

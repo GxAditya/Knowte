@@ -84,12 +84,25 @@ jobs:
         run: |
           echo "CMAKE_TOOLCHAIN_FILE_aarch64_apple_darwin=${{ github.workspace }}/src-tauri/${{ matrix.cmakeToolchainFile }}" >> "$GITHUB_ENV"
 
+      # ── Windows: install LLVM for bindgen (whisper-rs-sys) ─────────────────
+      - name: Install LLVM (Windows)
+        if: runner.os == 'Windows'
+        run: choco install llvm -y
+
+      # ── Skip pre-generated bindings on Linux/macOS (they work there) ───────
+      # On Windows we must let bindgen generate proper Windows bindings,
+      # because the bundled pre-generated bindings contain Linux-only types.
+      - name: Set whisper bindings env (non-Windows)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: echo "WHISPER_DONT_GENERATE_BINDINGS=1" >> "$GITHUB_ENV"
+
       # ── Build & package with Tauri ─────────────────────────────────────────
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WHISPER_DONT_GENERATE_BINDINGS: '1'
+          MACOSX_DEPLOYMENT_TARGET: '11.0'
           # macOS code signing (optional — remove if not signing)
           # APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           # APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}

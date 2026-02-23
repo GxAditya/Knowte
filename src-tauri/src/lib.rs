@@ -18,8 +18,8 @@ use commands::library::{delete_lecture, export_all_lecture_data, list_lectures, 
 use commands::llm::{check_llm_availability, generate_llm_response};
 use commands::pipeline::{
     estimate_pipeline_work, export_flashcards_anki, export_flashcards_tsv, export_notes_markdown,
-    get_flashcards, get_mindmap, get_notes, get_pipeline_status, get_quiz, regenerate_mindmap,
-    regenerate_notes, regenerate_quiz, save_quiz_attempt, start_pipeline,
+    get_flashcards, get_mindmap, get_notes, get_pipeline_status, get_quiz, regenerate_flashcards,
+    regenerate_mindmap, regenerate_notes, regenerate_quiz, save_quiz_attempt, start_pipeline,
 };
 use commands::research::{get_lecture_papers, search_related_papers};
 use commands::settings::{check_ollama_status, get_settings, get_storage_usage, save_settings};
@@ -88,6 +88,7 @@ pub fn run() {
             regenerate_quiz,
             save_quiz_attempt,
             regenerate_mindmap,
+            regenerate_flashcards,
             export_flashcards_anki,
             export_flashcards_tsv,
             list_lectures,

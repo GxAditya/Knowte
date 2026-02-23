@@ -286,6 +286,16 @@ export async function regenerateQuiz(lectureId: string): Promise<string | null> 
   return invoke<string | null>("regenerate_quiz", { lectureId });
 }
 
+// ─── Flashcard Regenerate ─────────────────────────────────────────────────────
+
+/**
+ * Re-run the flashcards generation stage for a lecture using the current LLM
+ * settings.  Returns the new flashcards JSON string, or null on error.
+ */
+export async function regenerateFlashcards(lectureId: string): Promise<string | null> {
+  return invoke<string | null>("regenerate_flashcards", { lectureId });
+}
+
 // ─── Flashcard Export Commands ────────────────────────────────────────────────
 
 /**

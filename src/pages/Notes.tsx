@@ -237,16 +237,34 @@ export default function Notes() {
     return (
       <div className={notesContainerClass}>
         <ViewHeader title="Notes" description={currentLecture.filename} />
-        <div className="bg-[var(--color-error-muted)] border border-[var(--color-error-muted)] rounded-lg p-4 text-[var(--color-error)] text-sm">
-          {error}
+        <div className="rounded-lg border border-[var(--color-error-muted)] bg-[var(--color-error-muted)] p-4 text-[var(--color-error)] text-sm">
+          <p className="font-medium mb-1">Failed to load notes</p>
+          <p className="text-xs opacity-80">{error}</p>
         </div>
-        <button
-          type="button"
-          onClick={() => void loadNotes()}
-          className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
-        >
-          Retry
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => void loadNotes()}
+            className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
+          >
+            Retry
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleRegenerate()}
+            disabled={isRegenerating}
+            className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-[var(--accent-primary-hover)]"
+          >
+            {isRegenerating ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Regenerating…
+              </>
+            ) : (
+              "Regenerate Notes"
+            )}
+          </button>
+        </div>
       </div>
     );
   }

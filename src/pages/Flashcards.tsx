@@ -2,13 +2,21 @@ import { useCallback, useEffect, useState } from "react";
 import { FlashcardSkeleton } from "../components/Skeletons";
 import { AnkiExport, FlashcardViewer } from "../components/Flashcards";
 import { ViewHeader } from "../components/Layout";
-import { getFlashcards } from "../lib/tauriApi";
+import { getFlashcards, regenerateFlashcards } from "../lib/tauriApi";
 import type { Flashcard, FlashcardsOutput } from "../lib/types";
-import { useLectureStore } from "../stores";
+import { useLectureStore, useToastStore } from "../stores";
 
 // ─── Empty States ─────────────────────────────────────────────────────────────
 
-function EmptyState({ reason }: { reason: "no-lecture" | "no-flashcards" }) {
+function EmptyState({
+  reason,
+  onRegenerate,
+  isRegenerating,
+}: {
+  reason: "no-lecture" | "no-flashcards";
+  onRegenerate?: () => void;
+  isRegenerating?: boolean;
+}) {
   if (reason === "no-lecture") {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-2">
@@ -19,10 +27,29 @@ function EmptyState({ reason }: { reason: "no-lecture" | "no-flashcards" }) {
     );
   }
   return (
-    <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-2">
+    <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-4">
       <span className="text-4xl">🃏</span>
-      <p className="text-sm font-medium text-[var(--text-secondary)]">No flashcards generated yet.</p>
-      <p className="text-xs">Run the processing pipeline to generate flashcards.</p>
+      <div className="text-center space-y-1">
+        <p className="text-sm font-medium text-[var(--text-secondary)]">No flashcards generated yet.</p>
+        <p className="text-xs">Run the processing pipeline or generate flashcards directly.</p>
+      </div>
+      {onRegenerate && (
+        <button
+          type="button"
+          onClick={onRegenerate}
+          disabled={isRegenerating}
+          className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-[var(--accent-primary-hover)]"
+        >
+          {isRegenerating ? (
+            <>
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              Generating…
+            </>
+          ) : (
+            "Generate Flashcards"
+          )}
+        </button>
+      )}
     </div>
   );
 }
@@ -31,9 +58,11 @@ function EmptyState({ reason }: { reason: "no-lecture" | "no-flashcards" }) {
 
 export default function Flashcards() {
   const { currentLectureId } = useLectureStore();
+  const pushToast = useToastStore((state) => state.pushToast);
 
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Load flashcards from backend
@@ -57,8 +86,31 @@ export default function Flashcards() {
 
   useEffect(() => {
     if (!currentLectureId) return;
-    loadFlashcards(currentLectureId);
+    void loadFlashcards(currentLectureId);
   }, [currentLectureId, loadFlashcards]);
+
+  // Regenerate flashcards via LLM
+  const handleRegenerate = useCallback(async () => {
+    if (!currentLectureId || isRegenerating) return;
+    setIsRegenerating(true);
+    setError(null);
+
+    try {
+      const raw = await regenerateFlashcards(currentLectureId);
+      if (raw) {
+        const parsed = JSON.parse(raw) as FlashcardsOutput;
+        setCards(Array.isArray(parsed.cards) ? parsed.cards : []);
+        pushToast({ kind: "success", message: "Flashcards regenerated successfully." });
+      } else {
+        pushToast({ kind: "warning", message: "Flashcard regeneration returned no data." });
+      }
+    } catch (err) {
+      setError(typeof err === "string" ? err : "Failed to regenerate flashcards.");
+      pushToast({ kind: "error", message: "Failed to regenerate flashcards." });
+    } finally {
+      setIsRegenerating(false);
+    }
+  }, [currentLectureId, isRegenerating, pushToast]);
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -93,16 +145,34 @@ export default function Flashcards() {
           title="Flashcards"
           description="Review key terms using active recall cards."
         />
-        <div className="bg-[var(--color-error-muted)] border border-[var(--color-error-muted)] rounded-lg p-4 text-sm text-[var(--color-error)] shadow-sm">
-          {error}
+        <div className="rounded-lg border border-[var(--color-error-muted)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
+          <p className="font-medium mb-1">Failed to load flashcards</p>
+          <p className="text-xs opacity-80">{error}</p>
         </div>
-        <button
-          type="button"
-          onClick={() => currentLectureId && void loadFlashcards(currentLectureId)}
-          className="mt-4 rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
-        >
-          Retry
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => void loadFlashcards(currentLectureId)}
+            className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
+          >
+            Retry
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleRegenerate()}
+            disabled={isRegenerating}
+            className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-[var(--accent-primary-hover)]"
+          >
+            {isRegenerating ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Regenerating…
+              </>
+            ) : (
+              "Regenerate Flashcards"
+            )}
+          </button>
+        </div>
       </div>
     );
   }
@@ -113,8 +183,29 @@ export default function Flashcards() {
         <ViewHeader
           title="Flashcards"
           description="Review key terms using active recall cards."
+          actions={
+            <button
+              type="button"
+              onClick={() => void handleRegenerate()}
+              disabled={isRegenerating}
+              className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-[var(--accent-primary-hover)]"
+            >
+              {isRegenerating ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Generating…
+                </>
+              ) : (
+                "Generate Flashcards"
+              )}
+            </button>
+          }
         />
-        <EmptyState reason="no-flashcards" />
+        <EmptyState
+          reason="no-flashcards"
+          onRegenerate={handleRegenerate}
+          isRegenerating={isRegenerating}
+        />
       </div>
     );
   }
@@ -124,6 +215,23 @@ export default function Flashcards() {
       <ViewHeader
         title="Flashcards"
         description={`${cards.length} cards generated`}
+        actions={
+          <button
+            type="button"
+            onClick={() => void handleRegenerate()}
+            disabled={isRegenerating}
+            className="flex items-center gap-2 rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] disabled:opacity-60 hover:bg-[var(--border-strong)]"
+          >
+            {isRegenerating ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--border-default)] border-t-transparent" />
+                Regenerating…
+              </>
+            ) : (
+              "Regenerate"
+            )}
+          </button>
+        }
       />
 
       {/* Card Viewer */}

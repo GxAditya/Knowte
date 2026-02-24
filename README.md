@@ -1,6 +1,6 @@
-# Knowte
 
 <div align="center">
+  <h1>Knowte</h1>
   <img src="public/Knowte.png" alt="Knowte Logo" width="200">
 </div>
 

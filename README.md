@@ -12,7 +12,9 @@ Knowte is a desktop application that turns lecture recordings into structured no
 
 ## Demo
 
-![Knowte Demo](public/Knowte.gif)
+<div align="center">
+  <img src="public/Knowte.gif" alt="Knowte Demo" />
+</div>
 
 ---
 
@@ -86,7 +88,7 @@ Knowte bundles platform-specific `ffmpeg` and `yt-dlp` binaries. For development
 ### Development
 
 ```bash
-git clone https://github.com/your-username/knowte.git
+git clone https://github.com/GxAditya/Knowte.git
 cd knowte
 bun install
 bun run tauri dev
@@ -109,21 +111,27 @@ Build artefacts are in `src-tauri/target/release/bundle/`:
 
 ---
 
+
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Runtime | [Tauri v2](https://v2.tauri.app/) |
-| Frontend | [React 19](https://react.dev/) + TypeScript |
-| Styling | [Tailwind CSS v4](https://tailwindcss.com/) + CSS custom properties |
-| State | [Zustand](https://github.com/pmndrs/zustand) |
-| Routing | [React Router v7](https://reactrouter.com/) |
-| Bundler | [Vite 7](https://vitejs.dev/) |
-| Database | SQLite via [rusqlite](https://github.com/rusqlite/rusqlite) |
-| Transcription | [whisper.cpp](https://github.com/ggerganov/whisper.cpp) via whisper-rs |
-| LLM | [Ollama](https://ollama.ai) local HTTP API |
-| Mind Map | [React Flow (@xyflow/react)](https://reactflow.dev/) |
-| Audio Download | [yt-dlp](https://github.com/yt-dlp/yt-dlp) + [ffmpeg](https://ffmpeg.org/) |
+<div align="center">
+  <img alt="Tauri" src="https://img.shields.io/badge/Tauri-v2-0F1724?style=for-the-badge&logo=tauri&logoColor=white" />
+  <img alt="Rust" src="https://img.shields.io/badge/Rust-stable-DE8C33?style=for-the-badge&logo=rust&logoColor=white" />
+  <img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-4.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />
+  <img alt="Zustand" src="https://img.shields.io/badge/Zustand-state-111827?style=for-the-badge&logo=zustand&logoColor=white" />
+  <img alt="React Router" src="https://img.shields.io/badge/React_Router-v7-CA4245?style=for-the-badge&logo=reactrouter&logoColor=white" />
+  <img alt="Vite" src="https://img.shields.io/badge/Vite-7-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
+  <img alt="Bun" src="https://img.shields.io/badge/Bun-%3E%3D1.0-000000?style=for-the-badge&logo=bun&logoColor=white" />
+  <br/>
+  <img alt="SQLite" src="https://img.shields.io/badge/SQLite-database-003B57?style=for-the-badge&logo=sqlite&logoColor=white" />
+  <img alt="whisper.cpp" src="https://img.shields.io/badge/whisper.cpp-transcription-7C3AED?style=for-the-badge" />
+  <img alt="Ollama" src="https://img.shields.io/badge/Ollama-local_LLM-0EA5A4?style=for-the-badge" />
+  <img alt="React Flow" src="https://img.shields.io/badge/React_Flow-diagram-00C2A8?style=for-the-badge&logo=reactflow" />
+  <img alt="yt-dlp" src="https://img.shields.io/badge/yt--dlp-downloader-FF6B6B?style=for-the-badge" />
+  <img alt="ffmpeg" src="https://img.shields.io/badge/ffmpeg-media-232323?style=for-the-badge" />
+</div>
 
 ---
 

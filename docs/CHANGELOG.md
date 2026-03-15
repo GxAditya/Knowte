@@ -2,6 +2,18 @@
 
 All notable changes to the Knowte project will be documented in this file.
 
+## [Task 5 & 6 Frontend Revamp] - 2026-03-15
+- Changed: Completely revamped the app's frontend with a polished, glassmorphic design system to feel production-ready.
+- Changed: Transferred hardcoded colors to CSS variables and a unified design system that supports future custom themes.
+- Added: `glass-panel` utility for elevated cards, modals, and views with background blur and gradient borders.
+- Changed: Applied `btn-primary`, `btn-secondary`, and `btn-ghost` utilities across all interactive buttons.
+- Changed: Lecture feature views (Transcript, Notes, Pipeline, Quiz, Flashcards, MindMap, Research) updated to the new aesthetic.
+- Fixed: Resolved layout and styling inconsistencies for a smoother, tasteful user flow.
+- Files modified:
+  - src/index.css
+  - src/components/*.tsx (multiple views and components updated)
+
+
 ## [Prompt Quality Overhaul] - 2026-03-15
 - Changed: Ollama generation now supports per-request system prompts, JSON schema `format`, and temperature controls so backend stages can request stricter structured outputs.
 - Changed: Prompt templates for summaries, notes, quizzes, flashcards, mind maps, and research keywords now use clearer local-model-oriented instruction scaffolds with explicit rules and examples.

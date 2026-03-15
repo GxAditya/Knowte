@@ -70,7 +70,7 @@ export default function Flashcards() {
   const flashcardsStageError = usePipelineStore((state) =>
     currentLectureId
       ? state.lectureStates[currentLectureId]?.stages.find((stage) => stage.name === "flashcards")
-          ?.error ?? null
+        ?.error ?? null
       : null,
   );
 

@@ -52,7 +52,7 @@ export default function PaperList({ papers, isLoading, onRefresh }: PaperListPro
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortKey)}
-            className="text-xs px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
+            className="input text-xs px-3 py-1.5 !min-h-0"
           >
             <option value="citations">Citations</option>
             <option value="year">Year (newest first)</option>
@@ -65,9 +65,12 @@ export default function PaperList({ papers, isLoading, onRefresh }: PaperListPro
             type="checkbox"
             checked={filterPdfOnly}
             onChange={(e) => setFilterPdfOnly(e.target.checked)}
-            className="w-3.5 h-3.5 accent-blue-500"
+            className="toggle-knob sr-only"
           />
-          <span className="text-xs text-[var(--text-muted)]">PDF only</span>
+          <div className="toggle-track shrink-0" data-checked={filterPdfOnly || undefined}>
+            <div className="toggle-knob" />
+          </div>
+          <span className="text-xs font-medium text-[var(--text-primary)]">PDF only</span>
         </label>
 
         <div className="flex items-center gap-1.5">
@@ -77,7 +80,7 @@ export default function PaperList({ papers, isLoading, onRefresh }: PaperListPro
             placeholder="from"
             value={yearFrom}
             onChange={(e) => setYearFrom(e.target.value)}
-            className="w-16 text-xs px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
+            className="input w-16 text-xs px-3 py-1.5 !min-h-0"
           />
           <span className="text-xs text-[var(--text-muted)]">–</span>
           <input
@@ -85,7 +88,7 @@ export default function PaperList({ papers, isLoading, onRefresh }: PaperListPro
             placeholder="to"
             value={yearTo}
             onChange={(e) => setYearTo(e.target.value)}
-            className="w-16 text-xs px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
+            className="input w-16 text-xs px-3 py-1.5 !min-h-0"
           />
         </div>
 
@@ -93,7 +96,7 @@ export default function PaperList({ papers, isLoading, onRefresh }: PaperListPro
           <button
             onClick={onRefresh}
             disabled={isLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] rounded-md border border-[var(--border-strong)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-secondary !px-3 !py-1.5 !text-xs"
           >
             {isLoading ? (
               <>

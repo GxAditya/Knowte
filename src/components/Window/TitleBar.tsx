@@ -84,14 +84,14 @@ export default function TitleBar({
 
   return (
     <header
-      className="flex h-11 items-center justify-between px-3 backdrop-blur-sm"
+      className="flex h-12 items-center justify-between px-3 backdrop-blur-xl"
       style={{
         background: "var(--bg-surface-overlay)",
-        borderBottom: "1px solid var(--border-default)",
+        borderBottom: "1px solid var(--border-subtle)",
       }}
     >
       <div className="flex min-w-0 items-center gap-3" data-tauri-drag-region>
-        <img src="/Knowte.png" alt="Knowte app icon" className="h-8 w-16 shrink-0" />
+        <img src="/Knowte.png" alt="Knowte app icon" className="h-8 w-16 shrink-0 drop-shadow-sm" />
         <p
           className="truncate text-xs font-semibold tracking-widest"
           style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}
@@ -106,12 +106,8 @@ export default function TitleBar({
         <button
           type="button"
           onClick={onToggleTheme}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] transition-all duration-200 hover:scale-110"
-          style={{
-            color: "var(--text-tertiary)",
-            background: "var(--bg-muted)",
-            border: "1px solid var(--border-default)",
-          }}
+          className="btn-ghost transition-transform duration-200 hover:scale-110"
+          style={{ height: "1.75rem", width: "1.75rem", padding: 0, borderRadius: "50%" }}
           aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
         >
           {theme === "dark" ? (
@@ -130,12 +126,8 @@ export default function TitleBar({
             <button
               type="button"
               onClick={() => void handleMinimize()}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] transition-colors"
-              style={{
-                color: "var(--text-tertiary)",
-                background: "var(--bg-muted)",
-                border: "1px solid var(--border-default)",
-              }}
+              className="btn-ghost"
+              style={{ padding: 0, height: "1.75rem", width: "1.75rem" }}
               aria-label="Minimize window"
             >
               <svg aria-hidden="true" className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.5}>
@@ -145,12 +137,8 @@ export default function TitleBar({
             <button
               type="button"
               onClick={() => void handleToggleMaximize()}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] transition-colors"
-              style={{
-                color: "var(--text-tertiary)",
-                background: "var(--bg-muted)",
-                border: "1px solid var(--border-default)",
-              }}
+              className="btn-ghost"
+              style={{ padding: 0, height: "1.75rem", width: "1.75rem" }}
               aria-label={isMaximized ? "Restore window" : "Maximize window"}
             >
               {isMaximized ? (
@@ -167,12 +155,8 @@ export default function TitleBar({
             <button
               type="button"
               onClick={() => void handleClose()}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] transition-colors"
-              style={{
-                color: "var(--color-error)",
-                background: "var(--color-error-subtle)",
-                border: "1px solid transparent",
-              }}
+              className="btn-ghost transition-colors hover:bg-[var(--color-error-subtle)] hover:text-[var(--color-error)]"
+              style={{ padding: 0, height: "1.75rem", width: "1.75rem" }}
               aria-label="Close window"
             >
               <svg aria-hidden="true" className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.5}>

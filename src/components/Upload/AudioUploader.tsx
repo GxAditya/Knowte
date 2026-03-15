@@ -710,7 +710,7 @@ export default function AudioUploader() {
         id="lecture-input-panel"
         role="tabpanel"
         aria-labelledby={activeTab === "upload" ? "upload-tab" : "record-tab"}
-        className="card p-4"
+        className="glass-panel p-6 animate-view-in"
       >
         {activeTab === "upload" ? (
           <div className="space-y-5">
@@ -795,7 +795,7 @@ export default function AudioUploader() {
       )}
 
       {hasQueueItems && (
-        <section className="card space-y-4 p-4">
+        <section className="glass-panel space-y-5 p-6 animate-slide-up">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Batch Queue</h2>

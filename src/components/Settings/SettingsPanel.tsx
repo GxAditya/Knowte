@@ -116,7 +116,7 @@ export default function SettingsPanel() {
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="card space-y-4 p-4">
+        <div className="glass-panel space-y-5 p-6 animate-slide-up">
           <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Ollama Connection</h2>
           <div className="space-y-2">
             <label className="block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
@@ -160,7 +160,7 @@ export default function SettingsPanel() {
           </div>
         </div>
 
-        <div className="card space-y-4 p-4">
+        <div className="glass-panel space-y-5 p-6 animate-slide-up">
           <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Personalization</h2>
           <PersonalizationConfig
             value={formData.personalization_level}
@@ -168,7 +168,7 @@ export default function SettingsPanel() {
           />
         </div>
 
-        <div className="card space-y-4 p-4">
+        <div className="glass-panel space-y-5 p-6 animate-slide-up">
           <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Export Settings</h2>
           <div className="space-y-2">
             <label className="block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
@@ -187,7 +187,7 @@ export default function SettingsPanel() {
           </div>
         </div>
 
-        <div className="card space-y-4 p-4">
+        <div className="glass-panel space-y-5 p-6 animate-slide-up">
           <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Storage</h2>
 
           <label className="flex items-start gap-3 cursor-pointer">
@@ -240,7 +240,7 @@ export default function SettingsPanel() {
           </div>
         </div>
 
-        <div className="card space-y-4 p-4">
+        <div className="glass-panel space-y-5 p-6 animate-slide-up">
           <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Research</h2>
           <label className="flex items-start gap-3 cursor-pointer">
             <div className="relative mt-0.5">
@@ -270,7 +270,7 @@ export default function SettingsPanel() {
           </label>
         </div>
 
-        <div className="card space-y-4 p-4">
+        <div className="glass-panel space-y-5 p-6 animate-slide-up">
           <div className="space-y-1">
             <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Keyboard Shortcuts</h2>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>

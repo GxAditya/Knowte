@@ -48,8 +48,8 @@ export default function KeyboardShortcutsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[120] flex items-center justify-center px-4 py-8 backdrop-blur-sm animate-view-in"
-      style={{ background: "rgba(0,0,0,0.6)" }}
+      className="fixed inset-0 z-[120] flex items-center justify-center px-4 py-8 backdrop-blur-md animate-view-in"
+      style={{ background: "rgba(15, 23, 42, 0.4)" }}
       onClick={onClose}
       role="presentation"
     >
@@ -57,7 +57,7 @@ export default function KeyboardShortcutsModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="keyboard-shortcuts-title"
-        className="card w-full max-w-3xl p-6 shadow-lg animate-scale-in"
+        className="glass-panel w-full max-w-3xl p-8 animate-scale-in"
         onClick={(event) => event.stopPropagation()}
       >
         <header className="mb-5 flex items-center justify-between gap-3">

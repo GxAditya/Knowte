@@ -204,14 +204,15 @@ export default function DropZone({
   return (
     <div className="space-y-4">
       <div
-        className={`rounded-lg border-2 border-dashed p-10 text-center shadow-sm transition-colors ${
+        className={`rounded-2xl border-2 border-dashed p-12 text-center transition-all duration-300 ${
           isDragActive
             ? "dropzone-drag-active"
             : ""
         }`}
         style={{
           borderColor: isDragActive ? "var(--accent-primary)" : "var(--border-strong)",
-          background: isDragActive ? "var(--accent-glow)" : "var(--bg-elevated)",
+          background: isDragActive ? "var(--accent-primary-subtle)" : "var(--bg-surface-raised)",
+          boxShadow: isDragActive ? "0 0 0 4px var(--accent-glow)" : "none",
         }}
       >
         <h3 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>

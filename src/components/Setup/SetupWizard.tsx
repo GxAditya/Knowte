@@ -866,18 +866,15 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "var(--bg-base)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center animate-view-in"
+      style={{ background: "var(--bg-surface)" }}
       role="dialog"
       aria-modal="true"
       aria-label="Knowte setup wizard"
     >
       <div
-        className="relative w-full max-w-lg rounded-2xl mx-4 p-8 flex flex-col gap-6"
+        className="glass-panel relative w-full max-w-lg mx-4 p-8 flex flex-col gap-6 animate-scale-in"
         style={{
-          background: "var(--bg-surface)",
-          border: "1px solid var(--border-default)",
-          boxShadow: "var(--card-shadow-lg)",
           maxHeight: "calc(100vh - 4rem)",
           overflowY: "auto",
         }}

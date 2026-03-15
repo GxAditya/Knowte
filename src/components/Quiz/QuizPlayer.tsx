@@ -62,7 +62,7 @@ function NavDot({ index, isCurrent, isSubmitted, isCorrect, onClick }: NavDotPro
 function ProgressBar({ answered, total }: { answered: number; total: number }) {
   const pct = total === 0 ? 0 : Math.round((answered / total) * 100);
   return (
-    <div className="w-full h-1.5 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
+    <div className="w-full h-1.5 glass-panel !rounded-full overflow-hidden !border-none !p-0">
       <div
         className="h-full bg-gradient-to-r from-violet-600 to-violet-400 rounded-full transition-all duration-500"
         style={{ width: `${pct}%` }}
@@ -157,13 +157,13 @@ export function QuizPlayer({ quiz, onComplete, onRegenerateQuiz, isRegenerating 
 
       {/* Question card */}
       <div
-        className={`bg-[var(--bg-elevated)] border rounded-2xl p-6 transition-all duration-300 ${
+        className={`glass-panel p-8 transition-all duration-300 ${
           isCurrentSubmitted
             ? answers[currentQuestion.id] === currentQuestion.correct_answer ||
               currentQuestion.type === "short_answer"
-              ? "border-[var(--color-success-muted)] shadow-[var(--color-success-muted)] shadow-lg"
-              : "border-[var(--color-error)]/40 shadow-red-900/20 shadow-lg"
-            : "border-[var(--border-default)] shadow-lg shadow-slate-900/30"
+              ? "border-[var(--color-success-muted)] shadow-[var(--card-shadow-success)]"
+              : "border-[var(--color-error)]/40 shadow-[var(--card-shadow-error)]"
+            : "border-[var(--border-subtle)] hover:shadow-[var(--card-shadow-hover)]"
         }`}
       >
         <QuestionCard
@@ -182,7 +182,7 @@ export function QuizPlayer({ quiz, onComplete, onRegenerateQuiz, isRegenerating 
           type="button"
           onClick={goToPreviousQuestion}
           disabled={currentIndex === 0}
-          className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-secondary)] bg-[var(--bg-elevated)]/60 hover:bg-[var(--bg-elevated)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="btn-ghost"
         >
           ← Previous
         </button>
@@ -193,7 +193,7 @@ export function QuizPlayer({ quiz, onComplete, onRegenerateQuiz, isRegenerating 
               type="button"
               onClick={handleSubmit}
               disabled={!currentAnswer || currentAnswer.trim() === ""}
-              className="px-5 py-2 rounded-lg text-sm font-semibold bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
+              className="btn-primary"
             >
               Submit Answer
             </button>
@@ -201,7 +201,7 @@ export function QuizPlayer({ quiz, onComplete, onRegenerateQuiz, isRegenerating 
             <button
               type="button"
               onClick={handleFinish}
-              className="px-5 py-2 rounded-lg text-sm font-semibold bg-[var(--color-success)] hover:bg-[var(--color-success)] text-white transition-colors"
+              className="px-5 py-2 rounded-full text-sm font-bold bg-[var(--color-success)] hover:brightness-110 text-white transition-all shadow-[var(--card-shadow-success)]"
             >
               See Results →
             </button>
@@ -219,7 +219,7 @@ export function QuizPlayer({ quiz, onComplete, onRegenerateQuiz, isRegenerating 
                   setCurrentIndex((i) => Math.min(total - 1, i + 1));
                 }
               }}
-              className="px-5 py-2 rounded-lg text-sm font-semibold bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] text-white transition-colors"
+              className="btn-primary flex items-center gap-2"
             >
               Next Question →
             </button>
@@ -230,7 +230,7 @@ export function QuizPlayer({ quiz, onComplete, onRegenerateQuiz, isRegenerating 
           type="button"
           onClick={goToNextQuestion}
           disabled={currentIndex === total - 1}
-          className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-secondary)] bg-[var(--bg-elevated)]/60 hover:bg-[var(--bg-elevated)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="btn-ghost"
         >
           Next →
         </button>

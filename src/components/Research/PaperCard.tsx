@@ -34,7 +34,7 @@ export default function PaperCard({ paper }: PaperCardProps) {
         : `${paper.authors[0]} et al.`;
 
   return (
-    <div className="p-4 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-lg space-y-3 hover:border-[var(--border-strong)] transition-colors">
+    <div className="glass-panel p-5 space-y-4 hover:border-[var(--accent-primary)] hover:shadow-[var(--card-shadow-hover)] transition-all duration-300">
       {/* Header row */}
       <div className="space-y-1">
         <h3 className="text-sm font-semibold text-[var(--text-primary)] leading-snug line-clamp-2">
@@ -46,20 +46,20 @@ export default function PaperCard({ paper }: PaperCardProps) {
       {/* Meta badges */}
       <div className="flex flex-wrap gap-2 text-xs">
         {paper.year != null && (
-          <span className="px-2 py-0.5 bg-[var(--bg-elevated)] text-[var(--text-secondary)] rounded-full">
+          <span className="badge badge-neutral">
             {paper.year}
           </span>
         )}
         {paper.venue && (
-          <span className="px-2 py-0.5 bg-[var(--bg-elevated)] text-[var(--text-secondary)] rounded-full truncate max-w-[200px]">
+          <span className="badge badge-neutral truncate max-w-[200px]">
             {paper.venue}
           </span>
         )}
-        <span className="px-2 py-0.5 bg-[var(--color-info-muted)] text-[var(--color-info)] rounded-full">
+        <span className="badge badge-info whitespace-nowrap">
           {paper.citation_count.toLocaleString()} citations
         </span>
         {paper.pdf_url && (
-          <span className="px-2 py-0.5 bg-[var(--color-success-muted)] text-[var(--color-success)] rounded-full">
+          <span className="badge badge-success whitespace-nowrap">
             Open Access PDF
           </span>
         )}
@@ -86,14 +86,14 @@ export default function PaperCard({ paper }: PaperCardProps) {
       <div className="flex gap-2 pt-1">
         <button
           onClick={handleOpenPaper}
-          className="px-3 py-1.5 text-xs bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white rounded-md transition-colors"
+          className="btn-primary !px-4 !py-1.5 !text-xs !rounded-md"
         >
           Open Paper ↗
         </button>
         {paper.pdf_url && (
           <button
             onClick={handleOpenPdf}
-            className="px-3 py-1.5 text-xs bg-[var(--color-success)] hover:bg-[var(--color-success)] text-white rounded-md transition-colors"
+            className="px-4 py-1.5 text-xs font-bold text-white bg-[var(--color-success)] hover:brightness-110 rounded-md shadow-[var(--card-shadow-success)] transition-all"
           >
             Download PDF ↓
           </button>

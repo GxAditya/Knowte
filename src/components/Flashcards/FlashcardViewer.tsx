@@ -117,7 +117,7 @@ function FlashcardDisplay({
       >
         {/* Front */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-start bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-2xl p-8 shadow-xl overflow-y-auto"
+          className="absolute inset-0 flex flex-col items-center justify-start glass-panel !rounded-2xl p-8 transition-transform duration-500 overflow-y-auto"
           style={
             prefersReducedMotion
               ? {
@@ -138,7 +138,7 @@ function FlashcardDisplay({
 
         {/* Back */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-start bg-[var(--bg-elevated)] border border-[var(--accent-primary)]/40 rounded-2xl p-8 shadow-xl overflow-y-auto"
+          className="absolute inset-0 flex flex-col items-center justify-start glass-panel shadow-[var(--card-shadow-glow)] border-[var(--accent-primary)]/30 !rounded-2xl p-8 transition-transform duration-500 overflow-y-auto"
           style={{
             ...(prefersReducedMotion
               ? {
@@ -162,7 +162,7 @@ function FlashcardDisplay({
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-2 py-0.5 text-xs rounded-full bg-[var(--accent-glow)] text-[var(--accent-primary)] border border-[var(--accent-primary)]"
+                  className="badge badge-primary"
                 >
                   {tag}
                 </span>
@@ -212,7 +212,7 @@ function StudyComplete({ stats, total, onReviewAll, onReviewWeak }: StudyComplet
           <button
             type="button"
             onClick={onReviewWeak}
-            className="px-5 py-2.5 rounded-xl bg-[var(--color-warning-muted)] hover:bg-[var(--color-warning-muted)] text-[var(--color-warning)] border border-[var(--color-warning-muted)] text-sm font-medium transition-colors"
+            className="btn-ghost text-[var(--color-warning)] hover:text-[var(--color-warning)] hover:bg-[var(--color-warning-muted)]"
           >
             Review weak cards ({weakCount})
           </button>
@@ -220,7 +220,7 @@ function StudyComplete({ stats, total, onReviewAll, onReviewWeak }: StudyComplet
         <button
           type="button"
           onClick={onReviewAll}
-          className="px-5 py-2.5 rounded-xl bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] text-sm font-medium transition-colors"
+            className="btn-secondary"
         >
           Review all again
         </button>
@@ -269,7 +269,7 @@ function VirtualizedCardIndex({
   };
 
   return (
-    <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)]/40 p-3">
+    <div className="glass-panel p-4">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
           Card Index (Virtualized)
@@ -277,7 +277,7 @@ function VirtualizedCardIndex({
         <p className="text-[11px] text-[var(--text-muted)]">{cards.length} cards</p>
       </div>
       <List
-        className="rounded border border-[var(--border-default)] bg-[var(--bg-base)]/40"
+        className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)]/40 shadow-inner"
         rowComponent={Row}
         rowCount={cards.length}
         rowHeight={rowHeight}
@@ -454,7 +454,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
               <button
                 type="button"
                 onClick={shuffle}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors"
+                className="btn-ghost flex items-center gap-1.5 !px-3 !py-1.5 !text-xs"
                 title="Shuffle cards"
               >
                 <svg
@@ -475,7 +475,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
               <button
                 type="button"
                 onClick={startStudyMode}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] text-white font-medium transition-colors"
+                className="btn-primary flex items-center gap-1.5 !px-3 !py-1.5 !text-xs"
               >
                 Study Mode
               </button>
@@ -485,7 +485,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
             <button
               type="button"
               onClick={endStudyMode}
-              className="px-3 py-1.5 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors"
+              className="btn-ghost flex items-center gap-1.5 !px-3 !py-1.5 !text-xs"
             >
               Exit Study Mode
             </button>
@@ -526,7 +526,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
               {currentCard.card.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-2 py-0.5 text-xs rounded-full bg-[var(--bg-elevated)]/80 text-[var(--text-muted)] border border-[var(--border-strong)]/50"
+                  className="badge badge-neutral"
                 >
                   {tag}
                 </span>
@@ -541,7 +541,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
                 type="button"
                 onClick={goPrev}
                 disabled={currentIndex === 0}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="btn-ghost flex items-center gap-1.5"
               >
                 <svg
                   aria-hidden="true"
@@ -558,7 +558,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
               <button
                 type="button"
                 onClick={() => setIsFlipped((f) => !f)}
-                className="px-5 py-2 rounded-xl text-sm bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] transition-colors"
+                className="btn-secondary !px-5 !py-2"
               >
                 {isFlipped ? "Hide answer" : "Show answer"}
               </button>
@@ -566,7 +566,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
                 type="button"
                 onClick={goNext}
                 disabled={currentIndex === cardStates.length - 1}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="btn-ghost flex items-center gap-1.5"
               >
                 Next
                 <svg
@@ -605,7 +605,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
                   type="button"
                   onClick={() => sortCard("unknown")}
                   disabled={!isFlipped}
-                  className="flex flex-col items-center px-5 py-3 rounded-xl bg-[var(--color-error-muted)] hover:bg-[var(--color-error-muted)] text-[var(--color-error)] border border-[var(--color-error)]/50 text-sm font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[90px]"
+                  className="glass-panel flex flex-col items-center !px-5 !py-3 text-[var(--color-error)] border border-transparent hover:border-[var(--color-error)]/30 hover:bg-[var(--color-error-muted)] transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[90px]"
                 >
                   <span className="text-lg">✗</span>
                   <span className="text-xs mt-0.5">No clue</span>
@@ -614,7 +614,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
                   type="button"
                   onClick={() => sortCard("almost")}
                   disabled={!isFlipped}
-                  className="flex flex-col items-center px-5 py-3 rounded-xl bg-[var(--color-warning-muted)] hover:bg-[var(--color-warning-muted)] text-[var(--color-warning)] border border-[var(--color-warning-muted)] text-sm font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[90px]"
+                  className="glass-panel flex flex-col items-center !px-5 !py-3 text-[var(--color-warning)] border border-transparent hover:border-[var(--color-warning)]/30 hover:bg-[var(--color-warning-subtle)] transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[90px]"
                 >
                   <span className="text-lg">~</span>
                   <span className="text-xs mt-0.5">Almost</span>
@@ -623,7 +623,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
                   type="button"
                   onClick={() => sortCard("known")}
                   disabled={!isFlipped}
-                  className="flex flex-col items-center px-5 py-3 rounded-xl bg-[var(--color-success-muted)] hover:bg-[var(--color-success-muted)] text-[var(--color-success)] border border-[var(--color-success-muted)] text-sm font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[90px]"
+                  className="glass-panel flex flex-col items-center !px-5 !py-3 text-[var(--color-success)] border border-transparent hover:border-[var(--color-success)]/30 hover:bg-[var(--color-success-muted)] transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[90px]"
                 >
                   <span className="text-lg">✓</span>
                   <span className="text-xs mt-0.5">Know it</span>

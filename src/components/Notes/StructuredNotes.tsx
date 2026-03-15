@@ -127,13 +127,13 @@ function SupportMaterialCard({ material }: { material: NotesSupportMaterial }) {
   const isFormula = kind === "formula";
 
   return (
-    <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-elevated)]/60 p-4 space-y-3">
+    <div className="glass-panel p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-[var(--accent-primary-subtle)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent-primary)]">
+        <span className="rounded-full bg-[var(--accent-primary)]/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--accent-primary)]">
           {supportMaterialLabel(kind)}
         </span>
         {material.language && (
-          <span className="rounded-full bg-[var(--bg-surface-overlay)] px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--text-muted)]">
+          <span className="rounded-full bg-[var(--bg-surface-raised)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)] border border-[var(--border-default)]">
             {material.language}
           </span>
         )}
@@ -214,12 +214,13 @@ function CollapsibleTopic({ topic, topicIndex }: CollapsibleTopicProps) {
               {examples.map((ex, i) => (
                 <div
                   key={i}
-                  className="bg-[var(--color-info-muted)] border border-[var(--color-info-muted)] rounded-lg px-4 py-3"
+                  className="bg-[var(--color-info)]/10 border border-[var(--color-info)]/20 rounded-xl px-5 py-4 backdrop-blur-sm"
                 >
-                  <p className="text-xs font-semibold text-[var(--accent-primary)] uppercase tracking-wider mb-1">
+                  <p className="text-[11px] font-bold text-[var(--color-info)] uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-info)]"></span>
                     Example
                   </p>
-                  <p className="text-[var(--text-secondary)] text-sm leading-relaxed">{ex}</p>
+                  <p className="text-[var(--text-secondary)] text-[0.95rem] leading-relaxed">{ex}</p>
                 </div>
               ))}
             </div>
@@ -243,15 +244,15 @@ function CollapsibleTopic({ topic, topicIndex }: CollapsibleTopicProps) {
 function KeyTermsTable({ terms }: { terms: NotesTerm[] }) {
   return (
     <section id="key-terms" className="mb-8">
-      <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-4">Key Terms</h2>
-      <div className="overflow-hidden rounded-lg border border-[var(--border-default)]">
+      <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-5">Key Terms</h2>
+      <div className="overflow-hidden rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] backdrop-blur-md shadow-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[var(--bg-elevated)]/60">
-              <th className="text-left px-4 py-2.5 text-[var(--text-secondary)] font-semibold w-1/3">
+            <tr className="bg-[var(--bg-elevated)]/50 border-b border-[var(--border-default)]">
+              <th className="text-left px-5 py-3.5 text-[var(--text-secondary)] font-semibold w-1/3 text-xs uppercase tracking-wider">
                 Term
               </th>
-              <th className="text-left px-4 py-2.5 text-[var(--text-secondary)] font-semibold">
+              <th className="text-left px-5 py-3.5 text-[var(--text-secondary)] font-semibold text-xs uppercase tracking-wider">
                 Definition
               </th>
             </tr>
@@ -262,14 +263,14 @@ function KeyTermsTable({ terms }: { terms: NotesTerm[] }) {
                 key={i}
                 className={
                   i % 2 === 0
-                    ? "bg-[var(--bg-elevated)]"
-                    : "bg-[var(--bg-elevated)]/20"
+                    ? "bg-transparent hover:bg-[var(--bg-surface-raised)] transition-colors"
+                    : "bg-[var(--bg-elevated)]/30 hover:bg-[var(--bg-surface-raised)] transition-colors"
                 }
               >
-                <td className="px-4 py-2.5 font-medium text-[var(--accent-primary)] align-top">
+                <td className="px-5 py-4 font-semibold text-[var(--accent-primary)] align-top border-t border-[var(--border-subtle)]">
                   {item.term}
                 </td>
-                <td className="px-4 py-2.5 text-[var(--text-secondary)] leading-relaxed">
+                <td className="px-5 py-4 text-[var(--text-secondary)] leading-loose border-t border-[var(--border-subtle)]">
                   {item.definition}
                 </td>
               </tr>

@@ -48,10 +48,10 @@ function StageRow({
   onSkip: () => void;
 }) {
   const statusColors: Record<string, string> = {
-    pending: "border-[var(--border-strong)] bg-[var(--bg-elevated)]",
-    running: "border-[var(--accent-primary)]/50 bg-[var(--accent-primary)]/10",
-    complete: "border-[var(--color-success-muted)] bg-[var(--color-success)]/5",
-    error: "border-[var(--color-error-muted)] bg-[var(--color-error)]/5",
+    pending: "border-[var(--border-strong)] bg-[var(--bg-surface-overlay)] backdrop-blur-md shadow-sm",
+    running: "border-[var(--accent-primary)]/50 bg-[var(--accent-primary)]/10 backdrop-blur-md shadow-[var(--card-shadow-glow)]",
+    complete: "border-[var(--color-success-muted)] bg-[var(--color-success)]/5 backdrop-blur-md",
+    error: "border-[var(--color-error-muted)] bg-[var(--color-error)]/5 backdrop-blur-md",
   };
 
   const iconColors: Record<string, string> = {
@@ -63,9 +63,9 @@ function StageRow({
 
   return (
     <div
-      className={`rounded-lg border px-4 py-3 transition-all duration-300 ${statusColors[stage.status]}`}
+      className={`rounded-2xl border p-5 transition-all duration-300 ${statusColors[stage.status]}`}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <div className={`flex-shrink-0 ${iconColors[stage.status]}`}>
           {stage.status === "pending" && (
             <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,15 +86,14 @@ function StageRow({
         </div>
 
         <span
-          className={`flex-1 text-sm font-medium ${
-            stage.status === "pending"
+          className={`flex-1 text-sm font-medium ${stage.status === "pending"
               ? "text-[var(--text-muted)]"
               : stage.status === "complete"
                 ? "text-[var(--color-success)]"
                 : stage.status === "error"
                   ? "text-[var(--color-error)]"
                   : "text-[var(--text-secondary)]"
-          }`}
+            }`}
         >
           {stage.label}
         </span>
@@ -110,15 +109,15 @@ function StageRow({
 
       {/* Streaming preview while running */}
       {stage.status === "running" && streamingPreview && (
-        <div className="mt-2 rounded border border-[var(--accent-primary)]/20 bg-[var(--bg-surface-overlay)] px-3 py-2">
-          <p className="line-clamp-3 font-mono text-xs text-[var(--text-muted)]">{streamingPreview}</p>
+        <div className="mt-3 rounded-xl border border-[var(--accent-primary)]/20 bg-[var(--bg-surface-overlay)]/40 p-3 shadow-inner">
+          <p className="line-clamp-3 font-mono text-xs text-[var(--text-muted)] leading-relaxed">{streamingPreview}</p>
         </div>
       )}
 
       {/* Result preview once complete */}
       {stage.status === "complete" && stage.preview && (
-        <div className="mt-2 rounded border border-[var(--color-success)]/20 bg-[var(--bg-surface-overlay)]/40 px-3 py-1.5">
-          <p className="line-clamp-2 text-xs text-[var(--text-muted)]">{stage.preview}</p>
+        <div className="mt-3 rounded-xl border border-[var(--color-success)]/20 bg-[var(--bg-surface-overlay)]/40 p-3 shadow-inner">
+          <p className="line-clamp-2 text-xs text-[var(--text-muted)] leading-relaxed">{stage.preview}</p>
         </div>
       )}
 
@@ -231,8 +230,8 @@ export default function ProgressTracker({
   // Detect an interrupted pipeline: at least one stage finished but some
   // stages are errored/pending and there is no stage currently running.
   const hasCompleted = stages.some((s) => s.status === "complete");
-  const hasErrors    = stages.some((s) => s.status === "error");
-  const isRunning    = stages.some((s) => s.status === "running");
+  const hasErrors = stages.some((s) => s.status === "error");
+  const isRunning = stages.some((s) => s.status === "running");
   const isInterrupted = hasCompleted && hasErrors && !isRunning && !isDone;
 
   const stageIndex = (stageName: string) =>
@@ -318,9 +317,9 @@ export default function ProgressTracker({
 
       {/* Interrupted pipeline banner */}
       {isInterrupted && (
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-[var(--color-warning-muted)] bg-[var(--color-warning)]/10 px-4 py-3">
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-[var(--color-warning-muted)] bg-[var(--color-warning)]/10 p-5 shadow-sm backdrop-blur-md">
           <div>
-            <p className="text-sm font-medium text-[var(--color-warning)]">Pipeline interrupted</p>
+            <p className="text-sm font-semibold text-[var(--color-warning)]">Pipeline interrupted</p>
             <p className="text-xs text-[var(--text-muted)] mt-0.5">
               {stagesComplete} of {TOTAL_PIPELINE_STAGES} stages completed. Resume to continue from where it left off.
             </p>

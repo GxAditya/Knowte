@@ -194,30 +194,26 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
 
   return (
     <aside
-      className={`flex shrink-0 flex-col backdrop-blur-sm ${
+      className={`flex shrink-0 flex-col backdrop-blur-xl ${
         isCollapsed ? "w-16" : "w-64"
-      } transition-all duration-300`}
+      } transition-all duration-300 z-10`}
       style={{
-        background: "var(--sidebar-bg)",
-        borderRight: "1px solid var(--sidebar-border)",
+        background: "var(--bg-surface-overlay)",
+        borderRight: "1px solid var(--border-subtle)",
       }}
       aria-label="Sidebar navigation"
     >
       {/* ── Brand + Collapse ──────────────────────────────────────────── */}
       <div
         className={`${isCollapsed ? "px-2 py-3" : "px-4 py-4"}`}
-        style={{ borderBottom: "1px solid var(--sidebar-border)" }}
+        style={{ borderBottom: "1px solid var(--border-subtle)" }}
       >
         <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-end"}`}>
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)]"
-            style={{
-              color: "var(--text-tertiary)",
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-default)",
-            }}
+            className="btn-ghost"
+            style={{ padding: 0, height: "1.75rem", width: "1.75rem" }}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <svg

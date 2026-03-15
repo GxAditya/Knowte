@@ -83,10 +83,7 @@ function SingleToast({ toast, isExiting, onDismiss }: SingleToastProps) {
         onClick={() => onDismiss(toast.id)}
         className="toast-card group"
         style={{
-          background: "var(--bg-surface)",
-          border: `1px solid ${cfg.accentVar}33`,
           borderLeft: `3px solid ${cfg.accentVar}`,
-          boxShadow: `0 4px 24px rgba(0,0,0,0.18), 0 0 0 1px ${cfg.accentVar}11`,
         }}
         aria-label={`${cfg.label}: ${toast.message}. Click to dismiss.`}
       >

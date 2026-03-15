@@ -335,7 +335,7 @@ function InnerCanvas({ data }: { data: MindMapData }) {
         <button
           type="button"
           onClick={handleFitView}
-          className="px-3 py-1.5 text-xs font-medium bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] rounded-lg border border-[var(--border-strong)] transition-colors"
+          className="btn-secondary !px-3 !py-1.5 !text-xs !rounded-lg"
           title="Fit the full map in view"
         >
           Fit View
@@ -344,7 +344,7 @@ function InnerCanvas({ data }: { data: MindMapData }) {
           type="button"
           data-hotkey-export="true"
           onClick={downloadPng}
-          className="px-3 py-1.5 text-xs font-medium bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] rounded-lg border border-[var(--border-strong)] transition-colors"
+          className="btn-secondary !px-3 !py-1.5 !text-xs !rounded-lg"
           title="Download as PNG"
         >
           ↓ PNG
@@ -352,7 +352,7 @@ function InnerCanvas({ data }: { data: MindMapData }) {
         <button
           type="button"
           onClick={downloadSvg}
-          className="px-3 py-1.5 text-xs font-medium bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] rounded-lg border border-[var(--border-strong)] transition-colors"
+          className="btn-secondary !px-3 !py-1.5 !text-xs !rounded-lg"
           title="Download as SVG"
         >
           ↓ SVG
@@ -361,7 +361,7 @@ function InnerCanvas({ data }: { data: MindMapData }) {
           <button
             type="button"
             onClick={() => setSelectedBranch(null)}
-            className="px-3 py-1.5 text-xs font-medium bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] text-white rounded-lg border border-[var(--accent-primary)] transition-colors"
+            className="btn-primary !px-3 !py-1.5 !text-xs !rounded-lg"
           >
             Clear Selection
           </button>
@@ -369,7 +369,7 @@ function InnerCanvas({ data }: { data: MindMapData }) {
       </div>
 
       {selectedBranch !== null && (
-        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)]/80 px-3 py-1.5 rounded-full" data-export-exclude="true">
+        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-[var(--text-primary)] font-medium glass-panel !rounded-full px-4 py-2 shadow-sm" data-export-exclude="true">
           Click a node to highlight its branch · Click background to clear
         </p>
       )}

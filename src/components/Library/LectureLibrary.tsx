@@ -295,7 +295,7 @@ export default function LectureLibrary() {
         }
       />
 
-      <section className="card grid gap-3 p-4 md:grid-cols-[1fr_auto_auto]">
+      <section className="glass-panel grid gap-4 p-5 md:grid-cols-[1fr_auto_auto] animate-slide-up">
         <label className="block">
           <span className="sr-only">Search knowtes</span>
           <input
@@ -307,12 +307,12 @@ export default function LectureLibrary() {
           />
         </label>
 
-        <label className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+        <label className="flex items-center gap-3 text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
           <span>Sort</span>
           <select
             value={sortOption}
             onChange={(event) => setSortOption(event.target.value as SortOption)}
-            className="input"
+            className="input pr-8"
           >
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
@@ -364,14 +364,14 @@ export default function LectureLibrary() {
             return (
               <article
                 key={lecture.id}
-                className="card card-interactive relative p-4 transition-all hover:shadow-lg animate-card-in"
+                className="card card-interactive relative p-5 transition-all animate-card-in"
                 style={{ cursor: "pointer", animationDelay: `${Math.min(idx * 55, 400)}ms` }}
               >
                 <button
                   type="button"
                   onClick={() => openLecture(lecture.id)}
                   disabled={isBusy}
-                  className="block w-full pr-10 text-left"
+                  className="block w-full text-left"
                 >
                   <p className="truncate text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>{lecture.title}</p>
                   <p className="mt-1 truncate text-xs" style={{ color: "var(--text-muted)" }}>{lecture.filename}</p>

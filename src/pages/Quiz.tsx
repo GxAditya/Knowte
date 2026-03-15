@@ -48,7 +48,7 @@ export default function Quiz() {
   const quizStageError = usePipelineStore((state) =>
     currentLectureId
       ? state.lectureStates[currentLectureId]?.stages.find((stage) => stage.name === "quiz")
-          ?.error ?? null
+        ?.error ?? null
       : null,
   );
 

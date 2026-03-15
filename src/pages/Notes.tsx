@@ -60,11 +60,10 @@ function TableOfContents({ items, activeId }: TableOfContentsProps) {
         <button
           key={item.id}
           onClick={() => scrollTo(item.id)}
-          className={`block w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors ${
-            activeId === item.id
+          className={`block w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors ${activeId === item.id
               ? "text-[var(--accent-primary)] bg-[var(--accent-glow)] font-medium"
               : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
-          } ${item.level === "h2" ? "pl-3" : "pl-5"}`}
+            } ${item.level === "h2" ? "pl-3" : "pl-5"}`}
         >
           {item.label}
         </button>
@@ -146,7 +145,7 @@ export default function Notes() {
   const notesStageError = usePipelineStore((state) =>
     currentLectureId
       ? state.lectureStates[currentLectureId]?.stages.find((stage) => stage.name === "notes")
-          ?.error ?? null
+        ?.error ?? null
       : null,
   );
   const currentLecture = lectures.find((l) => l.id === currentLectureId) ?? null;
@@ -234,10 +233,10 @@ export default function Notes() {
   const activeId = useActiveSection(tocIds);
   const hasNotesContent = Boolean(
     notes &&
-      (notes.topics.length > 0 ||
-        notes.key_terms.length > 0 ||
-        notes.takeaways.length > 0 ||
-        currentLecture?.summary),
+    (notes.topics.length > 0 ||
+      notes.key_terms.length > 0 ||
+      notes.takeaways.length > 0 ||
+      currentLecture?.summary),
   );
   const notesContainerClass = isSidebarCollapsed
     ? "mx-auto w-full max-w-[1240px] space-y-6"

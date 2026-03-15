@@ -1,5 +1,8 @@
 import { NavLink } from "react-router-dom";
 import { useLectureStore } from "../stores";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -159,29 +162,27 @@ function navLinkClass(isActive: boolean, isCollapsed: boolean): string {
     "group relative flex items-center text-sm font-medium",
     "transition-all duration-200",
     isCollapsed
-      ? "justify-center px-0 py-2.5 rounded-[var(--radius-md)]"
-      : "gap-3 px-3 py-2 rounded-[var(--radius-md)]",
+      ? "justify-center px-0 py-2.5 rounded-md"
+      : "gap-3 px-3 py-2 rounded-md",
   ];
 
   if (isActive) {
     base.push(
-      "bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-text)]",
-      "shadow-[0_1px_3px_rgba(0,0,0,0.12)]",
+      "bg-primary text-primary-foreground",
+      "shadow-sm",
     );
   } else {
     base.push(
-      "text-[var(--text-secondary)]",
-      "hover:bg-[var(--sidebar-item-hover)] hover:text-[var(--text-primary)]",
+      "text-muted-foreground",
+      "hover:bg-muted hover:text-foreground",
     );
   }
 
   return base.join(" ");
 }
 
-function lectureBadgeClass(isActive: boolean): string {
-  return isActive
-    ? "bg-white/20 text-[var(--sidebar-item-active-text)]"
-    : "bg-[var(--badge-neutral-bg)] text-[var(--text-tertiary)]";
+function lectureBadgeVariant(): "secondary" {
+  return "secondary";
 }
 
 export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
@@ -209,16 +210,16 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
         style={{ borderBottom: "1px solid var(--border-subtle)" }}
       >
         <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-end"}`}>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onToggleCollapse}
-            className="btn-ghost"
-            style={{ padding: 0, height: "1.75rem", width: "1.75rem" }}
+            className="h-7 w-7"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <svg
               aria-hidden="true"
-              className={`h-3.5 w-3.5 transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`}
+              className={`h-4 w-4 transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -226,7 +227,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
             >
               <path d="m15 18-6-6 6-6" />
             </svg>
-          </button>
+          </Button>
         </div>
 
         {!isCollapsed && currentLectureId && (
@@ -241,31 +242,34 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
 
       {/* ── Navigation ────────────────────────────────────────────────── */}
       <nav
-        className={`${isCollapsed ? "p-2" : "p-3"} flex-1 overflow-y-auto`}
+        className="flex-1 overflow-hidden flex flex-col"
         role="tablist"
         aria-label={currentLectureId ? "Knowte view navigation" : "Primary navigation"}
       >
-        {currentLectureId ? (
-          <ul className="space-y-0.5">
+        <ScrollArea className="flex-1">
+          <div className={isCollapsed ? "p-2" : "p-3 pr-4"}>
+            {currentLectureId ? (
+              <ul className="space-y-0.5">
             <li>
               <NavLink
                 to="/"
                 end
                 role="tab"
                 title="Library"
-                className={({ isActive }) => navLinkClass(isActive, isCollapsed)}
+                className={({ isActive: _isActive }) => navLinkClass(_isActive, isCollapsed)}
               >
-                {({ isActive }) => (
+                {({ isActive: _isActive }) => (
                   <>
                     <NavIcon name="library" />
                     {!isCollapsed && (
                       <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
                         <span>Library</span>
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${lectureBadgeClass(isActive)}`}
+                        <Badge
+                          variant={lectureBadgeVariant()}
+                          className="px-1.5 py-0 min-w-5 h-5 flex items-center justify-center text-[10px]"
                         >
                           {lectureCount}
-                        </span>
+                        </Badge>
                       </span>
                     )}
                   </>
@@ -342,20 +346,21 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
                   end={item.to === "/"}
                   role="tab"
                   title={item.label}
-                  className={({ isActive }) => navLinkClass(isActive, isCollapsed)}
+                  className={({ isActive: _isActive }) => navLinkClass(_isActive, isCollapsed)}
                 >
-                  {({ isActive }) => (
+                  {({ isActive: _isActive }) => (
                     <>
                       <NavIcon name={item.icon} />
                       {!isCollapsed && (
                         <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
                           <span>{item.label}</span>
                           {item.to === "/" && (
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${lectureBadgeClass(isActive)}`}
+                            <Badge
+                              variant={lectureBadgeVariant()}
+                              className="px-1.5 py-0 min-w-5 h-5 flex items-center justify-center text-[10px]"
                             >
                               {lectureCount}
-                            </span>
+                            </Badge>
                           )}
                         </span>
                       )}
@@ -366,6 +371,8 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
             ))}
           </ul>
         )}
+          </div>
+        </ScrollArea>
       </nav>
     </aside>
   );

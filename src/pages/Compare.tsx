@@ -16,6 +16,11 @@ import type {
   MergedFlashcardsResult,
 } from "../lib/types";
 import { useToastStore } from "../stores";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent } from "@/components/ui/card";
+import { Search, Play, Layers } from "lucide-react";
 
 const STOPWORDS = new Set([
   "about",
@@ -108,7 +113,7 @@ function highlightTerms(text: string, terms: string[]): ReactNode {
     termSet.has(part.toLowerCase()) ? (
       <mark
         key={`${part}-${index}`}
-        className="rounded bg-[var(--color-success-muted)] px-1 text-[var(--color-success)]"
+        className="rounded bg-primary/10 px-1 text-primary"
       >
         {part}
       </mark>
@@ -353,163 +358,193 @@ export default function Compare() {
         description="Select 2-3 lectures to compare summaries, overlap terms, and combine outputs."
         actions={
           <>
-            <button
-              type="button"
+            <Button
               onClick={() => void handleCompare()}
               disabled={selectedIds.length < 2 || isComparing}
-              className="rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-primary)] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isComparing ? "Comparing..." : "Run Comparison"}
-            </button>
-            <button
-              type="button"
+              {isComparing ? (
+                "Comparing..."
+              ) : (
+                <>
+                  <Play className="mr-2 h-4 w-4" />
+                  Run Comparison
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => void handleMergeDeck()}
               disabled={selectedIds.length < 2 || isMergingDeck}
-              className="rounded-md border border-[var(--color-success-muted)] bg-[var(--color-success-muted)] px-4 py-2 text-sm font-medium text-[var(--color-success)] transition-colors hover:bg-[var(--color-success-muted)] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isMergingDeck ? "Merging..." : "Merge Flashcards"}
-            </button>
+              {isMergingDeck ? (
+                "Merging..."
+              ) : (
+                <>
+                  <Layers className="mr-2 h-4 w-4" />
+                  Merge Flashcards
+                </>
+              )}
+            </Button>
           </>
         }
       />
 
-      <section className="space-y-4 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search lectures by title or filename..."
-            className="w-full max-w-md rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)] focus:outline-none"
-          />
-          <span className="text-xs text-[var(--text-muted)]">
-            Selected: {selectedIds.length}/3
-          </span>
-        </div>
-
-        {isLoadingLectures ? (
-          <p className="text-sm text-[var(--text-muted)]">Loading lectures...</p>
-        ) : filteredLectures.length === 0 ? (
-          <p className="text-sm text-[var(--text-muted)]">No knowtes match your search.</p>
-        ) : (
-          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-            {filteredLectures.map((lecture) => {
-              const checked = selectedIds.includes(lecture.id);
-              const disabled = !checked && selectedIds.length >= 3;
-
-              return (
-                <label
-                  key={lecture.id}
-                  className={`flex cursor-pointer items-start gap-3 rounded-md border px-3 py-2 text-sm transition-colors ${
-                    checked
-                      ? "border-[var(--accent-primary)] bg-[var(--accent-primary)]/15"
-                      : "border-[var(--border-default)] bg-[var(--bg-elevated)] hover:border-[var(--border-strong)]"
-                  } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    disabled={disabled}
-                    onChange={() => toggleLectureSelection(lecture.id)}
-                    className="mt-0.5 h-4 w-4 accent-blue-500"
-                  />
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-[var(--text-primary)]">{lecture.title}</p>
-                    <p className="truncate text-xs text-[var(--text-muted)]">{lecture.filename}</p>
-                    <p className="mt-1 text-xs text-[var(--text-muted)]">
-                      {lecture.summary ? "Summary ready" : "Summary not generated"}
-                    </p>
-                  </div>
-                </label>
-              );
-            })}
+      <Card className="shadow-sm">
+        <CardContent className="p-4 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search lectures..."
+                className="pl-9"
+              />
+            </div>
+            <span className="text-xs text-muted-foreground">
+              Selected: {selectedIds.length}/3
+            </span>
           </div>
-        )}
-      </section>
+
+          {isLoadingLectures ? (
+            <p className="text-sm text-muted-foreground">Loading lectures...</p>
+          ) : filteredLectures.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No knowtes match your search.</p>
+          ) : (
+            <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+              {filteredLectures.map((lecture) => {
+                const checked = selectedIds.includes(lecture.id);
+                const disabled = !checked && selectedIds.length >= 3;
+
+                return (
+                  <Card
+                    key={lecture.id}
+                    className={`cursor-pointer transition-colors ${
+                      checked
+                        ? "border-primary bg-accent/50"
+                        : "hover:bg-accent/30"
+                    } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+                    onClick={() => !disabled && toggleLectureSelection(lecture.id)}
+                  >
+                    <CardContent className="flex items-start gap-3 p-3 text-sm">
+                      <Checkbox
+                        checked={checked}
+                        disabled={disabled}
+                        onCheckedChange={() => toggleLectureSelection(lecture.id)}
+                        className="mt-1"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium">{lecture.title}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {lecture.filename}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {lecture.summary ? "Summary ready" : "Summary not generated"}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {selectedLectures.length >= 2 && (
         <>
-          <section className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-4">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Overlapping Key Terms</h2>
-            {overlapTerms.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {overlapTerms.map((term) => (
-                  <span
-                    key={term}
-                    className="rounded-full border border-[var(--color-success-muted)] bg-[var(--color-success-muted)] px-2.5 py-1 text-xs font-medium text-[var(--color-success)]"
-                  >
-                    {term}
-                  </span>
+          <Card className="shadow-sm">
+            <CardContent className="p-4 space-y-3">
+              <h2 className="text-lg font-semibold">Overlapping Key Terms</h2>
+              {overlapTerms.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {overlapTerms.map((term) => (
+                    <span
+                      key={term}
+                      className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+                    >
+                      {term}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Run comparison after summaries are generated to see overlapping terms.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm">
+            <CardContent className="p-4 space-y-3">
+              <h2 className="text-lg font-semibold">Summary Side-by-Side</h2>
+              <div
+                className={`grid gap-4 ${
+                  selectedLectures.length === 2 ? "md:grid-cols-2" : "md:grid-cols-2 xl:grid-cols-3"
+                }`}
+              >
+                {selectedLectures.map((lecture) => (
+                  <Card key={lecture.id} className="shadow-none bg-muted/30">
+                    <CardContent className="p-4">
+                      <h3 className="text-sm font-semibold">{lecture.title}</h3>
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+                        {highlightTerms(
+                          lecture.summary ?? "No summary available for this lecture yet.",
+                          overlapTerms,
+                        )}
+                      </p>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
-            ) : (
-              <p className="text-sm text-[var(--text-muted)]">
-                Run comparison after summaries are generated to see overlapping terms.
-              </p>
-            )}
-          </section>
-
-          <section className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-4">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Summary Side-by-Side</h2>
-            <div
-              className={`grid gap-4 ${
-                selectedLectures.length === 2 ? "md:grid-cols-2" : "md:grid-cols-2 xl:grid-cols-3"
-              }`}
-            >
-              {selectedLectures.map((lecture) => (
-                <article
-                  key={lecture.id}
-                  className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4"
-                >
-                  <h3 className="text-sm font-semibold text-[var(--text-primary)]">{lecture.title}</h3>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--text-secondary)]">
-                    {highlightTerms(
-                      lecture.summary ?? "No summary available for this lecture yet.",
-                      overlapTerms,
-                    )}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </section>
+            </CardContent>
+          </Card>
         </>
       )}
 
       {comparison && (
-        <section className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-4">
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Comparison Analysis</h2>
-          <p className="whitespace-pre-wrap text-sm leading-6 text-[var(--text-secondary)]">{comparison}</p>
-        </section>
+        <Card className="shadow-sm">
+          <CardContent className="p-4 space-y-3">
+            <h2 className="text-lg font-semibold">Comparison Analysis</h2>
+            <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{comparison}</p>
+          </CardContent>
+        </Card>
       )}
 
       {combinedMindMap && (
-        <section className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-4">
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Combined Mind Map</h2>
-          <div className="h-[520px] overflow-hidden rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)]">
-            <MindMapCanvas data={combinedMindMap} />
-          </div>
-        </section>
+        <Card className="shadow-sm">
+          <CardContent className="p-4 space-y-3">
+            <h2 className="text-lg font-semibold">Combined Mind Map</h2>
+            <div className="h-[520px] overflow-hidden rounded-lg border bg-muted/10">
+              <MindMapCanvas data={combinedMindMap} />
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {mergedDeck && (
-        <section className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-4">
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Merged Flashcard Deck</h2>
-          <p className="text-sm text-[var(--text-muted)]">
-            {mergedDeck.cards.length} cards from {mergedDeck.source_count} lectures (
-            {mergedDeck.duplicate_count} near-duplicates removed).
-          </p>
-          {mergedDeck.cards.length > 0 ? (
-            <FlashcardViewer cards={mergedDeck.cards} />
-          ) : (
-            <p className="text-sm text-[var(--text-muted)]">
-              No cards available after merge. Generate flashcards first.
+        <Card className="shadow-sm">
+          <CardContent className="p-4 space-y-3">
+            <h2 className="text-lg font-semibold">Merged Flashcard Deck</h2>
+            <p className="text-sm text-muted-foreground">
+              {mergedDeck.cards.length} cards from {mergedDeck.source_count} lectures (
+              {mergedDeck.duplicate_count} near-duplicates removed).
             </p>
-          )}
-        </section>
+            {mergedDeck.cards.length > 0 ? (
+              <FlashcardViewer cards={mergedDeck.cards} />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No cards available after merge. Generate flashcards first.
+              </p>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {error && (
-        <div className="rounded-lg border border-[var(--color-error-muted)] bg-[var(--color-error-muted)] px-4 py-3 text-sm text-[var(--color-error)]">
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       )}

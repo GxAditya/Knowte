@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export default function EmptyState() {
   const navigate = useNavigate();
 
   return (
-    <div className="card px-6 py-12 text-center animate-scale-in">
+    <Card className="px-6 py-12 text-center animate-scale-in">
       <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-lg" style={{ border: "1px solid var(--border-strong)", background: "var(--bg-surface-overlay)" }}>
         <svg
           aria-hidden="true"
@@ -26,13 +28,13 @@ export default function EmptyState() {
       <p className="mx-auto mt-2 max-w-md text-sm" style={{ color: "var(--text-muted)" }}>
         Add your first knowte to start generating transcripts, notes, quizzes, and flashcards.
       </p>
-      <button
+      <Button
         type="button"
         onClick={() => navigate("/upload")}
-        className="btn-primary mt-6"
+        className="mt-6"
       >
         Add your first knowte
-      </button>
-    </div>
+      </Button>
+    </Card>
   );
 }

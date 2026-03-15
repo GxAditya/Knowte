@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { HOTKEY_EVENT_NAMES } from "../../lib/hotkeys";
 import { startRecording as apiStartRecording, stopRecording as apiStopRecording } from "../../lib/tauriApi";
 import type { AudioFileMetadata } from "../../lib/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface LiveRecorderProps {
   onRecordingSaved: (metadata: AudioFileMetadata) => void;
@@ -195,7 +197,7 @@ export default function LiveRecorder({
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         {!isRecording ? (
-          <button
+          <Button
             type="button"
             onClick={() => void handleStartRecording()}
             disabled={disabled || isBusy}
@@ -204,9 +206,10 @@ export default function LiveRecorder({
             style={{ background: "var(--color-error)" }}
           >
             Record
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
+            variant="ghost"
             type="button"
             onClick={() => void handleStopRecording()}
             disabled={isBusy}
@@ -215,7 +218,7 @@ export default function LiveRecorder({
             style={{ background: "var(--bg-elevated)", color: "var(--text-primary)" }}
           >
             Stop
-          </button>
+          </Button>
         )}
 
         <div>
@@ -233,15 +236,17 @@ export default function LiveRecorder({
         </div>
       </div>
 
-      <div className="card p-3">
-        <canvas
-          ref={canvasRef}
-          width={640}
-          height={160}
-          className="h-32 w-full rounded"
-          style={{ background: "var(--bg-base)" }}
-        />
-      </div>
+      <Card>
+        <CardContent className="p-3">
+          <canvas
+            ref={canvasRef}
+            width={640}
+            height={160}
+            className="h-32 w-full rounded"
+            style={{ background: "var(--bg-base)" }}
+          />
+        </CardContent>
+      </Card>
 
       {error && <p className="text-sm" style={{ color: "var(--color-error)" }}>{error}</p>}
     </div>

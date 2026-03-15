@@ -19,6 +19,10 @@ import { usePipelineStore } from "../../stores/pipelineStore";
 import { ViewHeader } from "../Layout";
 import DropZone, { type UploadStageUpdate } from "./DropZone";
 import LiveRecorder from "./LiveRecorder";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 type UploadTab = "upload" | "record";
 type QueueStatus = "importing" | "waiting" | "processing" | "complete" | "error";
@@ -81,31 +85,17 @@ const toLecture = (metadata: AudioFileMetadata): Lecture => ({
   createdAt: new Date().toISOString(),
 });
 
-function statusBadgeClass(status: QueueStatus): string {
-  if (status === "complete") {
-    return "badge-success";
-  }
-  if (status === "processing") {
-    return "badge-info";
-  }
-  if (status === "importing") {
-    return "badge-warning";
-  }
-  if (status === "error") {
-    return "badge-error";
-  }
-  return "badge-neutral";
+function statusBadgeVariant(status: QueueStatus) {
+  if (status === "complete") return "default";
+  if (status === "processing" || status === "importing") return "secondary";
+  if (status === "error") return "destructive";
+  return "outline";
 }
 
-function sourceBadgeClass(origin: QueueOrigin, sourceType: LectureSourceType): string {
-  if (origin === "youtube") {
-    return "badge-error";
-  }
-  if (sourceType === "video") {
-    return "badge-accent";
-  }
-
-  return "badge-info";
+function sourceBadgeVariant(origin: QueueOrigin, sourceType: LectureSourceType) {
+  if (origin === "youtube") return "destructive";
+  if (sourceType === "video") return "secondary";
+  return "default";
 }
 
 function sourceLabel(origin: QueueOrigin, sourceType: LectureSourceType): string {
@@ -672,46 +662,34 @@ export default function AudioUploader() {
         role="tablist"
         aria-label="Knowte input modes"
       >
-        <button
+        <Button
+          variant={activeTab === "upload" ? "default" : "ghost"}
           type="button"
           id="upload-tab"
           role="tab"
           aria-selected={activeTab === "upload"}
           aria-controls="lecture-input-panel"
           onClick={() => setActiveTab("upload")}
-          className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === "upload"
-              ? "btn-primary"
-              : ""
-          }`}
-          style={activeTab !== "upload" ? { color: "var(--text-secondary)" } : undefined}
+          className="rounded-md px-4 py-2"
         >
           Upload Files
-        </button>
-        <button
+        </Button>
+        <Button
+          variant={activeTab === "record" ? "default" : "ghost"}
           type="button"
           id="record-tab"
           role="tab"
           aria-selected={activeTab === "record"}
           aria-controls="lecture-input-panel"
           onClick={() => setActiveTab("record")}
-          className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === "record"
-              ? "btn-primary"
-              : ""
-          }`}
-          style={activeTab !== "record" ? { color: "var(--text-secondary)" } : undefined}
+          className="rounded-md px-4 py-2"
         >
           Record Live
-        </button>
+        </Button>
       </div>
 
-      <section
-        id="lecture-input-panel"
-        role="tabpanel"
-        aria-labelledby={activeTab === "upload" ? "upload-tab" : "record-tab"}
-        className="glass-panel p-6 animate-view-in"
-      >
+      <Card className="animate-view-in" id="lecture-input-panel" role="tabpanel" aria-labelledby={activeTab === "upload" ? "upload-tab" : "record-tab"}>
+        <CardContent className="p-6">
         {activeTab === "upload" ? (
           <div className="space-y-5">
             <DropZone
@@ -730,7 +708,7 @@ export default function AudioUploader() {
               </div>
 
               <div className="flex flex-col gap-2 md:flex-row">
-                <input
+                <Input
                   type="url"
                   value={youtubeUrl}
                   onChange={(event) => {
@@ -741,9 +719,9 @@ export default function AudioUploader() {
                   }}
                   placeholder="https://www.youtube.com/watch?v=..."
                   disabled={isUploading || isRecording || isProcessingLecture || isYoutubeImporting}
-                  className="input w-full"
+                  className="w-full"
                 />
-                <button
+                <Button
                   type="button"
                   onClick={() => void handleYoutubeImport()}
                   disabled={
@@ -753,14 +731,13 @@ export default function AudioUploader() {
                     isYoutubeImporting ||
                     youtubeUrl.trim().length === 0
                   }
-                  className="btn-primary whitespace-nowrap"
-                  style={{ background: "#dc2626" }}
+                  className="whitespace-nowrap bg-red-600 hover:bg-red-700 text-white"
                 >
                   {isYoutubeImporting ? "Importing..." : "Add to Queue"}
-                </button>
+                </Button>
               </div>
 
-              {youtubeError && <p className="text-xs" style={{ color: "var(--color-error)" }}>{youtubeError}</p>}
+              {youtubeError && <p className="text-xs text-destructive">{youtubeError}</p>}
             </section>
           </div>
         ) : (
@@ -770,7 +747,8 @@ export default function AudioUploader() {
             disabled={isUploading || isProcessingLecture}
           />
         )}
-      </section>
+        </CardContent>
+      </Card>
 
       {(isUploading || isRecording) && (
         <div className="rounded-lg px-4 py-3 text-sm" style={{ border: "1px solid var(--color-info-muted)", background: "var(--color-info-muted)", color: "var(--color-info)" }}>
@@ -795,112 +773,109 @@ export default function AudioUploader() {
       )}
 
       {hasQueueItems && (
-        <section className="glass-panel space-y-5 p-6 animate-slide-up">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+        <Card className="animate-slide-up">
+          <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 pb-4">
             <div>
-              <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Batch Queue</h2>
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              <CardTitle>Batch Queue</CardTitle>
+              <CardDescription>
                 {waitingCount > 0
                   ? `${waitingCount} knowte${waitingCount === 1 ? "" : "s"} waiting to process.`
                   : "No waiting knowtes in queue."}
-              </p>
+              </CardDescription>
             </div>
-            <button
+            <Button
               type="button"
               onClick={() => void handleProcessAll()}
               disabled={isUploading || isRecording || isBatchRunning || waitingCount === 0}
-              className="btn-primary"
-              style={{ background: "var(--color-success)" }}
+              className="bg-green-600 hover:bg-green-700 text-white"
             >
               {isBatchRunning ? "Processing Queue..." : "Process All"}
-            </button>
-          </div>
+            </Button>
+          </CardHeader>
 
-          <ul className="space-y-2">
-            {queueItems.map((item) => {
-              const canRemove = !isBatchRunning && (item.status === "waiting" || item.status === "error");
-              const progress = item.lectureId ? transcriptionProgress[item.lectureId] : undefined;
+          <CardContent>
+            <ul className="space-y-2">
+              {queueItems.map((item) => {
+                const canRemove = !isBatchRunning && (item.status === "waiting" || item.status === "error");
+                const progress = item.lectureId ? transcriptionProgress[item.lectureId] : undefined;
 
-              return (
-                <li
-                  key={item.queueId}
-                  className="rounded-md px-3 py-3"
-                  style={{ border: "1px solid var(--border-default)", background: "var(--bg-surface-overlay)" }}
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 space-y-1">
-                      <p className="break-all text-sm font-medium" style={{ color: "var(--text-primary)" }}>{item.filename}</p>
+                return (
+                  <li
+                    key={item.queueId}
+                    className="rounded-md border bg-card text-card-foreground px-3 py-3 shadow-sm"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0 space-y-1">
+                        <p className="break-all text-sm font-medium">{item.filename}</p>
 
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className={`rounded-full border px-2 py-0.5 text-xs font-medium ${sourceBadgeClass(item.origin, item.sourceType)}`}
-                        >
-                          {sourceLabel(item.origin, item.sourceType)}
-                        </span>
-                        <span className="text-xs" style={{ color: "var(--text-muted)" }}>{stageLabel(item.stage)}</span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant={sourceBadgeVariant(item.origin, item.sourceType)}>
+                            {sourceLabel(item.origin, item.sourceType)}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">{stageLabel(item.stage)}</span>
+                        </div>
+
+                        {item.metadata ? (
+                          <p className="text-xs text-muted-foreground">
+                            {formatDuration(item.metadata.duration_seconds)} /{" "}
+                            {formatSize(item.metadata.size_bytes)}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">
+                            {item.stage === "validating url"
+                              ? "Validating YouTube URL..."
+                              : item.stage === "downloading"
+                                ? "Downloading audio stream from YouTube..."
+                                : item.stage === "extracting audio"
+                                  ? "Extracting 16kHz mono WAV..."
+                                  : "Preparing import..."}
+                          </p>
+                        )}
+
+                        <p className="break-all text-xs text-muted-foreground">{item.sourcePath}</p>
+                        {item.error && <p className="text-xs text-destructive">{item.error}</p>}
                       </div>
 
-                      {item.metadata ? (
-                        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                          {formatDuration(item.metadata.duration_seconds)} /{" "}
-                          {formatSize(item.metadata.size_bytes)}
+                      <div className="flex items-center gap-2">
+                        <Badge variant={statusBadgeVariant(item.status)}>
+                          {item.status}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          onClick={() => removeQueueItem(item.queueId)}
+                          disabled={!canRemove}
+                          className="px-2.5 py-1 text-xs"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+
+                    {activeQueueLectureId === item.lectureId && item.stage === "transcribing" && progress && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-primary">Currently transcribing...</p>
+                        <p className="text-xs text-muted-foreground">
+                          Transcription {progress.percent}%{" "}
+                          {typeof progress.chunk_index === "number" &&
+                          typeof progress.chunk_total === "number"
+                            ? `• chunk ${progress.chunk_index}/${progress.chunk_total}`
+                            : ""}
+                          {typeof progress.chunk_percent === "number"
+                            ? ` • segment ${Math.round(progress.chunk_percent ?? 0)}%`
+                            : ""}
+                          {formatEta(progress.eta_seconds)
+                            ? ` • ETA ${formatEta(progress.eta_seconds)}`
+                            : ""}
                         </p>
-                      ) : (
-                        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                          {item.stage === "validating url"
-                            ? "Validating YouTube URL..."
-                            : item.stage === "downloading"
-                              ? "Downloading audio stream from YouTube..."
-                              : item.stage === "extracting audio"
-                                ? "Extracting 16kHz mono WAV..."
-                                : "Preparing import..."}
-                        </p>
-                      )}
-
-                      <p className="break-all text-xs" style={{ color: "var(--text-muted)" }}>{item.sourcePath}</p>
-                      {item.error && <p className="text-xs" style={{ color: "var(--color-error)" }}>{item.error}</p>}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`rounded-full border px-2 py-0.5 text-xs font-medium ${statusBadgeClass(item.status)}`}
-                      >
-                        {item.status}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => removeQueueItem(item.queueId)}
-                        disabled={!canRemove}
-                        className="btn-ghost px-2.5 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-
-                  {activeQueueLectureId === item.lectureId && item.stage === "transcribing" && progress && (
-                    <div className="mt-2 space-y-1">
-                      <p className="text-xs" style={{ color: "var(--color-info)" }}>Currently transcribing...</p>
-                      <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                        Transcription {progress.percent}%{" "}
-                        {typeof progress.chunk_index === "number" &&
-                        typeof progress.chunk_total === "number"
-                          ? `• chunk ${progress.chunk_index}/${progress.chunk_total}`
-                          : ""}
-                        {typeof progress.chunk_percent === "number"
-                          ? ` • segment ${Math.round(progress.chunk_percent ?? 0)}%`
-                          : ""}
-                        {formatEta(progress.eta_seconds)
-                          ? ` • ETA ${formatEta(progress.eta_seconds)}`
-                          : ""}
-                      </p>
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

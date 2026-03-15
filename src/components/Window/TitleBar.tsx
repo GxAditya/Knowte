@@ -1,6 +1,7 @@
 import { isTauri } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import type { ThemeMode } from "../../lib/types";
 
 interface TitleBarProps {
@@ -103,11 +104,11 @@ export default function TitleBar({
 
       <div className="flex items-center gap-1.5">
         {/* Theme toggle button */}
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onToggleTheme}
-          className="btn-ghost transition-transform duration-200 hover:scale-110"
-          style={{ height: "1.75rem", width: "1.75rem", padding: 0, borderRadius: "50%" }}
+          className="transition-transform duration-200 hover:scale-110 h-7 w-7 rounded-full"
           aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
         >
           {theme === "dark" ? (
@@ -119,26 +120,26 @@ export default function TitleBar({
               <path d="M12.996 2a.75.75 0 0 1 .721.954 8.25 8.25 0 1 0 7.33 10.323.75.75 0 0 1 1.423-.073A9.75 9.75 0 1 1 12.275 2.279a.75.75 0 0 1 .721-.279z" />
             </svg>
           )}
-        </button>
+        </Button>
 
         {isNative && (
           <div className="ml-1 flex items-center gap-1">
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => void handleMinimize()}
-              className="btn-ghost"
-              style={{ padding: 0, height: "1.75rem", width: "1.75rem" }}
+              className="h-7 w-7"
               aria-label="Minimize window"
             >
               <svg aria-hidden="true" className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.5}>
                 <path d="M2 6h8" />
               </svg>
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => void handleToggleMaximize()}
-              className="btn-ghost"
-              style={{ padding: 0, height: "1.75rem", width: "1.75rem" }}
+              className="h-7 w-7"
               aria-label={isMaximized ? "Restore window" : "Maximize window"}
             >
               {isMaximized ? (
@@ -151,18 +152,18 @@ export default function TitleBar({
                   <rect x="2" y="2" width="8" height="8" rx="1" />
                 </svg>
               )}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => void handleClose()}
-              className="btn-ghost transition-colors hover:bg-[var(--color-error-subtle)] hover:text-[var(--color-error)]"
-              style={{ padding: 0, height: "1.75rem", width: "1.75rem" }}
+              className="transition-colors hover:bg-destructive-foreground hover:bg-opacity-20 hover:text-destructive h-7 w-7"
               aria-label="Close window"
             >
               <svg aria-hidden="true" className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.5}>
                 <path d="M3 3l6 6M9 3l-6 6" />
               </svg>
-            </button>
+            </Button>
           </div>
         )}
       </div>

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { exportFlashcardsAnki, exportFlashcardsTsv } from "../../lib/tauriApi";
 import { useToastStore } from "../../stores";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 interface AnkiExportProps {
   lectureId: string;
@@ -55,10 +57,10 @@ export default function AnkiExport({ lectureId, cardCount }: AnkiExportProps) {
   };
 
   return (
-    <div className="bg-[var(--bg-elevated)]/50 border border-[var(--border-default)]/50 rounded-2xl p-5 space-y-4">
+    <div className="bg-card/50 border border-border/50 shadow-sm rounded-2xl p-5 space-y-4">
       <div className="flex items-center gap-2">
-        <span className="text-base font-semibold text-[var(--text-secondary)]">Export</span>
-        <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] rounded-full px-2 py-0.5">
+        <span className="text-base font-semibold text-foreground">Export</span>
+        <span className="text-xs text-muted-foreground bg-accent rounded-full px-2 py-0.5">
           {cardCount} cards
         </span>
       </div>
@@ -67,35 +69,27 @@ export default function AnkiExport({ lectureId, cardCount }: AnkiExportProps) {
         {/* Anki .apkg export */}
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-[var(--text-secondary)]">Anki Package (.apkg)</p>
-            <p className="text-xs text-[var(--text-muted)] truncate">
+            <p className="text-sm font-medium text-foreground">Anki Package (.apkg)</p>
+            <p className="text-xs text-muted-foreground truncate">
               Import directly into Anki desktop app
             </p>
           </div>
-          <button
+          <Button
             type="button"
             data-hotkey-export="true"
             onClick={handleAnkiExport}
             disabled={ankiState === "loading"}
-            className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`shrink-0 flex items-center gap-1.5 h-8 text-xs font-medium transition-all ${
               ankiState === "success"
-                ? "bg-[var(--color-success-muted)] text-[var(--color-success)] border border-[var(--color-success-muted)]"
+                ? "bg-green-500/10 text-green-500 hover:bg-green-500/20 border-transparent shadow-none"
                 : ankiState === "error"
-                  ? "bg-[var(--color-error-muted)] text-[var(--color-error)] border border-[var(--color-error)]/50"
-                  : "bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] text-white"
-            } disabled:opacity-60 disabled:cursor-not-allowed`}
+                  ? "bg-destructive/10 text-destructive hover:bg-destructive/20 border-transparent shadow-none"
+                  : ""
+            }`}
           >
             {ankiState === "loading" ? (
               <>
-                <svg
-                  aria-hidden="true"
-                  className="w-3.5 h-3.5 animate-spin"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
+                <Spinner className="mr-2 size-3.5" />
                 Exporting…
               </>
             ) : ankiState === "success" ? (
@@ -119,50 +113,43 @@ export default function AnkiExport({ lectureId, cardCount }: AnkiExportProps) {
                 Export .apkg
               </>
             )}
-          </button>
+          </Button>
         </div>
 
         {ankiState === "success" && ankiPath && (
-          <div className="bg-[var(--color-success-muted)] border border-[var(--color-success-muted)] rounded-lg px-3 py-2">
-            <p className="text-xs text-[var(--color-success)] font-medium">Saved to:</p>
-            <p className="text-xs text-[var(--color-success)] truncate font-mono mt-0.5">{ankiPath}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1.5">
-              In Anki: <span className="text-[var(--text-secondary)] font-medium">File → Import</span> → select the .apkg file
+          <div className="bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">
+            <p className="text-xs text-green-500 font-medium">Saved to:</p>
+            <p className="text-xs text-green-500/90 truncate font-mono mt-0.5">{ankiPath}</p>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              In Anki: <span className="text-foreground font-medium">File → Import</span> → select the .apkg file
             </p>
           </div>
         )}
 
         {/* TSV export */}
-        <div className="flex items-center justify-between gap-3 pt-1 border-t border-[var(--border-default)]/50">
+        <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/50">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-[var(--text-secondary)]">Tab-Separated (.txt)</p>
-            <p className="text-xs text-[var(--text-muted)] truncate">
+            <p className="text-sm font-medium text-foreground">Tab-Separated (.txt)</p>
+            <p className="text-xs text-muted-foreground truncate">
               Import via Anki → File → Import (text format)
             </p>
           </div>
-          <button
+          <Button
+            variant="secondary"
             type="button"
             onClick={handleTsvExport}
             disabled={tsvState === "loading"}
-            className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`shrink-0 flex items-center gap-1.5 h-8 text-xs font-medium transition-all ${
               tsvState === "success"
-                ? "bg-[var(--color-success-muted)] text-[var(--color-success)] border border-[var(--color-success-muted)]"
+                ? "bg-green-500/10 text-green-500 hover:bg-green-500/20 border-transparent shadow-none"
                 : tsvState === "error"
-                  ? "bg-[var(--color-error-muted)] text-[var(--color-error)] border border-[var(--color-error)]/50"
-                  : "bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] border border-[var(--border-strong)]"
-            } disabled:opacity-60 disabled:cursor-not-allowed`}
+                  ? "bg-destructive/10 text-destructive hover:bg-destructive/20 border-transparent shadow-none"
+                  : ""
+            }`}
           >
             {tsvState === "loading" ? (
               <>
-                <svg
-                  aria-hidden="true"
-                  className="w-3.5 h-3.5 animate-spin"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
+                <Spinner className="mr-2 size-3.5" />
                 Exporting…
               </>
             ) : tsvState === "success" ? (
@@ -186,22 +173,22 @@ export default function AnkiExport({ lectureId, cardCount }: AnkiExportProps) {
                 Export .txt
               </>
             )}
-          </button>
+          </Button>
         </div>
 
         {tsvState === "success" && tsvPath && (
-          <div className="bg-[var(--color-success-muted)] border border-[var(--color-success-muted)] rounded-lg px-3 py-2">
-            <p className="text-xs text-[var(--color-success)] font-medium">Saved to:</p>
-            <p className="text-xs text-[var(--color-success)] truncate font-mono mt-0.5">{tsvPath}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1.5">
-              In Anki: <span className="text-[var(--text-secondary)] font-medium">File → Import</span> → select the .txt file → ensure separator is Tab
+          <div className="bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">
+            <p className="text-xs text-green-500 font-medium">Saved to:</p>
+            <p className="text-xs text-green-500/90 truncate font-mono mt-0.5">{tsvPath}</p>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              In Anki: <span className="text-foreground font-medium">File → Import</span> → select the .txt file → ensure separator is Tab
             </p>
           </div>
         )}
 
         {error && (
-          <div className="bg-[var(--color-error-muted)] border border-[var(--color-error-muted)] rounded-lg px-3 py-2">
-            <p className="text-xs text-[var(--color-error)]">{error}</p>
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
+            <p className="text-xs text-destructive">{error}</p>
           </div>
         )}
       </div>

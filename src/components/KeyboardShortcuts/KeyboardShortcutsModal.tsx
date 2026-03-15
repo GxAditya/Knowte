@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { GLOBAL_SHORTCUTS, LECTURE_VIEW_SHORTCUTS } from "../../lib/hotkeys";
+import { Button } from "@/components/ui/button";
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean;
@@ -69,15 +70,15 @@ export default function KeyboardShortcutsModal({
               Use these shortcuts to navigate and control Knowte faster.
             </p>
           </div>
-          <button
+          <Button
+            variant="ghost"
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
             aria-label="Close keyboard shortcuts dialog"
-            className="btn-ghost"
           >
             Close
-          </button>
+          </Button>
         </header>
 
         <div className="grid gap-6 md:grid-cols-2">

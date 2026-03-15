@@ -7,6 +7,7 @@ import {
 } from "../../lib/constants";
 import { acceptAudioFile, pickAudioFiles } from "../../lib/tauriApi";
 import type { AudioFileMetadata, LectureSourceType } from "../../lib/types";
+import { Button } from "@/components/ui/button";
 
 export interface UploadStageUpdate {
   key: string;
@@ -221,14 +222,14 @@ export default function DropZone({
         <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
           Supported: {SUPPORTED_MEDIA_EXTENSIONS.map((ext) => `.${ext}`).join(", ")}
         </p>
-        <button
+        <Button
           type="button"
           onClick={() => void handleBrowseClick()}
           disabled={disabled || isProcessing}
-          className="btn-primary mt-6"
+          className="mt-6"
         >
           {isProcessing ? "Importing..." : "Browse files"}
-        </button>
+        </Button>
 
         {isProcessing && (
           <div className="mt-5 space-y-1">

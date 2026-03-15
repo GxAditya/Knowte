@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { Paper } from "../../lib/types";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface PaperCardProps {
   paper: Paper;
@@ -34,34 +36,34 @@ export default function PaperCard({ paper }: PaperCardProps) {
         : `${paper.authors[0]} et al.`;
 
   return (
-    <div className="glass-panel p-5 space-y-4 hover:border-[var(--accent-primary)] hover:shadow-[var(--card-shadow-hover)] transition-all duration-300">
+    <div className="bg-card p-5 space-y-4 rounded-xl border border-border hover:border-primary hover:shadow-md transition-all duration-300">
       {/* Header row */}
       <div className="space-y-1">
-        <h3 className="text-sm font-semibold text-[var(--text-primary)] leading-snug line-clamp-2">
+        <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-2">
           {paper.title}
         </h3>
-        <p className="text-xs text-[var(--text-muted)]">{authorLine}</p>
+        <p className="text-xs text-muted-foreground">{authorLine}</p>
       </div>
 
       {/* Meta badges */}
       <div className="flex flex-wrap gap-2 text-xs">
         {paper.year != null && (
-          <span className="badge badge-neutral">
+          <Badge variant="secondary" className="font-normal">
             {paper.year}
-          </span>
+          </Badge>
         )}
         {paper.venue && (
-          <span className="badge badge-neutral truncate max-w-[200px]">
+          <Badge variant="secondary" className="font-normal truncate max-w-[200px]">
             {paper.venue}
-          </span>
+          </Badge>
         )}
-        <span className="badge badge-info whitespace-nowrap">
+        <Badge variant="outline" className="font-normal whitespace-nowrap bg-blue-500/10 text-blue-600 border-blue-500/20">
           {paper.citation_count.toLocaleString()} citations
-        </span>
+        </Badge>
         {paper.pdf_url && (
-          <span className="badge badge-success whitespace-nowrap">
+          <Badge variant="outline" className="font-normal whitespace-nowrap bg-green-500/10 text-green-600 border-green-500/20">
             Open Access PDF
-          </span>
+          </Badge>
         )}
       </div>
 
@@ -70,12 +72,12 @@ export default function PaperCard({ paper }: PaperCardProps) {
         <div>
           <button
             onClick={() => setExpanded((v) => !v)}
-            className="text-xs text-[var(--accent-primary)] hover:text-[var(--color-info)] transition-colors"
+            className="text-xs text-primary hover:text-primary/80 transition-colors"
           >
             {expanded ? "Hide abstract ▲" : "View abstract ▼"}
           </button>
           {expanded && (
-            <p className="mt-2 text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-5">
+            <p className="mt-2 text-xs text-muted-foreground leading-relaxed line-clamp-5">
               {paper.abstract_text}
             </p>
           )}
@@ -84,19 +86,20 @@ export default function PaperCard({ paper }: PaperCardProps) {
 
       {/* Action buttons */}
       <div className="flex gap-2 pt-1">
-        <button
+        <Button
           onClick={handleOpenPaper}
-          className="btn-primary !px-4 !py-1.5 !text-xs !rounded-md"
+          variant="secondary"
+          className="h-8 px-4 py-1.5 text-xs rounded-md"
         >
           Open Paper ↗
-        </button>
+        </Button>
         {paper.pdf_url && (
-          <button
+          <Button
             onClick={handleOpenPdf}
-            className="px-4 py-1.5 text-xs font-bold text-white bg-[var(--color-success)] hover:brightness-110 rounded-md shadow-[var(--card-shadow-success)] transition-all"
+            className="h-8 px-4 py-1.5 text-xs font-bold text-white bg-green-600 hover:bg-green-700 rounded-md shadow-sm transition-all"
           >
             Download PDF ↓
-          </button>
+          </Button>
         )}
       </div>
     </div>

@@ -7,6 +7,8 @@ import { parseStructuredNotesJson } from "../lib/generatedContent";
 import { getNotes, regenerateNotes } from "../lib/tauriApi";
 import type { StructuredNotes } from "../lib/types";
 import { useLectureStore, usePipelineStore, useToastStore, useUiStore } from "../stores";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 // ─── Table of Contents ────────────────────────────────────────────────────────
 
@@ -53,7 +55,7 @@ function TableOfContents({ items, activeId }: TableOfContentsProps) {
 
   return (
     <nav className="space-y-1">
-      <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
         Contents
       </p>
       {items.map((item) => (
@@ -61,8 +63,8 @@ function TableOfContents({ items, activeId }: TableOfContentsProps) {
           key={item.id}
           onClick={() => scrollTo(item.id)}
           className={`block w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors ${activeId === item.id
-              ? "text-[var(--accent-primary)] bg-[var(--accent-glow)] font-medium"
-              : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+              ? "text-primary bg-primary/10 font-medium"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted"
             } ${item.level === "h2" ? "pl-3" : "pl-5"}`}
         >
           {item.label}
@@ -115,7 +117,7 @@ function EmptyState({
 }) {
   if (reason === "no-lecture") {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-2">
+      <div className="flex flex-col items-center justify-center h-64 text-muted-foreground space-y-2">
         <span className="text-4xl">📝</span>
         <p className="text-sm">No knowte selected.</p>
         <p className="text-xs">Add and process a knowte to view notes.</p>
@@ -123,12 +125,12 @@ function EmptyState({
     );
   }
   return (
-    <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-2">
+    <div className="flex flex-col items-center justify-center h-64 text-muted-foreground space-y-2">
       <span className="text-4xl">📝</span>
-      <p className="text-sm font-medium text-[var(--text-secondary)]">No notes generated yet.</p>
+      <p className="text-sm font-medium text-foreground">No notes generated yet.</p>
       <p className="text-xs">Run the processing pipeline to generate structured notes.</p>
       {detail && (
-        <p className="max-w-md rounded-lg border border-[var(--color-error-muted)] bg-[var(--color-error-muted)] px-4 py-2 text-center text-xs text-[var(--color-error)]">
+        <p className="max-w-md rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-center text-xs text-destructive">
           {detail}
         </p>
       )}
@@ -276,33 +278,31 @@ export default function Notes() {
     return (
       <div className={notesContainerClass}>
         <ViewHeader title="Notes" description={currentLecture.filename} />
-        <div className="rounded-lg border border-[var(--color-error-muted)] bg-[var(--color-error-muted)] p-4 text-[var(--color-error)] text-sm">
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive text-sm">
           <p className="font-medium mb-1">Failed to load notes</p>
           <p className="text-xs opacity-80">{error}</p>
         </div>
         <div className="flex gap-3">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={() => void loadNotes()}
-            className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
           >
             Retry
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
             onClick={() => void handleRegenerate()}
             disabled={isRegenerating}
-            className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-[var(--accent-primary-hover)]"
+            className="flex items-center gap-2"
           >
             {isRegenerating ? (
               <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <Spinner className="mr-2 size-4" />
                 Regenerating…
               </>
             ) : (
               "Regenerate Notes"
             )}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -316,20 +316,20 @@ export default function Notes() {
           title="Notes"
           description={currentLecture.filename}
           actions={
-            <button
+            <Button
               onClick={handleRegenerate}
               disabled={isRegenerating}
-              className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-[var(--accent-primary-hover)]"
+              className="flex items-center gap-2"
             >
               {isRegenerating ? (
                 <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <Spinner className="mr-2 size-4" />
                   Generating…
                 </>
               ) : (
                 "Generate Notes"
               )}
-            </button>
+            </Button>
           }
         />
         <EmptyState reason="no-notes" detail={notesStageError} />
@@ -345,33 +345,33 @@ export default function Notes() {
         description={currentLecture.filename}
         actions={
           <div className="flex items-center gap-2">
-            <button
-              type="button"
+            <Button
+              variant="outline"
               onClick={() => setIsOutlineOpen((previous) => !previous)}
-              className="rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all duration-150 hover:bg-[var(--bg-surface-overlay)] hover:border-[var(--accent-primary)] hover:text-[var(--text-primary)] active:scale-[0.97]"
             >
               {isOutlineOpen ? "Hide Outline" : "Show Outline"}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
               onClick={handleRegenerate}
               disabled={isRegenerating}
-              className="flex items-center gap-2 rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--border-strong)] disabled:opacity-60"
+              className="flex items-center gap-2"
             >
               {isRegenerating ? (
                 <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--border-default)] border-t-transparent" />
+                  <Spinner className="mr-2 size-4" />
                   Regenerating…
                 </>
               ) : (
                 "Regenerate"
               )}
-            </button>
+            </Button>
           </div>
         }
       />
 
       {isOutlineOpen && (
-        <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4 shadow-sm lg:hidden">
+        <div className="rounded-lg border border-border bg-card p-4 shadow-sm lg:hidden">
           <TableOfContents items={tocItems} activeId={activeId} />
         </div>
       )}
@@ -379,7 +379,7 @@ export default function Notes() {
       <div className="relative flex h-full gap-6">
         {isOutlineOpen && (
           <aside className="hidden w-56 flex-shrink-0 lg:block">
-            <div className="sticky top-6 rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-3 shadow-sm">
+            <div className="sticky top-6 rounded-lg border border-border bg-card p-3 shadow-sm">
               <TableOfContents items={tocItems} activeId={activeId} />
             </div>
           </aside>

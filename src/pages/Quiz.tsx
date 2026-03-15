@@ -7,6 +7,8 @@ import { parseQuizJson } from "../lib/generatedContent";
 import { getQuiz, regenerateQuiz, saveQuizAttempt } from "../lib/tauriApi";
 import type { Quiz } from "../lib/types";
 import { useLectureStore, usePipelineStore, useToastStore } from "../stores";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 // ─── Empty States ─────────────────────────────────────────────────────────────
 
@@ -19,7 +21,7 @@ function EmptyState({
 }) {
   if (reason === "no-lecture") {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-2">
+      <div className="flex flex-col items-center justify-center h-64 text-muted-foreground space-y-2">
         <span className="text-4xl">🧠</span>
         <p className="text-sm">No knowte selected.</p>
         <p className="text-xs">Add and process a knowte to take a quiz.</p>
@@ -27,12 +29,12 @@ function EmptyState({
     );
   }
   return (
-    <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-2">
+    <div className="flex flex-col items-center justify-center h-64 text-muted-foreground space-y-2">
       <span className="text-4xl">🧠</span>
-      <p className="text-sm font-medium text-[var(--text-secondary)]">No quiz generated yet.</p>
+      <p className="text-sm font-medium text-foreground">No quiz generated yet.</p>
       <p className="text-xs">Run the processing pipeline to generate a quiz.</p>
       {detail && (
-        <p className="max-w-md rounded-lg border border-[var(--color-error-muted)] bg-[var(--color-error-muted)] px-4 py-2 text-center text-xs text-[var(--color-error)]">
+        <p className="max-w-md rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-center text-xs text-destructive">
           {detail}
         </p>
       )}
@@ -202,33 +204,31 @@ export default function Quiz() {
           title="Quiz"
           description="Practice key concepts from your knowte."
         />
-        <div className="rounded-lg border border-[var(--color-error-muted)] bg-[var(--color-error-muted)] p-4 text-[var(--color-error)] text-sm">
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive text-sm">
           <p className="font-medium mb-1">Failed to load quiz</p>
           <p className="text-xs opacity-80">{error}</p>
         </div>
         <div className="flex gap-3">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={() => void loadQuiz()}
-            className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
           >
             Retry
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
             onClick={() => void handleRegenerateQuiz()}
             disabled={isRegenerating}
-            className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-[var(--accent-primary-hover)]"
+            className="flex items-center gap-2"
           >
             {isRegenerating ? (
               <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <Spinner className="mr-2 size-4" />
                 Regenerating…
               </>
             ) : (
               "Regenerate Quiz"
             )}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -241,20 +241,20 @@ export default function Quiz() {
           title="Quiz"
           description="Practice key concepts from your knowte."
           actions={
-            <button
+            <Button
               onClick={handleRegenerateQuiz}
               disabled={isRegenerating}
-              className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-[var(--accent-primary-hover)]"
+              className="flex items-center gap-2"
             >
               {isRegenerating ? (
                 <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <Spinner className="mr-2 size-4" />
                   Generating…
                 </>
               ) : (
                 "Generate Quiz"
               )}
-            </button>
+            </Button>
           }
         />
         <EmptyState reason="no-quiz" detail={quizStageError} />
@@ -270,20 +270,21 @@ export default function Quiz() {
         description={`${quiz.questions.length} question${quiz.questions.length !== 1 ? "s" : ""}`}
         actions={
           !showResults ? (
-            <button
+            <Button
+              variant="outline"
               onClick={handleRegenerateQuiz}
               disabled={isRegenerating}
-              className="flex items-center gap-2 rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] disabled:opacity-60 hover:bg-[var(--border-strong)]"
+              className="flex items-center gap-2"
             >
               {isRegenerating ? (
                 <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--border-default)] border-t-transparent" />
+                  <Spinner className="mr-2 size-4" />
                   Regenerating…
                 </>
               ) : (
                 "Regenerate"
               )}
-            </button>
+            </Button>
           ) : null
         }
       />

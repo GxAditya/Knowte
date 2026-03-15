@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import ProgressTracker from "../components/Pipeline/ProgressTracker";
 import { ViewHeader } from "../components/Layout";
 import { useLectureStore } from "../stores";
+import { Button } from "@/components/ui/button";
 
 export default function Pipeline() {
   const navigate = useNavigate();
@@ -32,45 +33,45 @@ export default function Pipeline() {
           onPipelineComplete={handlePipelineComplete}
         />
       ) : (
-        <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] px-6 py-10 text-center text-[var(--text-muted)] shadow-sm">
+        <div className="rounded-lg border border-border bg-card px-6 py-10 text-center text-muted-foreground shadow-sm">
           No knowte selected. Please add and process a knowte first.
         </div>
       )}
 
       {/* Navigation shortcuts */}
       <div className="flex flex-wrap gap-3 pt-2">
-        <button
+        <Button
+          variant="secondary"
           type="button"
           onClick={() => currentLectureId && navigate(`/lecture/${currentLectureId}/notes`)}
           disabled={!currentLectureId}
-          className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
         >
           View Notes
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="secondary"
           type="button"
           onClick={() => currentLectureId && navigate(`/lecture/${currentLectureId}/quiz`)}
           disabled={!currentLectureId}
-          className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
         >
           View Quiz
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="secondary"
           type="button"
           onClick={() => currentLectureId && navigate(`/lecture/${currentLectureId}/flashcards`)}
           disabled={!currentLectureId}
-          className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
         >
           View Flashcards
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="secondary"
           type="button"
           onClick={() => currentLectureId && navigate(`/lecture/${currentLectureId}/mindmap`)}
           disabled={!currentLectureId}
-          className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
         >
           View Mind Map
-        </button>
+        </Button>
       </div>
     </div>
   );

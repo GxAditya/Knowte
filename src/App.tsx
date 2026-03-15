@@ -10,7 +10,8 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { KeyboardShortcutsModal, SetupWizard, Sidebar, TitleBar } from "./components";
-import { ToastViewport } from "./components/Toast";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { useHotkeys } from "./hooks";
 import { HOTKEY_EVENT_NAMES, LECTURE_VIEW_SHORTCUTS } from "./lib/hotkeys";
 import { getLectureSummary, listLectures } from "./lib/tauriApi";
@@ -463,8 +464,10 @@ function AppLayout() {
 function App() {
   return (
     <BrowserRouter>
-      <AppLayout />
-      <ToastViewport />
+      <TooltipProvider>
+        <AppLayout />
+        <Toaster />
+      </TooltipProvider>
     </BrowserRouter>
   );
 }

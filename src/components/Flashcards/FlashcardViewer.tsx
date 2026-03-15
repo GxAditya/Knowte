@@ -2,6 +2,8 @@ import { type CSSProperties, useCallback, useEffect, useRef, useState } from "re
 import { List, type RowComponentProps } from "react-window";
 import { HOTKEY_EVENT_NAMES } from "../../lib/hotkeys";
 import type { Flashcard } from "../../lib/types";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -117,7 +119,7 @@ function FlashcardDisplay({
       >
         {/* Front */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-start glass-panel !rounded-2xl p-8 transition-transform duration-500 overflow-y-auto"
+          className="absolute inset-0 flex flex-col items-center justify-start bg-card border border-border shadow-sm rounded-2xl p-8 transition-transform duration-500 overflow-y-auto"
           style={
             prefersReducedMotion
               ? {
@@ -127,18 +129,18 @@ function FlashcardDisplay({
               : { backfaceVisibility: "hidden" }
           }
         >
-          <span className="text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-4 shrink-0">
+          <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4 shrink-0">
             Front
           </span>
-          <p className="text-base font-medium text-[var(--text-primary)] text-center leading-relaxed w-full break-words">
+          <p className="text-base font-medium text-foreground text-center leading-relaxed w-full break-words">
             {front}
           </p>
-          <span className="mt-6 text-xs text-[var(--text-muted)] shrink-0">Click to reveal answer</span>
+          <span className="mt-6 text-xs text-muted-foreground shrink-0">Click to reveal answer</span>
         </div>
 
         {/* Back */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-start glass-panel shadow-[var(--card-shadow-glow)] border-[var(--accent-primary)]/30 !rounded-2xl p-8 transition-transform duration-500 overflow-y-auto"
+          className="absolute inset-0 flex flex-col items-center justify-start bg-card border border-primary/30 shadow-md rounded-2xl p-8 transition-transform duration-500 overflow-y-auto"
           style={{
             ...(prefersReducedMotion
               ? {
@@ -151,21 +153,21 @@ function FlashcardDisplay({
                 }),
           }}
         >
-          <span className="text-xs font-semibold uppercase tracking-widest text-[var(--accent-primary)] mb-4 shrink-0">
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary mb-4 shrink-0">
             Back
           </span>
-          <p className="text-base font-medium text-[var(--text-primary)] text-center leading-relaxed w-full break-words">
+          <p className="text-base font-medium text-foreground text-center leading-relaxed w-full break-words">
             {back}
           </p>
           {tags.length > 0 && (
             <div className="flex flex-wrap justify-center gap-1.5 mt-5">
               {tags.map((tag) => (
-                <span
+                <Badge
                   key={tag}
-                  className="badge badge-primary"
+                  variant="default"
                 >
                   {tag}
-                </span>
+                </Badge>
               ))}
             </div>
           )}
@@ -189,41 +191,42 @@ function StudyComplete({ stats, total, onReviewAll, onReviewWeak }: StudyComplet
   return (
     <div className="flex flex-col items-center justify-center gap-6 py-12">
       <div className="text-5xl">🎉</div>
-      <h2 className="text-2xl font-bold text-[var(--text-primary)]">Round Complete!</h2>
+      <h2 className="text-2xl font-bold text-foreground">Round Complete!</h2>
       <div className="flex gap-6 text-center">
         <div className="flex flex-col items-center">
-          <span className="text-3xl font-bold text-[var(--color-success)]">{stats.known}</span>
-          <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide mt-1">Know it</span>
+          <span className="text-3xl font-bold text-green-500">{stats.known}</span>
+          <span className="text-xs text-muted-foreground uppercase tracking-wide mt-1">Know it</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-3xl font-bold text-[var(--color-warning)]">{stats.almost}</span>
-          <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide mt-1">Almost</span>
+          <span className="text-3xl font-bold text-amber-500">{stats.almost}</span>
+          <span className="text-xs text-muted-foreground uppercase tracking-wide mt-1">Almost</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-3xl font-bold text-[var(--color-error)]">{stats.unknown}</span>
-          <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide mt-1">No clue</span>
+          <span className="text-3xl font-bold text-destructive">{stats.unknown}</span>
+          <span className="text-xs text-muted-foreground uppercase tracking-wide mt-1">No clue</span>
         </div>
       </div>
-      <p className="text-sm text-[var(--text-muted)]">
+      <p className="text-sm text-muted-foreground">
         You know {stats.known} of {total} cards ({Math.round((stats.known / total) * 100)}%)
       </p>
       <div className="flex gap-3 flex-wrap justify-center">
         {weakCount > 0 && (
-          <button
+          <Button
+            variant="ghost"
             type="button"
             onClick={onReviewWeak}
-            className="btn-ghost text-[var(--color-warning)] hover:text-[var(--color-warning)] hover:bg-[var(--color-warning-muted)]"
+            className="text-amber-500 hover:text-amber-600 hover:bg-amber-500/10"
           >
             Review weak cards ({weakCount})
-          </button>
+          </Button>
         )}
-        <button
+        <Button
+          variant="secondary"
           type="button"
           onClick={onReviewAll}
-            className="btn-secondary"
         >
           Review all again
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -254,7 +257,7 @@ function VirtualizedCardIndex({
         type="button"
         onClick={() => rowSelect(index)}
         className={`flex w-full items-center justify-between px-2 text-left text-xs transition-colors ${
-          isActive ? "bg-[var(--accent-primary)]/30 text-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+          isActive ? "bg-primary/20 text-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
         }`}
         style={style}
       >
@@ -263,21 +266,21 @@ function VirtualizedCardIndex({
             ? entry.card.front
             : "Untitled card"}
         </span>
-        <span className="text-[10px] uppercase text-[var(--text-muted)]">{entry.pile}</span>
+        <span className="text-[10px] uppercase text-muted-foreground">{entry.pile}</span>
       </button>
     );
   };
 
   return (
-    <div className="glass-panel p-4">
+    <div className="bg-card border border-border shadow-sm rounded-lg p-4">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Card Index (Virtualized)
         </p>
-        <p className="text-[11px] text-[var(--text-muted)]">{cards.length} cards</p>
+        <p className="text-[11px] text-muted-foreground">{cards.length} cards</p>
       </div>
       <List
-        className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)]/40 shadow-inner"
+        className="rounded-md border border-border bg-background/40 shadow-inner"
         rowComponent={Row}
         rowCount={cards.length}
         rowHeight={rowHeight}
@@ -439,11 +442,11 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-sm text-[var(--text-muted)] font-medium">
+          <span className="text-sm text-muted-foreground font-medium">
             {studyMode ? "Study Mode" : "Browse Mode"}
           </span>
           {studyMode && !studyComplete && (
-            <span className="text-xs text-[var(--text-muted)]">
+            <span className="text-xs text-muted-foreground">
               {currentIndex + 1} / {cardStates.length}
             </span>
           )}
@@ -451,10 +454,11 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
         <div className="flex items-center gap-2">
           {!studyMode && (
             <>
-              <button
+              <Button
+                variant="ghost"
                 type="button"
                 onClick={shuffle}
-                className="btn-ghost flex items-center gap-1.5 !px-3 !py-1.5 !text-xs"
+                className="flex items-center gap-1.5 h-8 text-xs"
                 title="Shuffle cards"
               >
                 <svg
@@ -471,24 +475,25 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
                   <line x1="15" y1="15" x2="21" y2="21" />
                 </svg>
                 Shuffle
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={startStudyMode}
-                className="btn-primary flex items-center gap-1.5 !px-3 !py-1.5 !text-xs"
+                className="flex items-center gap-1.5 h-8 text-xs"
               >
                 Study Mode
-              </button>
+              </Button>
             </>
           )}
           {studyMode && (
-            <button
+            <Button
+              variant="ghost"
               type="button"
               onClick={endStudyMode}
-              className="btn-ghost flex items-center gap-1.5 !px-3 !py-1.5 !text-xs"
+              className="flex items-center gap-1.5 h-8 text-xs"
             >
               Exit Study Mode
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -505,7 +510,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
         <>
           {/* ── Card Counter (browse mode) ── */}
           {!studyMode && (
-            <div className="text-center text-xs text-[var(--text-muted)]">
+            <div className="text-center text-xs text-muted-foreground">
               Card {currentIndex + 1} of {cardStates.length}
             </div>
           )}
@@ -524,12 +529,12 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
           {!studyMode && !isFlipped && currentCard?.card.tags.length > 0 && (
             <div className="flex flex-wrap justify-center gap-1.5">
               {currentCard.card.tags.map((tag) => (
-                <span
+                <Badge
                   key={tag}
-                  className="badge badge-neutral"
+                  variant="secondary"
                 >
                   {tag}
-                </span>
+                </Badge>
               ))}
             </div>
           )}
@@ -537,11 +542,12 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
           {/* ── Navigation (browse mode) ── */}
           {!studyMode && (
             <div className="flex items-center justify-center gap-4">
-              <button
+              <Button
+                variant="ghost"
                 type="button"
                 onClick={goPrev}
                 disabled={currentIndex === 0}
-                className="btn-ghost flex items-center gap-1.5"
+                className="flex items-center gap-1.5"
               >
                 <svg
                   aria-hidden="true"
@@ -554,19 +560,20 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
                 Previous
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="secondary"
                 type="button"
                 onClick={() => setIsFlipped((f) => !f)}
-                className="btn-secondary !px-5 !py-2"
               >
                 {isFlipped ? "Hide answer" : "Show answer"}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 type="button"
                 onClick={goNext}
                 disabled={currentIndex === cardStates.length - 1}
-                className="btn-ghost flex items-center gap-1.5"
+                className="flex items-center gap-1.5"
               >
                 Next
                 <svg
@@ -579,7 +586,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
                 >
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
-              </button>
+              </Button>
             </div>
           )}
 
@@ -598,36 +605,39 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
           {studyMode && !studyComplete && (
             <div className="flex flex-col items-center gap-3">
               {!isFlipped && (
-                <p className="text-xs text-[var(--text-muted)] text-center">Flip the card first, then rate yourself</p>
+                <p className="text-xs text-muted-foreground text-center">Flip the card first, then rate yourself</p>
               )}
               <div className="flex gap-3 flex-wrap justify-center">
-                <button
+                <Button
+                  variant="outline"
                   type="button"
                   onClick={() => sortCard("unknown")}
                   disabled={!isFlipped}
-                  className="glass-panel flex flex-col items-center !px-5 !py-3 text-[var(--color-error)] border border-transparent hover:border-[var(--color-error)]/30 hover:bg-[var(--color-error-muted)] transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[90px]"
+                  className="h-auto flex-col items-center px-5 py-3 text-destructive border-transparent hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive min-w-[90px]"
                 >
                   <span className="text-lg">✗</span>
                   <span className="text-xs mt-0.5">No clue</span>
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="outline"
                   type="button"
                   onClick={() => sortCard("almost")}
                   disabled={!isFlipped}
-                  className="glass-panel flex flex-col items-center !px-5 !py-3 text-[var(--color-warning)] border border-transparent hover:border-[var(--color-warning)]/30 hover:bg-[var(--color-warning-subtle)] transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[90px]"
+                  className="h-auto flex-col items-center px-5 py-3 text-amber-500 border-transparent hover:border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-500 min-w-[90px]"
                 >
                   <span className="text-lg">~</span>
                   <span className="text-xs mt-0.5">Almost</span>
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="outline"
                   type="button"
                   onClick={() => sortCard("known")}
                   disabled={!isFlipped}
-                  className="glass-panel flex flex-col items-center !px-5 !py-3 text-[var(--color-success)] border border-transparent hover:border-[var(--color-success)]/30 hover:bg-[var(--color-success-muted)] transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[90px]"
+                  className="h-auto flex-col items-center px-5 py-3 text-green-500 border-transparent hover:border-green-500/30 hover:bg-green-500/10 hover:text-green-500 min-w-[90px]"
                 >
                   <span className="text-lg">✓</span>
                   <span className="text-xs mt-0.5">Know it</span>
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -635,7 +645,7 @@ export default function FlashcardViewer({ cards }: FlashcardViewerProps) {
       )}
 
       {/* ── Keyboard shortcuts hint ── */}
-      <div className="flex justify-center gap-4 text-[10px] text-[var(--text-muted)] mt-auto">
+      <div className="flex justify-center gap-4 text-[10px] text-muted-foreground mt-auto">
         <span>← → Navigate</span>
         <span>Space / Enter Flip</span>
       </div>

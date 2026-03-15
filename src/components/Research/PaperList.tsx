@@ -1,6 +1,17 @@
 import { useMemo, useState } from "react";
 import type { Paper } from "../../lib/types";
 import PaperCard from "./PaperCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type SortKey = "citations" | "year" | "relevance";
 
@@ -48,76 +59,71 @@ export default function PaperList({ papers, isLoading, onRefresh }: PaperListPro
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
-          <label className="text-xs text-[var(--text-muted)] whitespace-nowrap">Sort by:</label>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortKey)}
-            className="input text-xs px-3 py-1.5 !min-h-0"
-          >
-            <option value="citations">Citations</option>
-            <option value="year">Year (newest first)</option>
-            <option value="relevance">Relevance</option>
-          </select>
+          <label className="text-xs text-muted-foreground whitespace-nowrap">Sort by:</label>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortKey)}>
+            <SelectTrigger className="h-8 w-[140px] text-xs">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="citations">Citations</SelectItem>
+              <SelectItem value="year">Year (newest first)</SelectItem>
+              <SelectItem value="relevance">Relevance</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <label className="flex items-center gap-1.5 cursor-pointer">
-          <input
-            type="checkbox"
+        <label className="flex items-center gap-2 cursor-pointer">
+          <Switch
             checked={filterPdfOnly}
-            onChange={(e) => setFilterPdfOnly(e.target.checked)}
-            className="toggle-knob sr-only"
+            onCheckedChange={setFilterPdfOnly}
           />
-          <div className="toggle-track shrink-0" data-checked={filterPdfOnly || undefined}>
-            <div className="toggle-knob" />
-          </div>
-          <span className="text-xs font-medium text-[var(--text-primary)]">PDF only</span>
+          <span className="text-xs font-medium text-foreground">PDF only</span>
         </label>
 
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-[var(--text-muted)]">Year:</span>
-          <input
-            type="number"
+          <span className="text-xs text-muted-foreground">Year:</span>
+          <Input
             placeholder="from"
             value={yearFrom}
-            onChange={(e) => setYearFrom(e.target.value)}
-            className="input w-16 text-xs px-3 py-1.5 !min-h-0"
+            onChange={(e) => setYearFrom(e.target.value.replace(/[^0-9]/g, ""))}
+            className="w-16 text-xs px-3 py-1.5 h-8"
           />
-          <span className="text-xs text-[var(--text-muted)]">–</span>
-          <input
-            type="number"
+          <span className="text-xs text-muted-foreground">–</span>
+          <Input
             placeholder="to"
             value={yearTo}
-            onChange={(e) => setYearTo(e.target.value)}
-            className="input w-16 text-xs px-3 py-1.5 !min-h-0"
+            onChange={(e) => setYearTo(e.target.value.replace(/[^0-9]/g, ""))}
+            className="w-16 text-xs px-3 py-1.5 h-8"
           />
         </div>
 
         <div className="ml-auto">
-          <button
+          <Button
+            variant="secondary"
             onClick={onRefresh}
             disabled={isLoading}
-            className="btn-secondary !px-3 !py-1.5 !text-xs"
+            className="h-8 px-3 py-1.5 text-xs"
           >
             {isLoading ? (
               <>
-                <span className="inline-block w-3 h-3 border-2 border-[var(--border-default)] border-t-transparent rounded-full animate-spin" />
+                <Spinner className="mr-2 size-3" />
                 Searching…
               </>
             ) : (
               <>↻ Refresh Papers</>
             )}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Count */}
-      <p className="text-xs text-[var(--text-muted)]">
+      <p className="text-xs text-muted-foreground">
         {filtered.length} paper{filtered.length !== 1 ? "s" : ""} found
       </p>
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="text-center py-12 text-[var(--text-muted)] text-sm">
+        <div className="text-center py-12 text-muted-foreground text-sm flex flex-col items-center">
           No papers match the current filters.
         </div>
       ) : (

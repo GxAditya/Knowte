@@ -2,6 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { updateTranscriptSegment } from "../../lib/tauriApi";
 import type { TranscriptSegment } from "../../lib/types";
 import { useLectureStore } from "../../stores";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface TranscriptEditorProps {
   activeSegmentIndex?: number | null;
@@ -177,52 +180,57 @@ export default function TranscriptEditor({
 
   if (!lecture) {
     return (
-      <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4 shadow-sm">
-        <h1 className="text-xl font-semibold text-[var(--text-primary)]">Transcript Editor</h1>
-        <p className="mt-2 text-sm text-[var(--text-muted)]">
-          Process a knowte from the Upload page to edit transcript segments.
-        </p>
-      </div>
+      <Card>
+        <CardContent className="p-4">
+          <h1 className="text-xl font-semibold">Transcript Editor</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Process a knowte from the Upload page to edit transcript segments.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
   if (!lecture.transcriptId) {
     return (
-      <div className="rounded-lg border border-[var(--color-warning-muted)] bg-[var(--color-warning)]/10 p-4 shadow-sm">
-        <h1 className="text-xl font-semibold text-[var(--color-warning)]">Transcript Editor</h1>
-        <p className="mt-2 text-sm text-[var(--color-warning)]">
-          Transcript editing is unavailable for this knowte. Re-process the knowte
-          transcript to enable editing.
-        </p>
-      </div>
+      <Card className="border-destructive/50 bg-destructive/10">
+        <CardContent className="p-4">
+          <h1 className="text-xl font-semibold text-destructive">Transcript Editor</h1>
+          <p className="mt-2 text-sm text-destructive">
+            Transcript editing is unavailable for this knowte. Re-process the knowte
+            transcript to enable editing.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-4">
-      <section className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4 shadow-sm">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <Card>
+        <CardContent className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex-1">
             <label htmlFor="transcript-editor-search" className="sr-only">
               Search transcript
             </label>
-            <input
+            <Input
               id="transcript-editor-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search transcript segments..."
-              className="w-full rounded-md border border-[var(--border-strong)] bg-[var(--bg-surface-overlay)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
+              className="w-full"
             />
           </div>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-muted-foreground">
             Editing auto-saves 1 second after each change.
           </p>
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      <section className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-elevated)] p-4 shadow-sm">
+      <Card>
+        <CardContent className="p-4">
         {filteredSegments.length === 0 ? (
-          <p className="text-sm text-[var(--text-muted)]">
+          <p className="text-sm text-muted-foreground">
             {query
               ? "No transcript segments match your search."
               : "No transcript segments are available for this knowte."}
@@ -237,32 +245,32 @@ export default function TranscriptEditor({
               return (
                 <article
                   key={`${segment.start}-${segment.end}-${index}`}
-                  className={`rounded-md border bg-[var(--bg-surface-overlay)] p-3 transition-colors ${
-                    activeSegmentIndex === index
-                      ? "border-[var(--accent-primary)] ring-1 ring-[var(--accent-primary)]"
-                      : "border-[var(--border-default)]"
-                  }`}
+                  className={`rounded-md border bg-card p-3 transition-colors ${activeSegmentIndex === index
+                      ? "border-primary ring-1 ring-primary"
+                      : "border-border"
+                    }`}
                 >
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <button
                       type="button"
                       onClick={() => onSegmentClick?.(index)}
-                      className="rounded-md bg-[var(--bg-elevated)] px-2 py-1 text-xs text-[var(--color-info)] transition-colors hover:bg-[var(--bg-elevated)]"
+                      className="rounded-md bg-accent px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent/80"
                     >
                       {formatTimestamp(segment.start)} - {formatTimestamp(segment.end)}
                     </button>
 
                     <div className="flex items-center gap-2 text-xs">
-                      {isSaving && <span className="text-[var(--color-info)]">Saving...</span>}
-                      {errorMessage && <span className="text-[var(--color-error)]">{errorMessage}</span>}
-                      <button
-                        type="button"
+                      {isSaving && <span className="text-muted-foreground">Saving...</span>}
+                      {errorMessage && <span className="text-destructive">{errorMessage}</span>}
+                      <Button
+                        variant="outline"
+                        size="sm"
                         disabled={!hasOriginal}
                         onClick={() => handleResetSegment(index)}
-                        className="rounded-md border border-[var(--border-strong)] px-2 py-1 text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="h-7 px-2 text-xs"
                       >
                         Reset to original
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
@@ -270,14 +278,15 @@ export default function TranscriptEditor({
                     value={segment.text}
                     onChange={(event) => handleSegmentInput(index, event.target.value)}
                     rows={Math.max(2, Math.ceil(segment.text.length / 80))}
-                    className="w-full resize-none rounded-md border border-[var(--border-default)] bg-[var(--bg-base)]/80 px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
+                    className="flex w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </article>
               );
             })}
           </div>
         )}
-      </section>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,20 +1,27 @@
 import type { Question, QuestionDifficulty } from "../../lib/types";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 
 // ─── Difficulty Badge ─────────────────────────────────────────────────────────
 
-const DIFFICULTY_STYLES: Record<QuestionDifficulty, string> = {
-  easy: "bg-[var(--color-success-muted)] text-[var(--color-success)] border border-[var(--color-success-muted)]",
-  medium: "bg-[var(--color-warning-muted)] text-[var(--color-warning)] border border-[var(--color-warning-muted)]",
-  hard: "bg-[var(--color-error-muted)] text-[var(--color-error)] border border-[var(--color-error)]/40",
-};
-
 function DifficultyBadge({ difficulty }: { difficulty: QuestionDifficulty }) {
+  const variant =
+    difficulty === "easy"
+      ? "secondary" 
+      : difficulty === "medium"
+        ? "outline" 
+        : "destructive";
+  
   return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide ${DIFFICULTY_STYLES[difficulty]}`}
+    <Badge
+      variant={variant as any}
+      className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide
+        ${difficulty === "easy" ? "bg-green-500/20 text-green-600 hover:bg-green-500/30" : ""}
+        ${difficulty === "medium" ? "bg-yellow-500/20 text-yellow-600 border-yellow-500/30 hover:bg-yellow-500/30" : ""}
+      `}
     >
       {difficulty}
-    </span>
+    </Badge>
   );
 }
 
@@ -42,18 +49,18 @@ function MultipleChoiceInput({
         const isCorrect = option === correctAnswer;
 
         let cardStyle =
-          "border border-[var(--border-default)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:border-[var(--accent-primary)] hover:bg-[var(--bg-elevated)]";
+          "border border-border bg-card text-muted-foreground hover:border-primary hover:bg-accent";
 
         if (submitted) {
           if (isCorrect) {
-            cardStyle = "border border-[var(--color-success)] bg-[var(--color-success-muted)] text-[var(--color-success)]";
+            cardStyle = "border border-green-500 bg-green-500/10 text-green-600";
           } else if (isSelected && !isCorrect) {
-            cardStyle = "border border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]";
+            cardStyle = "border border-destructive bg-destructive/10 text-destructive";
           } else {
-            cardStyle = "border border-[var(--border-default)]/50 bg-[var(--bg-elevated)]/30 text-[var(--text-muted)]";
+            cardStyle = "border border-border/50 bg-card/50 text-muted-foreground opacity-50";
           }
         } else if (isSelected) {
-          cardStyle = "border border-[var(--accent-primary)] bg-[var(--accent-glow)] text-[var(--text-primary)]";
+          cardStyle = "border border-primary bg-primary/10 text-foreground ring-1 ring-primary";
         }
 
         return (
@@ -66,12 +73,12 @@ function MultipleChoiceInput({
             <span
               className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center text-xs font-bold ${
                 submitted && isCorrect
-                  ? "border-[var(--color-success)] bg-[var(--color-success)] text-white"
+                  ? "border-green-500 bg-green-500 text-white"
                   : submitted && isSelected && !isCorrect
-                    ? "border-[var(--color-error)] bg-[var(--color-error)] text-white"
+                    ? "border-destructive bg-destructive text-destructive-foreground"
                     : isSelected
-                      ? "border-[var(--accent-primary)] bg-[var(--accent-primary)] text-white"
-                      : "border-[var(--border-strong)]"
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border"
               }`}
             >
               {submitted && isCorrect ? "✓" : submitted && isSelected && !isCorrect ? "✗" : ""}
@@ -103,22 +110,22 @@ function TrueFalseInput({ selected, submitted, correctAnswer, onSelect }: TrueFa
         const isCorrect = option === correctAnswer;
 
         let style =
-          "flex-1 py-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:border-[var(--accent-primary)] hover:bg-[var(--bg-elevated)] font-semibold text-base transition-all duration-150";
+          "flex-1 py-4 rounded-xl border border-border bg-card text-muted-foreground hover:border-primary hover:bg-accent font-semibold text-base transition-all duration-150";
 
         if (submitted) {
           if (isCorrect) {
             style =
-              "flex-1 py-4 rounded-xl border border-[var(--color-success)] bg-[var(--color-success-muted)] text-[var(--color-success)] font-semibold text-base";
+              "flex-1 py-4 rounded-xl border border-green-500 bg-green-500/10 text-green-600 font-semibold text-base";
           } else if (isSelected && !isCorrect) {
             style =
-              "flex-1 py-4 rounded-xl border border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)] font-semibold text-base";
+              "flex-1 py-4 rounded-xl border border-destructive bg-destructive/10 text-destructive font-semibold text-base";
           } else {
             style =
-              "flex-1 py-4 rounded-xl border border-[var(--border-default)]/50 bg-[var(--bg-elevated)]/30 text-[var(--text-muted)] font-semibold text-base";
+              "flex-1 py-4 rounded-xl border border-border/50 bg-card/50 text-muted-foreground font-semibold text-base opacity-50";
           }
         } else if (isSelected) {
           style =
-            "flex-1 py-4 rounded-xl border border-[var(--accent-primary)] bg-[var(--accent-glow)] text-[var(--text-primary)] font-semibold text-base";
+            "flex-1 py-4 rounded-xl border border-primary bg-primary/10 text-foreground font-semibold text-base ring-1 ring-primary";
         }
 
         return (
@@ -148,21 +155,21 @@ interface ShortAnswerProps {
 function ShortAnswerInput({ value, submitted, correctAnswer, onChange }: ShortAnswerProps) {
   return (
     <div className="mt-5 space-y-2">
-      <textarea
+      <Textarea
         value={value}
         onChange={(e) => !submitted && onChange(e.target.value)}
         disabled={submitted}
         placeholder="Type your answer here…"
         rows={3}
-        className={`w-full px-4 py-3 rounded-lg border text-sm leading-relaxed resize-none transition-colors focus:outline-none ${
+        className={`w-full px-4 py-3 rounded-lg border text-sm leading-relaxed resize-none transition-colors focus:outline-none focus:ring-1 ${
           submitted
-            ? "border-[var(--border-strong)] bg-[var(--bg-elevated)]/30 text-[var(--text-muted)] cursor-default"
-            : "border-[var(--border-strong)] bg-[var(--bg-elevated)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)]"
+            ? "border-border bg-muted/30 text-muted-foreground cursor-default"
+            : "border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
         }`}
       />
       {submitted && (
-        <p className="text-xs text-[var(--text-muted)]">
-          <span className="font-semibold text-[var(--color-success)]">Model answer: </span>
+        <p className="text-xs text-muted-foreground">
+          <span className="font-semibold text-green-600">Model answer: </span>
           {correctAnswer}
         </p>
       )}
@@ -196,14 +203,14 @@ export function QuestionCard({
     <div className="w-full">
       {/* Header row */}
       <div className="flex items-center justify-between mb-4">
-        <span className="text-sm text-[var(--text-muted)] font-medium">
+        <span className="text-sm text-muted-foreground font-medium">
           Question {questionNumber} of {totalQuestions}
         </span>
         <DifficultyBadge difficulty={question.difficulty} />
       </div>
 
       {/* Question text */}
-      <p className="text-[var(--text-primary)] text-lg font-medium leading-relaxed mb-1">
+      <p className="text-foreground text-lg font-medium leading-relaxed mb-1">
         {question.question}
       </p>
 
@@ -241,22 +248,22 @@ export function QuestionCard({
         <div
           className={`mt-5 rounded-lg p-4 border transition-all duration-300 ${
             correct
-              ? "bg-[var(--color-success-muted)] border-[var(--color-success-muted)]"
+              ? "bg-green-500/10 border-green-500/20"
               : incorrect
-                ? "bg-[var(--color-error-muted)] border-[var(--color-error-muted)]"
-                : "bg-[var(--bg-elevated)] border-[var(--border-default)]/50"
+                ? "bg-destructive/10 border-destructive/20"
+                : "bg-card border-border/50"
           }`}
         >
           {correct && (
-            <p className="text-[var(--color-success)] font-semibold text-sm mb-1.5">✓ Correct!</p>
+            <p className="text-green-600 font-semibold text-sm mb-1.5">✓ Correct!</p>
           )}
           {incorrect && (
             <div className="mb-1.5">
-              <p className="text-[var(--color-error)] font-semibold text-sm">✗ Incorrect</p>
+              <p className="text-destructive font-semibold text-sm">✗ Incorrect</p>
               {question.type !== "short_answer" && (
-                <p className="text-[var(--text-secondary)] text-sm mt-1">
+                <p className="text-muted-foreground text-sm mt-1">
                   Correct answer:{" "}
-                  <span className="font-semibold text-[var(--color-success)]">
+                  <span className="font-semibold text-green-600">
                     {question.correct_answer}
                   </span>
                 </p>
@@ -264,8 +271,8 @@ export function QuestionCard({
             </div>
           )}
           {!submitted || (!correct && !incorrect) ? null : (
-            <p className="text-[var(--text-secondary)] text-sm leading-relaxed mt-1">
-              <span className="text-[var(--text-muted)] font-medium">Explanation: </span>
+            <p className="text-muted-foreground text-sm leading-relaxed mt-1">
+              <span className="font-medium">Explanation: </span>
               {question.explanation}
             </p>
           )}

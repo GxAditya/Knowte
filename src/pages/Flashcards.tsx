@@ -6,6 +6,8 @@ import { parseFlashcardsJson } from "../lib/generatedContent";
 import { getFlashcards, regenerateFlashcards } from "../lib/tauriApi";
 import type { Flashcard } from "../lib/types";
 import { useLectureStore, usePipelineStore, useToastStore } from "../stores";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 // ─── Empty States ─────────────────────────────────────────────────────────────
 
@@ -22,7 +24,7 @@ function EmptyState({
 }) {
   if (reason === "no-lecture") {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-2">
+      <div className="flex flex-col items-center justify-center h-64 text-muted-foreground space-y-2">
         <span className="text-4xl">🃏</span>
         <p className="text-sm">No knowte selected.</p>
         <p className="text-xs">Add and process a knowte to generate flashcards.</p>
@@ -30,33 +32,32 @@ function EmptyState({
     );
   }
   return (
-    <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-4">
+    <div className="flex flex-col items-center justify-center h-64 text-muted-foreground space-y-4">
       <span className="text-4xl">🃏</span>
       <div className="text-center space-y-1">
-        <p className="text-sm font-medium text-[var(--text-secondary)]">No flashcards generated yet.</p>
+        <p className="text-sm font-medium text-foreground">No flashcards generated yet.</p>
         <p className="text-xs">Run the processing pipeline or generate flashcards directly.</p>
       </div>
       {detail && (
-        <p className="max-w-md rounded-lg border border-[var(--color-error-muted)] bg-[var(--color-error-muted)] px-4 py-2 text-center text-xs text-[var(--color-error)]">
+        <p className="max-w-md rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-2 text-center text-xs text-destructive">
           {detail}
         </p>
       )}
       {onRegenerate && (
-        <button
-          type="button"
+        <Button
           onClick={onRegenerate}
           disabled={isRegenerating}
-          className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-[var(--accent-primary-hover)]"
+          className="flex items-center gap-2"
         >
           {isRegenerating ? (
             <>
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <Spinner className="mr-2 size-4" />
               Generating…
             </>
           ) : (
             "Generate Flashcards"
           )}
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -172,33 +173,31 @@ export default function Flashcards() {
           title="Flashcards"
           description="Review key terms using active recall cards."
         />
-        <div className="rounded-lg border border-[var(--color-error-muted)] bg-[var(--color-error-muted)] p-4 text-sm text-[var(--color-error)]">
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
           <p className="font-medium mb-1">Failed to load flashcards</p>
           <p className="text-xs opacity-80">{error}</p>
         </div>
         <div className="flex gap-3">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={() => void loadFlashcards(currentLectureId)}
-            className="rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)]"
           >
             Retry
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
             onClick={() => void handleRegenerate()}
             disabled={isRegenerating}
-            className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-[var(--accent-primary-hover)]"
+            className="flex items-center gap-2"
           >
             {isRegenerating ? (
               <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <Spinner className="mr-2 size-4" />
                 Regenerating…
               </>
             ) : (
               "Regenerate Flashcards"
             )}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -211,21 +210,20 @@ export default function Flashcards() {
           title="Flashcards"
           description="Review key terms using active recall cards."
           actions={
-            <button
-              type="button"
+            <Button
               onClick={() => void handleRegenerate()}
               disabled={isRegenerating}
-              className="flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-[var(--accent-primary-hover)]"
+              className="flex items-center gap-2"
             >
               {isRegenerating ? (
                 <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <Spinner className="mr-2 size-4" />
                   Generating…
                 </>
               ) : (
                 "Generate Flashcards"
               )}
-            </button>
+            </Button>
           }
         />
         <EmptyState
@@ -244,21 +242,21 @@ export default function Flashcards() {
         title="Flashcards"
         description={`${cards.length} cards generated`}
         actions={
-          <button
-            type="button"
+          <Button
+            variant="outline"
             onClick={() => void handleRegenerate()}
             disabled={isRegenerating}
-            className="flex items-center gap-2 rounded-md bg-[var(--bg-elevated)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] disabled:opacity-60 hover:bg-[var(--border-strong)]"
+            className="flex items-center gap-2"
           >
             {isRegenerating ? (
               <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--border-default)] border-t-transparent" />
+                <Spinner className="mr-2 size-4" />
                 Regenerating…
               </>
             ) : (
               "Regenerate"
             )}
-          </button>
+          </Button>
         }
       />
 

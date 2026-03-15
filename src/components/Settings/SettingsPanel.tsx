@@ -5,18 +5,21 @@ import { useSettingsStore, useToastStore } from "../../stores";
 import { ViewHeader } from "../Layout";
 import ModelSelector from "./ModelSelector";
 import PersonalizationConfig from "./PersonalizationConfig";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
+import { RefreshCw, Save, HardDrive, Keyboard, Globe, Sparkles, MessageSquare, AlertCircle } from "lucide-react";
 import type { Settings, StorageUsage } from "../../lib/types";
 
 function renderShortcutKeys(keys: string) {
   return keys.split("+").map((part) => (
     <kbd
       key={`${keys}-${part}`}
-      className="rounded px-2 py-0.5 text-xs font-semibold"
-      style={{
-        border: "1px solid var(--border-strong)",
-        background: "var(--bg-surface-overlay)",
-        color: "var(--text-primary)",
-      }}
+      className="inline-flex h-5 items-center rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100"
     >
       {part}
     </kbd>
@@ -102,228 +105,283 @@ export default function SettingsPanel() {
 
   if (isLoading || !formData) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div style={{ color: "var(--text-muted)" }}>Loading settings...</div>
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <Spinner className="size-8" />
+        <div className="text-sm text-muted-foreground">Loading settings...</div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-[900px] space-y-6">
+    <div className="mx-auto max-w-[900px] space-y-6 pb-20">
       <ViewHeader
         title="Settings"
         description="Configure local models, personalization, and export defaults."
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="glass-panel space-y-5 p-6 animate-slide-up">
-          <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Ollama Connection</h2>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-              Ollama URL
-            </label>
-            <input
-              type="text"
-              value={formData.ollama_url}
-              onChange={(e) => updateField("ollama_url", e.target.value)}
-              className="input w-full"
-              placeholder="http://localhost:11434"
+        <Card className="animate-slide-up">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-primary" />
+              <CardTitle>Ollama Connection</CardTitle>
+            </div>
+            <CardDescription>Configure your local LLM backend</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="ollama_url">Ollama URL</Label>
+              <Input
+                id="ollama_url"
+                type="text"
+                value={formData.ollama_url}
+                onChange={(e) => updateField("ollama_url", e.target.value)}
+                placeholder="http://localhost:11434"
+              />
+            </div>
+            <ModelSelector
+              ollamaUrl={formData.ollama_url}
+              llmModel={formData.llm_model}
+              whisperModel={formData.whisper_model}
+              onLlmModelChange={(value) => updateField("llm_model", value)}
+              onWhisperModelChange={(value) => updateField("whisper_model", value)}
             />
-          </div>
-          <ModelSelector
-            ollamaUrl={formData.ollama_url}
-            llmModel={formData.llm_model}
-            whisperModel={formData.whisper_model}
-            onLlmModelChange={(value) => updateField("llm_model", value)}
-            onWhisperModelChange={(value) => updateField("whisper_model", value)}
-          />
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-              LLM timeout (seconds)
-            </label>
-            <input
-              type="number"
-              min={30}
-              max={1800}
-              step={1}
-              value={formData.llm_timeout_seconds}
-              onChange={(e) =>
-                updateField("llm_timeout_seconds", Math.max(30, Math.min(1800, Number(e.target.value) || 300)))
-              }
-              className="input w-full"
-              placeholder="300"
+            <div className="space-y-2">
+              <Label htmlFor="llm_timeout">LLM timeout (seconds)</Label>
+              <Input
+                id="llm_timeout"
+                type="number"
+                min={30}
+                max={1800}
+                step={1}
+                value={formData.llm_timeout_seconds}
+                onChange={(e) =>
+                  updateField("llm_timeout_seconds", Math.max(30, Math.min(1800, Number(e.target.value) || 300)))
+                }
+                placeholder="300"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Applies to all LLM requests. Recommended range: 120-600 seconds.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="animate-slide-up">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <CardTitle>Personalization</CardTitle>
+            </div>
+            <CardDescription>Tailor learning materials to your preferences</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PersonalizationConfig
+              value={formData.personalization_level}
+              onChange={(value) => updateField("personalization_level", value)}
             />
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Applies to all LLM requests. Recommended range: 120-600 seconds.
-            </p>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className="glass-panel space-y-5 p-6 animate-slide-up">
-          <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Personalization</h2>
-          <PersonalizationConfig
-            value={formData.personalization_level}
-            onChange={(value) => updateField("personalization_level", value)}
-          />
-        </div>
+        <Card className="animate-slide-up">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-primary" />
+              <CardTitle>Export Settings</CardTitle>
+            </div>
+            <CardDescription>Default locations for your generated data</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="export_path">Export Path</Label>
+              <Input
+                id="export_path"
+                type="text"
+                value={formData.export_path}
+                onChange={(e) => updateField("export_path", e.target.value)}
+                placeholder="~/Documents/Knowte"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Default location for exported files
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="glass-panel space-y-5 p-6 animate-slide-up">
-          <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Export Settings</h2>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-              Export Path
-            </label>
-            <input
-              type="text"
-              value={formData.export_path}
-              onChange={(e) => updateField("export_path", e.target.value)}
-              className="input w-full"
-              placeholder="~/Documents/Knowte"
-            />
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Default location for exported files
-            </p>
-          </div>
-        </div>
-
-        <div className="glass-panel space-y-5 p-6 animate-slide-up">
-          <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Storage</h2>
-
-          <label className="flex items-start gap-3 cursor-pointer">
-            <div className="relative mt-0.5">
-              <input
-                type="checkbox"
+        <Card className="animate-slide-up">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <HardDrive className="h-4 w-4 text-primary" />
+              <CardTitle>Storage</CardTitle>
+            </div>
+            <CardDescription>Manage local file optimization</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="flex items-start gap-3">
+              <Switch
+                id="delete_audio"
                 checked={formData.delete_audio_after_processing}
-                onChange={(e) => updateField("delete_audio_after_processing", e.target.checked)}
-                className="sr-only"
+                onCheckedChange={(checked) => updateField("delete_audio_after_processing", checked)}
               />
-              <div
-                className="toggle-track cursor-pointer"
-                data-checked={formData.delete_audio_after_processing || undefined}
+              <div className="grid gap-1.5 leading-none">
+                <Label htmlFor="delete_audio">Delete audio after processing</Label>
+                <p className="text-[10px] text-muted-foreground">
+                  Removes original and prepared audio files once pipeline generation finishes successfully.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-lg border bg-muted/20 p-4">
+              {isStorageLoading ? (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Spinner className="size-3" />
+                  Loading storage usage…
+                </div>
+              ) : storageUsage ? (
+                <div className="space-y-1.5 text-xs text-muted-foreground">
+                  <div className="flex justify-between">
+                    <span>App data:</span>
+                    <span className="font-medium text-foreground">{formatBytes(storageUsage.app_data_bytes)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Knowtes audio:</span>
+                    <span className="font-medium text-foreground">{formatBytes(storageUsage.lectures_bytes)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Prepared audio:</span>
+                    <span className="font-medium text-foreground">{formatBytes(storageUsage.prepared_audio_bytes)}</span>
+                  </div>
+                  <div className="flex justify-between pt-1 font-semibold">
+                    <span>Free disk space:</span>
+                    <span className="text-foreground">{formatBytes(storageUsage.free_bytes)}</span>
+                  </div>
+                  <p className="mt-3 break-all text-[9px] opacity-70">Path: {storageUsage.app_data_dir}</p>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">Storage usage is unavailable.</p>
+              )}
+
+              {storageError && (
+                <Alert variant="destructive" className="mt-3 py-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-[10px]">{storageError}</AlertDescription>
+                </Alert>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={() => void loadStorageUsage()}
+                disabled={isStorageLoading}
+                className="mt-4 h-7 text-[10px]"
               >
-                <div className="toggle-knob" />
-              </div>
+                {!isStorageLoading && <RefreshCw className="mr-1.5 h-3 w-3" />}
+                {isStorageLoading ? "Refreshing…" : "Refresh usage"}
+              </Button>
             </div>
-            <div>
-              <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Delete audio after processing</p>
-              <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                Removes original and prepared audio files once pipeline generation finishes successfully.
-              </p>
+          </CardContent>
+        </Card>
+
+        <Card className="animate-slide-up">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-primary" />
+              <CardTitle>Research</CardTitle>
             </div>
-          </label>
-
-          <div className="rounded-md p-3" style={{ border: "1px solid var(--border-default)", background: "var(--bg-surface-overlay)" }}>
-            {isStorageLoading ? (
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Loading storage usage…</p>
-            ) : storageUsage ? (
-              <div className="space-y-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
-                <p>App data: <span style={{ color: "var(--text-primary)" }}>{formatBytes(storageUsage.app_data_bytes)}</span></p>
-                <p>Knowtes audio: <span style={{ color: "var(--text-primary)" }}>{formatBytes(storageUsage.lectures_bytes)}</span></p>
-                <p>Prepared audio: <span style={{ color: "var(--text-primary)" }}>{formatBytes(storageUsage.prepared_audio_bytes)}</span></p>
-                <p>Free disk space: <span style={{ color: "var(--text-primary)" }}>{formatBytes(storageUsage.free_bytes)}</span></p>
-                <p className="break-all" style={{ color: "var(--text-muted)" }}>Path: {storageUsage.app_data_dir}</p>
-              </div>
-            ) : (
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Storage usage is unavailable.</p>
-            )}
-
-            {storageError && <p className="mt-2 text-xs" style={{ color: "var(--color-error)" }}>{storageError}</p>}
-            <button
-              type="button"
-              onClick={() => void loadStorageUsage()}
-              disabled={isStorageLoading}
-              className="btn-ghost mt-3 text-xs"
-            >
-              {isStorageLoading ? "Refreshing…" : "Refresh usage"}
-            </button>
-          </div>
-        </div>
-
-        <div className="glass-panel space-y-5 p-6 animate-slide-up">
-          <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Research</h2>
-          <label className="flex items-start gap-3 cursor-pointer">
-            <div className="relative mt-0.5">
-              <input
-                type="checkbox"
+            <CardDescription>Integrate external academic data</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-start gap-3">
+              <Switch
+                id="enable_research"
                 checked={formData.enable_research}
-                onChange={(e) => updateField("enable_research", e.target.checked)}
-                className="sr-only"
+                onCheckedChange={(checked) => updateField("enable_research", checked)}
               />
-              <div
-                className="toggle-track cursor-pointer"
-                data-checked={formData.enable_research || undefined}
-              >
-                <div className="toggle-knob" />
+              <div className="grid gap-1.5 leading-none">
+                <Label htmlFor="enable_research">Enable research paper search (requires internet)</Label>
+                <p className="text-[10px] text-muted-foreground">
+                  When enabled, Knowte queries the Semantic Scholar API to find papers
+                  related to your knowte content. This is the only external network call
+                  the app makes.
+                </p>
               </div>
             </div>
-            <div>
-              <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                Enable research paper search (requires internet)
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                When enabled, Knowte queries the Semantic Scholar API to find papers
-                related to your knowte content. This is the only external network call
-                the app makes.
-              </p>
+          </CardContent>
+        </Card>
+
+        <Card className="animate-slide-up">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Keyboard className="h-4 w-4 text-primary" />
+              <CardTitle>Keyboard Shortcuts</CardTitle>
             </div>
-          </label>
-        </div>
-
-        <div className="glass-panel space-y-5 p-6 animate-slide-up">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>Keyboard Shortcuts</h2>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Press <kbd className="rounded px-1.5 py-0.5 text-[11px]" style={{ border: "1px solid var(--border-strong)", background: "var(--bg-surface-overlay)", color: "var(--text-secondary)" }}>?</kbd> anywhere in the app to open the full shortcuts modal.
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Global</p>
-              {GLOBAL_SHORTCUTS.map((shortcut) => (
-                <div
-                  key={shortcut.keys}
-                  className="flex items-center justify-between gap-3 rounded-md px-3 py-2"
-                  style={{ border: "1px solid var(--border-default)", background: "var(--bg-surface-overlay)" }}
-                >
-                  <div className="flex items-center gap-1">{renderShortcutKeys(shortcut.keys)}</div>
-                  <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{shortcut.action}</span>
+            <CardDescription className="flex items-center gap-1.5">
+              Press {renderShortcutKeys("?")} anywhere in the app to open the full shortcuts modal.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Global</p>
+                <div className="grid gap-2">
+                  {GLOBAL_SHORTCUTS.map((shortcut) => (
+                    <div
+                      key={shortcut.keys}
+                      className="flex items-center justify-between rounded-lg border bg-card/50 px-3 py-2"
+                    >
+                      <div className="flex gap-1">{renderShortcutKeys(shortcut.keys)}</div>
+                      <span className="text-[11px] text-muted-foreground">{shortcut.action}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Knowte Views</p>
-              {LECTURE_VIEW_SHORTCUTS.map((shortcut) => (
-                <div
-                  key={shortcut.key}
-                  className="flex items-center justify-between gap-3 rounded-md px-3 py-2"
-                  style={{ border: "1px solid var(--border-default)", background: "var(--bg-surface-overlay)" }}
-                >
-                  <div className="flex items-center gap-1">{renderShortcutKeys(`Ctrl+${shortcut.key}`)}</div>
-                  <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{shortcut.label}</span>
+              <div className="space-y-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Knowte Views</p>
+                <div className="grid gap-2">
+                  {LECTURE_VIEW_SHORTCUTS.map((shortcut) => (
+                    <div
+                      key={shortcut.key}
+                      className="flex items-center justify-between rounded-lg border bg-card/50 px-3 py-2"
+                    >
+                      <div className="flex gap-1">{renderShortcutKeys(`Ctrl+${shortcut.key}`)}</div>
+                      <span className="text-[11px] text-muted-foreground">{shortcut.label}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className="flex justify-end">
-          <button
+        <div className="flex justify-end pt-4">
+          <Button
             type="submit"
             disabled={isSaving}
-            className="btn-primary px-6 py-2"
+            className="h-10 px-8"
           >
-            {isSaving ? "Saving..." : "Save Settings"}
-          </button>
+            {isSaving ? (
+              <>
+                <Spinner className="mr-2 size-4" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Save Settings
+              </>
+            )}
+          </Button>
         </div>
       </form>
 
       {error && (
-        <div className="rounded-lg px-4 py-3 text-sm" style={{ border: "1px solid var(--color-error-muted)", background: "var(--color-error-muted)", color: "var(--color-error)" }}>
-          {error}
-        </div>
+        <Alert variant="destructive" className="animate-in fade-in slide-in-from-bottom-2">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error saving settings</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
     </div>
   );

@@ -3,6 +3,7 @@ import type { StructuredNotes } from "../../lib/types";
 import { exportNotesMarkdown } from "../../lib/tauriApi";
 import { useToastStore } from "../../stores";
 import { sanitizeSummaryText } from "./summaryFormatting";
+import { Button } from "@/components/ui/button";
 
 // ─── HTML for Print / PDF ─────────────────────────────────────────────────────
 
@@ -355,31 +356,34 @@ export function NotesExport({ lectureId, notes, summary }: NotesExportProps) {
   return (
     <>
       <div className="flex items-center gap-3 flex-wrap">
-        <button
+        <Button
+          variant="secondary"
           type="button"
           onClick={handleCopyMarkdown}
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center gap-2"
         >
           <span>📋</span> Copy as Markdown
-        </button>
+        </Button>
 
-        <button
+        <Button
+          variant="secondary"
           type="button"
           data-hotkey-export="true"
           onClick={handleDownloadMarkdown}
           disabled={savingMd}
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] disabled:opacity-50 text-[var(--text-secondary)] rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center gap-2"
         >
           <span>⬇️</span> {savingMd ? "Saving…" : "Download as Markdown"}
-        </button>
+        </Button>
 
-        <button
+        <Button
+          variant="secondary"
           type="button"
           onClick={handlePrint}
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] hover:bg-[var(--border-strong)] text-[var(--text-secondary)] rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center gap-2"
         >
           <span>🖨️</span> Download as PDF
-        </button>
+        </Button>
       </div>
     </>
   );

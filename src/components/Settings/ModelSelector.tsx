@@ -1,6 +1,14 @@
 import { useMemo } from "react";
 import { useSettingsStore } from "../../stores";
 import { WHISPER_MODELS } from "../../lib/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
+import { RefreshCw, Download, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface ModelSelectorProps {
   ollamaUrl: string;
@@ -37,134 +45,162 @@ export default function ModelSelector({
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <div
-          className={`h-3 w-3 rounded-full ${
-            isConnected ? "bg-[var(--color-success)]" : "bg-[var(--color-error)]"
-          }`}
-          title={isConnected ? "Connected to Ollama" : "Not connected to Ollama"}
-        />
-        <span className="text-sm text-[var(--text-secondary)]">
-          {isConnected ? "Connected to Ollama" : "Ollama not reachable"}
-        </span>
-        <button
+    <div className="space-y-6">
+      {/* Ollama Connection Status */}
+      <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2">
+        <div className="flex items-center gap-2">
+          {isConnected ? (
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          ) : (
+            <AlertCircle className="h-4 w-4 text-destructive" />
+          )}
+          <span className="text-sm font-medium">
+            {isConnected ? "Connected to Ollama" : "Ollama not reachable"}
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
           type="button"
           onClick={() => void checkOllama(ollamaUrl)}
-          className="text-xs text-[var(--accent-primary)] hover:text-[var(--color-info)]"
+          className="h-8 gap-1.5 text-xs text-primary"
         >
+          <RefreshCw className="h-3 w-3" />
           Refresh
-        </button>
+        </Button>
       </div>
 
       {!isConnected && ollamaStatus?.error && (
-        <p className="text-xs text-[var(--color-error)]">{ollamaStatus.error}</p>
+        <div className="rounded-md bg-destructive/10 p-2 text-xs text-destructive">
+          {ollamaStatus.error}
+        </div>
       )}
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-[var(--text-secondary)]">LLM Model</label>
-        <select
-          value={llmModel}
-          onChange={(event) => onLlmModelChange(event.target.value)}
-          disabled={!isConnected}
-          className="w-full rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isConnected ? (
-            llmModels.length > 0 ? (
-              llmModels.map((model) => (
-                <option key={model} value={model}>
-                  {model}
-                </option>
-              ))
-            ) : (
-              <option value="">No models available</option>
-            )
-          ) : (
-            <option value={llmModel}>{llmModel || "Select model"}</option>
+      {/* Models Selection */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label>LLM Model</Label>
+          <Select
+            value={llmModel}
+            onValueChange={onLlmModelChange}
+            disabled={!isConnected}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={isConnected ? "Select model" : "Ollama offline"} />
+            </SelectTrigger>
+            <SelectContent>
+              {llmModels.length > 0 ? (
+                llmModels.map((model) => (
+                  <SelectItem key={model} value={model}>
+                    {model}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="..." disabled>No models found</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+          {!isConnected && (
+            <p className="text-[10px] text-muted-foreground">
+              Start Ollama to refresh available models.
+            </p>
           )}
-        </select>
-        {!isConnected && (
-          <p className="text-xs text-[var(--text-muted)]">
-            Start Ollama to refresh available models.
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-[var(--text-secondary)]">
-          Whisper Model
-        </label>
-        <select
-          value={whisperModel}
-          onChange={(event) => onWhisperModelChange(event.target.value)}
-          className="w-full rounded-md border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
-        >
-          {WHISPER_MODELS.map((model) => (
-            <option key={model.value} value={model.value}>
-              {model.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="space-y-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] p-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-[var(--text-secondary)]">Whisper Models</h3>
-          <span className="text-xs text-[var(--text-muted)]">Stored in `src-tauri/whisper-models`</span>
         </div>
 
         <div className="space-y-2">
-          {WHISPER_MODELS.map((model) => {
-            const fileName = toModelFileName(model.value);
-            const isDownloaded = downloadedModelSet.has(fileName);
-            const isDownloading = whisperDownloadingModel === model.value;
-
-            return (
-              <div
-                key={model.value}
-                className="flex items-center justify-between rounded-md border border-[var(--border-default)] bg-[var(--bg-elevated)] px-3 py-2"
-              >
-                <div>
-                  <p className="text-sm text-[var(--text-secondary)]">{model.value}</p>
-                  <p className="text-xs text-[var(--text-muted)]">{fileName}</p>
-                </div>
-
-                {isDownloaded ? (
-                  <span className="rounded-full bg-[var(--color-success-muted)] px-3 py-1 text-xs text-[var(--color-success)]">
-                    Downloaded
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => void downloadWhisperModel(model.value)}
-                    disabled={Boolean(whisperDownloadingModel)}
-                    className="rounded-md bg-[var(--accent-primary)] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[var(--accent-primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {isDownloading ? "Downloading..." : "Download"}
-                  </button>
-                )}
-              </div>
-            );
-          })}
+          <Label>Whisper Model</Label>
+          <Select
+            value={whisperModel}
+            onValueChange={onWhisperModelChange}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select model" />
+            </SelectTrigger>
+            <SelectContent>
+              {WHISPER_MODELS.map((model) => (
+                <SelectItem key={model.value} value={model.value}>
+                  {model.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+      </div>
 
-        {whisperDownloadingModel && (
-          <div className="space-y-1">
-            <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
-              <span>Downloading {whisperDownloadingModel}</span>
-              <span>{Math.round(whisperDownloadProgress)}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded bg-[var(--bg-elevated)]">
-              <div
-                className="h-full bg-[var(--accent-primary)] transition-all"
-                style={{ width: `${whisperDownloadProgress}%` }}
-              />
+      {/* Whisper Models Management */}
+      <Card className="overflow-hidden border-border bg-muted/20">
+        <CardHeader className="pb-3 pt-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-sm font-semibold">Whisper Models</CardTitle>
+              <CardDescription className="text-[10px]">Stored in `src-tauri/whisper-models`</CardDescription>
             </div>
           </div>
-        )}
+        </CardHeader>
+        <CardContent className="space-y-3 pb-4">
+          <div className="grid gap-2">
+            {WHISPER_MODELS.map((model) => {
+              const fileName = toModelFileName(model.value);
+              const isDownloaded = downloadedModelSet.has(fileName);
+              const isDownloading = whisperDownloadingModel === model.value;
 
-        {whisperError && <p className="text-xs text-[var(--color-error)]">{whisperError}</p>}
-      </div>
+              return (
+                <div
+                  key={model.value}
+                  className="flex items-center justify-between rounded-md border bg-card/50 px-3 py-2 text-sm"
+                >
+                  <div className="space-y-0.5">
+                    <p className="font-medium">{model.value}</p>
+                    <p className="text-[10px] text-muted-foreground">{fileName}</p>
+                  </div>
+
+                  {isDownloaded ? (
+                    <Badge variant="secondary" className="bg-green-500/10 text-green-600 dark:text-green-400">
+                      Downloaded
+                    </Badge>
+                  ) : (
+                    <Button
+                      size="sm"
+                      type="button"
+                      onClick={() => void downloadWhisperModel(model.value)}
+                      disabled={Boolean(whisperDownloadingModel)}
+                      className="h-7 px-3 text-xs"
+                    >
+                      {isDownloading ? (
+                        "Downloading..."
+                      ) : (
+                        <>
+                          <Download className="mr-1.5 h-3 w-3" />
+                          Download
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {whisperDownloadingModel && (
+            <div className="space-y-2 pt-2">
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                <span className="flex items-center gap-2">
+                  <Spinner className="size-3" />
+                  Downloading {whisperDownloadingModel}...
+                </span>
+                <span className="font-medium text-foreground">{Math.round(whisperDownloadProgress)}%</span>
+              </div>
+              <Progress value={whisperDownloadProgress} className="h-1.5" />
+            </div>
+          )}
+
+          {whisperError && (
+            <p className="rounded bg-destructive/10 p-2 text-xs text-destructive">
+              {whisperError}
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

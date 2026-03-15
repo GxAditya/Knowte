@@ -8,6 +8,8 @@ import {
 } from "../../lib/tauriApi";
 import type { OllamaStatus, Settings } from "../../lib/types";
 import { PERSONALIZATION_LEVELS } from "../../lib/types";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -113,9 +115,9 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
         This setup takes about 2 minutes. Let's get you ready.
       </p>
 
-      <button className="btn-primary px-8 py-2.5" onClick={onNext}>
+      <Button className="px-8 py-2.5" onClick={onNext}>
         Get started →
-      </button>
+      </Button>
     </div>
   );
 }
@@ -264,24 +266,23 @@ function OllamaStep({
       )}
 
       <div className="flex gap-3 justify-between">
-        <button className="btn-ghost text-sm" onClick={onSkip}>
+        <Button variant="ghost" className="text-sm" onClick={onSkip}>
           Skip for now
-        </button>
+        </Button>
         <div className="flex gap-2">
-          <button
-            className="btn-secondary"
+          <Button
+            variant="secondary"
             onClick={onCheck}
             disabled={isChecking}
           >
             {isChecking ? "Checking…" : "Check again"}
-          </button>
-          <button
-            className="btn-primary"
+          </Button>
+          <Button
             onClick={onNext}
             disabled={isChecking}
           >
             {connected ? "Continue →" : "Continue anyway →"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -416,12 +417,12 @@ function ModelStep({
       </div>
 
       <div className="flex gap-3 justify-between">
-        <button className="btn-ghost text-sm" onClick={onBack}>
+        <Button variant="ghost" className="text-sm" onClick={onBack}>
           ← Back
-        </button>
-        <button className="btn-primary" onClick={onNext}>
+        </Button>
+        <Button onClick={onNext}>
           Continue →
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -621,22 +622,22 @@ function WhisperStep({
 
       {/* Download button */}
       {!selectedDownloaded && (
-        <button
-          className="btn-primary self-start"
+        <Button
+          className="self-start"
           onClick={() => void handleDownload()}
           disabled={isDownloading}
         >
           {isDownloading ? `Downloading… ${downloadPercent}%` : `Download ${whisperModel} model`}
-        </button>
+        </Button>
       )}
 
       <div className="flex gap-3 justify-between">
-        <button className="btn-ghost text-sm" onClick={onBack} disabled={isDownloading}>
+        <Button variant="ghost" className="text-sm" onClick={onBack} disabled={isDownloading}>
           ← Back
-        </button>
-        <button className="btn-primary" onClick={onNext} disabled={isDownloading}>
+        </Button>
+        <Button onClick={onNext} disabled={isDownloading}>
           {selectedDownloaded ? "Continue →" : "Skip for now →"}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -702,12 +703,12 @@ function LevelStep({
       </p>
 
       <div className="flex gap-3 justify-between">
-        <button className="btn-ghost text-sm" onClick={onBack}>
+        <Button variant="ghost" className="text-sm" onClick={onBack}>
           ← Back
-        </button>
-        <button className="btn-primary" onClick={onNext}>
+        </Button>
+        <Button onClick={onNext}>
           Continue →
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -779,9 +780,9 @@ function ReadyStep({ onFinish }: { onFinish: () => void }) {
         ))}
       </div>
 
-      <button className="btn-primary px-10 py-2.5" onClick={onFinish}>
+      <Button className="px-10 py-2.5" onClick={onFinish}>
         Open Knowte →
-      </button>
+      </Button>
     </div>
   );
 }
@@ -881,14 +882,15 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
       >
         {/* Skip all button */}
         {step !== "ready" && (
-          <button
-            className="absolute top-4 right-4 btn-ghost text-xs"
+          <Button
+            variant="ghost"
+            className="absolute top-4 right-4 text-xs"
             onClick={() => void handleSkipAll()}
             disabled={isSaving}
             aria-label="Skip setup and open Knowte"
           >
             Skip setup
-          </button>
+          </Button>
         )}
 
         {/* Step dots */}
@@ -934,16 +936,8 @@ export default function SetupWizard({ initialSettings, onComplete }: SetupWizard
         )}
 
         {isSaving && (
-          <div className="flex items-center justify-center gap-2 text-sm" style={{ color: "var(--text-muted)" }}>
-            <div
-              className="rounded-full animate-spin"
-              style={{
-                width: "1rem",
-                height: "1rem",
-                border: "2px solid var(--border-default)",
-                borderTopColor: "var(--accent-primary)",
-              }}
-            />
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Spinner className="size-4" />
             Saving preferences…
           </div>
         )}

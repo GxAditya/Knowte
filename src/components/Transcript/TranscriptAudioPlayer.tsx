@@ -1,4 +1,6 @@
 import { createPortal } from "react-dom";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 
 interface TranscriptAudioPlayerProps {
   lectureFilename: string;
@@ -47,40 +49,38 @@ export default function TranscriptAudioPlayer({
 
   return createPortal(
     <footer
-      className="fixed bottom-0 right-0 z-40 border-t border-[var(--border-default)] bg-[var(--bg-surface-overlay)]/95 backdrop-blur"
+      className="fixed bottom-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       style={{ left: "var(--app-sidebar-width, 16rem)" }}
     >
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-medium text-[var(--text-primary)]">Now Playing</p>
-            <p className="max-w-xs truncate text-xs text-[var(--text-muted)] md:max-w-md">
+            <p className="text-sm font-medium text-foreground">Now Playing</p>
+            <p className="max-w-xs truncate text-xs text-muted-foreground md:max-w-md">
               {lectureFilename}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
               type="button"
               onClick={onTogglePlay}
               disabled={isDisabled}
-              className="rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPlaying ? "Pause" : "Play"}
-            </button>
+            </Button>
 
-            <div className="flex items-center gap-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-elevated)] p-1">
+            <div className="flex items-center gap-1 rounded-md border border-border bg-muted p-1">
               {PLAYBACK_RATES.map((rate) => (
                 <button
                   key={rate}
                   type="button"
                   disabled={isDisabled}
                   onClick={() => onPlaybackRateChange(rate)}
-                  className={`rounded px-2 py-1 text-xs transition-colors ${
-                    playbackRate === rate
-                      ? "bg-[var(--accent-primary)] text-white"
-                      : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
-                  } disabled:cursor-not-allowed disabled:opacity-50`}
+                  className={`rounded px-2 py-1 text-xs transition-colors ${playbackRate === rate
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+                    } disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   {rate}x
                 </button>
@@ -90,24 +90,23 @@ export default function TranscriptAudioPlayer({
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="min-w-12 text-xs text-[var(--text-secondary)]">{formatTimestamp(safeCurrentTime)}</span>
-          <input
-            type="range"
+          <span className="min-w-12 text-xs text-muted-foreground">{formatTimestamp(safeCurrentTime)}</span>
+          <Slider
             min={0}
             max={safeDuration || 0}
             step={0.1}
-            value={safeCurrentTime}
-            onChange={(event) => onSeek(Number(event.target.value))}
+            value={[safeCurrentTime]}
+            onValueChange={(val) => onSeek(val[0])}
             disabled={isDisabled || safeDuration <= 0}
-            className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-[var(--bg-elevated)] accent-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+            className="w-full"
           />
-          <span className="min-w-12 text-right text-xs text-[var(--text-secondary)]">
+          <span className="min-w-12 text-right text-xs text-muted-foreground">
             {formatTimestamp(safeDuration)}
           </span>
         </div>
 
         {isDisabled && (
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-muted-foreground">
             {disabledReason ?? "Audio source is unavailable for this knowte."}
           </p>
         )}

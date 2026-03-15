@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { toast } from "sonner";
 
 export type ToastKind = "success" | "warning" | "error" | "info";
 
@@ -11,40 +12,34 @@ export interface ToastItem {
 }
 
 interface ToastState {
-  toasts: ToastItem[];
-  pushToast: (toast: Omit<ToastItem, "id" | "createdAt">) => string;
+  // We keep the state for compatibility, but pushToast now triggers Sonner
+  pushToast: (toastItem: Omit<ToastItem, "id" | "createdAt">) => string;
   dismissToast: (id: string) => void;
   clearToasts: () => void;
 }
 
-const MAX_TOASTS = 3;
-
-function generateToastId() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-export const useToastStore = create<ToastState>((set) => ({
-  toasts: [],
-  pushToast: (toast) => {
-    const id = generateToastId();
-    const nextToast: ToastItem = {
-      id,
-      kind: toast.kind,
-      message: toast.message,
-      title: toast.title,
-      createdAt: Date.now(),
+export const useToastStore = create<ToastState>(() => ({
+  pushToast: (toastItem) => {
+    const { kind, message, title } = toastItem;
+    
+    // Map kind to sonner methods
+    const options = {
+      description: message,
     };
 
-    set((state) => {
-      const trimmed = state.toasts.slice(-(MAX_TOASTS - 1));
-      return { toasts: [...trimmed, nextToast] };
-    });
-
-    return id;
+    switch (kind) {
+      case "success":
+        return toast.success(title ?? "Success", options).toString();
+      case "error":
+        return toast.error(title ?? "Error", options).toString();
+      case "warning":
+        return toast.warning(title ?? "Warning", options).toString();
+      case "info":
+      default:
+        return toast.info(title ?? "Info", options).toString();
+    }
   },
-  dismissToast: (id) =>
-    set((state) => ({
-      toasts: state.toasts.filter((toast) => toast.id !== id),
-    })),
-  clearToasts: () => set({ toasts: [] }),
+  dismissToast: (id) => toast.dismiss(id),
+  clearToasts: () => toast.dismiss(),
 }));
+

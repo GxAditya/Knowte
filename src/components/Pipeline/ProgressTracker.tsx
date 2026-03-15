@@ -10,27 +10,12 @@ import {
 import type { PipelineStage } from "../../lib/types";
 import { useToastStore } from "../../stores";
 import { usePipelineStore, PIPELINE_STAGE_DEFS, TOTAL_PIPELINE_STAGES } from "../../stores/pipelineStore";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Spinner } from "@/components/ui/spinner";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-
-function SpinnerIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="h-4 w-4 animate-spin text-[var(--accent-primary)]"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-      />
-    </svg>
-  );
-}
 
 function StageRow({
   stage,
@@ -48,31 +33,30 @@ function StageRow({
   onSkip: () => void;
 }) {
   const statusColors: Record<string, string> = {
-    pending: "border-[var(--border-strong)] bg-[var(--bg-surface-overlay)] backdrop-blur-md shadow-sm",
-    running: "border-[var(--accent-primary)]/50 bg-[var(--accent-primary)]/10 backdrop-blur-md shadow-[var(--card-shadow-glow)]",
-    complete: "border-[var(--color-success-muted)] bg-[var(--color-success)]/5 backdrop-blur-md",
-    error: "border-[var(--color-error-muted)] bg-[var(--color-error)]/5 backdrop-blur-md",
+    pending: "border-border bg-card shadow-sm opacity-60",
+    running: "border-primary bg-card shadow-sm ring-1 ring-primary/20",
+    complete: "border-border bg-card shadow-sm",
+    error: "border-destructive/50 bg-card shadow-sm",
   };
 
   const iconColors: Record<string, string> = {
-    pending: "text-[var(--text-muted)]",
-    running: "text-[var(--accent-primary)]",
-    complete: "text-[var(--color-success)]",
-    error: "text-[var(--color-error)]",
+    pending: "text-muted-foreground",
+    running: "text-primary",
+    complete: "text-green-500",
+    error: "text-destructive",
   };
 
   return (
-    <div
-      className={`rounded-2xl border p-5 transition-all duration-300 ${statusColors[stage.status]}`}
-    >
-      <div className="flex items-center gap-4">
+    <Card className={`transition-all duration-300 ${statusColors[stage.status]}`}>
+      <CardContent className="p-5">
+        <div className="flex items-center gap-4">
         <div className={`flex-shrink-0 ${iconColors[stage.status]}`}>
           {stage.status === "pending" && (
             <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <circle cx="12" cy="12" r="8" strokeWidth="2" />
             </svg>
           )}
-          {stage.status === "running" && <SpinnerIcon />}
+          {stage.status === "running" && <Spinner className="size-4" />}
           {stage.status === "complete" && (
             <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -87,65 +71,70 @@ function StageRow({
 
         <span
           className={`flex-1 text-sm font-medium ${stage.status === "pending"
-              ? "text-[var(--text-muted)]"
+              ? "text-muted-foreground"
               : stage.status === "complete"
-                ? "text-[var(--color-success)]"
+                ? "text-green-500"
                 : stage.status === "error"
-                  ? "text-[var(--color-error)]"
-                  : "text-[var(--text-secondary)]"
+                  ? "text-destructive"
+                  : "text-foreground"
             }`}
         >
           {stage.label}
         </span>
 
-        <span className="text-xs capitalize text-[var(--text-muted)]">
+        <span className="text-xs capitalize text-muted-foreground">
           {stage.status === "running" ? "In progress…" : stage.status}
         </span>
       </div>
 
       {sectionProgressText && (
-        <p className="mt-1 text-[11px] text-[var(--text-muted)]">{sectionProgressText}</p>
+        <p className="mt-1 text-[11px] text-muted-foreground">{sectionProgressText}</p>
       )}
 
       {/* Streaming preview while running */}
       {stage.status === "running" && streamingPreview && (
-        <div className="mt-3 rounded-xl border border-[var(--accent-primary)]/20 bg-[var(--bg-surface-overlay)]/40 p-3 shadow-inner">
-          <p className="line-clamp-3 font-mono text-xs text-[var(--text-muted)] leading-relaxed">{streamingPreview}</p>
+        <div className="mt-3 rounded-md bg-muted p-3">
+          <p className="line-clamp-3 font-mono text-xs text-muted-foreground leading-relaxed">{streamingPreview}</p>
         </div>
       )}
 
       {/* Result preview once complete */}
       {stage.status === "complete" && stage.preview && (
-        <div className="mt-3 rounded-xl border border-[var(--color-success)]/20 bg-[var(--bg-surface-overlay)]/40 p-3 shadow-inner">
-          <p className="line-clamp-2 text-xs text-[var(--text-muted)] leading-relaxed">{stage.preview}</p>
+        <div className="mt-3 rounded-md bg-muted p-3">
+          <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">{stage.preview}</p>
         </div>
       )}
 
       {/* Error message */}
       {stage.status === "error" && stage.error && (
         <div className="mt-2 space-y-2">
-          <p className="text-xs text-[var(--color-error)]">{stage.error}</p>
+          <p className="text-xs text-destructive">{stage.error}</p>
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="destructive"
+              size="sm"
               type="button"
               onClick={onRetry}
               disabled={isMutating}
-              className="rounded-md bg-[var(--color-error-muted)] px-2.5 py-1 text-xs font-medium text-[var(--color-error)] transition-colors hover:bg-[var(--color-error-muted)] disabled:opacity-50"
+              className="h-7 px-2.5 py-1 text-xs"
             >
               {isMutating ? "Retrying..." : "Retry"}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               type="button"
               onClick={onSkip}
               disabled={isMutating}
-              className="rounded-md bg-[var(--bg-elevated)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-strong)] disabled:opacity-50"
+              className="h-7 px-2.5 py-1 text-xs"
             >
               Skip
-            </button>
+            </Button>
           </div>
         </div>
       )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -310,40 +299,38 @@ export default function ProgressTracker({
   return (
     <section className={`space-y-4 ${className ?? ""}`}>
       {pipelineWarning && (
-        <div className="rounded-lg border border-[var(--color-warning-muted)] bg-[var(--color-warning)]/10 px-4 py-3 text-sm text-[var(--color-warning)]">
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {pipelineWarning}
         </div>
       )}
 
       {/* Interrupted pipeline banner */}
       {isInterrupted && (
-        <div className="flex items-center justify-between gap-4 rounded-xl border border-[var(--color-warning-muted)] bg-[var(--color-warning)]/10 p-5 shadow-sm backdrop-blur-md">
-          <div>
-            <p className="text-sm font-semibold text-[var(--color-warning)]">Pipeline interrupted</p>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              {stagesComplete} of {TOTAL_PIPELINE_STAGES} stages completed. Resume to continue from where it left off.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => void handleResumePipeline()}
-            disabled={isResuming}
-            className="flex-shrink-0 rounded-md bg-[var(--color-warning)] px-4 py-1.5 text-xs font-semibold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
-          >
-            {isResuming ? "Resuming…" : "Resume Pipeline"}
-          </button>
-        </div>
+        <Card className="border-border bg-card shadow-sm">
+          <CardContent className="flex items-center justify-between gap-4 p-5">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Pipeline interrupted</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {stagesComplete} of {TOTAL_PIPELINE_STAGES} stages completed. Resume to continue from where it left off.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => void handleResumePipeline()}
+              disabled={isResuming}
+              className="flex-shrink-0"
+            >
+              {isResuming ? "Resuming…" : "Resume Pipeline"}
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
       {/* Overall progress bar */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 overflow-hidden rounded-full bg-[var(--bg-elevated)] h-2">
-          <div
-            className="h-full rounded-full bg-[var(--accent-primary)] transition-all duration-500"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-        <span className="min-w-[3rem] text-right text-xs text-[var(--text-muted)] tabular-nums">
+        <Progress value={progressPercent} className="h-2 flex-1" />
+        <span className="min-w-[3rem] text-right text-xs text-muted-foreground tabular-nums">
           {progressPercent}%
         </span>
       </div>
@@ -370,7 +357,7 @@ export default function ProgressTracker({
       </div>
 
       {isDone && (
-        <div className="rounded-lg border border-[var(--color-success-muted)] bg-[var(--color-success-muted)] px-4 py-3 text-sm font-medium text-[var(--color-success)]">
+        <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground shadow-sm">
           All stages complete! Your results are ready to view.
         </div>
       )}

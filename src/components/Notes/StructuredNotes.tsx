@@ -6,6 +6,8 @@ import type {
   StructuredNotes,
 } from "../../lib/types";
 import { parseSummaryBlocks, type SummaryBlock } from "./summaryFormatting";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 function renderInlineMarkdown(text: string): ReactNode[] {
   const parts: ReactNode[] = [];
@@ -46,8 +48,8 @@ function renderSummaryBlock(block: SummaryBlock, index: number) {
         key={index}
         className={
           block.level === 2
-            ? "text-lg font-semibold text-[var(--accent-primary)]"
-            : "text-base font-semibold text-[var(--text-primary)]"
+            ? "text-lg font-semibold text-primary"
+            : "text-base font-semibold text-foreground"
         }
       >
         {renderInlineMarkdown(block.text)}
@@ -57,7 +59,7 @@ function renderSummaryBlock(block: SummaryBlock, index: number) {
 
   if (block.type === "paragraph") {
     return (
-      <p key={index} className="text-[var(--text-secondary)] leading-7">
+      <p key={index} className="text-muted-foreground leading-7">
         {renderInlineMarkdown(block.text)}
       </p>
     );
@@ -68,8 +70,8 @@ function renderSummaryBlock(block: SummaryBlock, index: number) {
       <ul key={index} className="space-y-2">
         {block.items.map((item, itemIndex) => (
           <li key={itemIndex} className="flex items-start gap-3">
-            <span className="mt-2 flex-shrink-0 w-2 h-2 rounded-full bg-[var(--accent-primary)]" />
-            <span className="text-[var(--text-secondary)] leading-7">{renderInlineMarkdown(item)}</span>
+            <span className="mt-2 flex-shrink-0 w-2 h-2 rounded-full bg-primary" />
+            <span className="text-muted-foreground leading-7">{renderInlineMarkdown(item)}</span>
           </li>
         ))}
       </ul>
@@ -80,10 +82,10 @@ function renderSummaryBlock(block: SummaryBlock, index: number) {
     <ol key={index} className="space-y-3">
       {block.items.map((item, itemIndex) => (
         <li key={itemIndex} className="flex items-start gap-3">
-          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-info-muted)] text-[var(--color-info)] text-sm font-semibold flex items-center justify-center">
+          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-muted text-muted-foreground text-sm font-semibold flex items-center justify-center">
             {itemIndex + 1}
           </span>
-          <span className="text-[var(--text-secondary)] leading-7">{renderInlineMarkdown(item)}</span>
+          <span className="text-muted-foreground leading-7">{renderInlineMarkdown(item)}</span>
         </li>
       ))}
     </ol>
@@ -127,34 +129,36 @@ function SupportMaterialCard({ material }: { material: NotesSupportMaterial }) {
   const isFormula = kind === "formula";
 
   return (
-    <div className="glass-panel p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-[var(--accent-primary)]/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--accent-primary)]">
-          {supportMaterialLabel(kind)}
-        </span>
-        {material.language && (
-          <span className="rounded-full bg-[var(--bg-surface-raised)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)] border border-[var(--border-default)]">
-            {material.language}
-          </span>
+    <Card className="shadow-sm hover:shadow-md transition-shadow">
+      <CardContent className="p-5 space-y-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="secondary" className="px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em]">
+            {supportMaterialLabel(kind)}
+          </Badge>
+          {material.language && (
+            <Badge variant="outline" className="px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              {material.language}
+            </Badge>
+          )}
+        </div>
+
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+
+        {isCode ? (
+          <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-sm leading-6 text-foreground">
+            <code>{material.content}</code>
+          </pre>
+        ) : isFormula ? (
+          <div className="overflow-x-auto rounded-lg border border-border bg-card px-4 py-3 font-mono text-sm leading-6 text-foreground">
+            {renderMultilineText(material.content)}
+          </div>
+        ) : (
+          <div className="rounded-lg bg-card px-4 py-3 text-sm leading-7 text-muted-foreground whitespace-pre-wrap">
+            {renderMultilineText(material.content)}
+          </div>
         )}
-      </div>
-
-      <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
-
-      {isCode ? (
-        <pre className="overflow-x-auto rounded-lg bg-[var(--bg-inset)] p-4 text-sm leading-6 text-[var(--text-primary)]">
-          <code>{material.content}</code>
-        </pre>
-      ) : isFormula ? (
-        <div className="overflow-x-auto rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] px-4 py-3 font-mono text-sm leading-6 text-[var(--text-primary)]">
-          {renderMultilineText(material.content)}
-        </div>
-      ) : (
-        <div className="rounded-lg bg-[var(--bg-surface-overlay)] px-4 py-3 text-sm leading-7 text-[var(--text-secondary)] whitespace-pre-wrap">
-          {renderMultilineText(material.content)}
-        </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -181,23 +185,23 @@ function CollapsibleTopic({ topic, topicIndex }: CollapsibleTopicProps) {
         className="flex items-center gap-2 w-full text-left group mb-1"
         aria-expanded={open}
       >
-        <span className="text-[var(--accent-primary)] text-lg leading-none select-none transition-transform group-hover:text-[var(--accent-primary)]">
+        <span className="text-primary text-lg leading-none select-none transition-transform group-hover:text-primary">
           {open ? "▾" : "▸"}
         </span>
-        <h2 className="text-xl font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] transition-colors leading-snug">
+        <h2 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors leading-snug">
           {topic.heading}
         </h2>
       </button>
 
       {open && (
-        <div className="mt-4 pl-5 border-l-2 border-[var(--border-default)] space-y-5">
+        <div className="mt-4 pl-5 border-l-2 border-border space-y-5">
           {/* Key Points */}
           {keyPoints.length > 0 && (
             <ul className="space-y-2">
               {keyPoints.map((point, i) => (
                 <li key={i} className="flex items-start gap-3">
-                  <span className="mt-2 flex-shrink-0 w-2 h-2 rounded-full bg-[var(--accent-primary)]" />
-                  <span className="text-[var(--text-secondary)] leading-7">{point}</span>
+                  <span className="mt-2 flex-shrink-0 w-2 h-2 rounded-full bg-primary" />
+                  <span className="text-muted-foreground leading-7">{point}</span>
                 </li>
               ))}
             </ul>
@@ -205,7 +209,7 @@ function CollapsibleTopic({ topic, topicIndex }: CollapsibleTopicProps) {
 
           {/* Details paragraph */}
           {topic.details && (
-            <p className="text-[var(--text-secondary)] leading-7 text-[0.95rem]">{topic.details}</p>
+            <p className="text-muted-foreground leading-7 text-[0.95rem]">{topic.details}</p>
           )}
 
           {/* Examples */}
@@ -214,13 +218,13 @@ function CollapsibleTopic({ topic, topicIndex }: CollapsibleTopicProps) {
               {examples.map((ex, i) => (
                 <div
                   key={i}
-                  className="bg-[var(--color-info)]/10 border border-[var(--color-info)]/20 rounded-xl px-5 py-4 backdrop-blur-sm"
+                  className="bg-muted/50 border border-border rounded-xl px-5 py-4 backdrop-blur-sm"
                 >
-                  <p className="text-[11px] font-bold text-[var(--color-info)] uppercase tracking-widest mb-2 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-info)]"></span>
+                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground"></span>
                     Example
                   </p>
-                  <p className="text-[var(--text-secondary)] text-[0.95rem] leading-relaxed">{ex}</p>
+                  <p className="text-muted-foreground text-[0.95rem] leading-relaxed">{ex}</p>
                 </div>
               ))}
             </div>
@@ -244,15 +248,15 @@ function CollapsibleTopic({ topic, topicIndex }: CollapsibleTopicProps) {
 function KeyTermsTable({ terms }: { terms: NotesTerm[] }) {
   return (
     <section id="key-terms" className="mb-8">
-      <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-5">Key Terms</h2>
-      <div className="overflow-hidden rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface-overlay)] backdrop-blur-md shadow-sm">
+      <h2 className="text-xl font-semibold text-foreground mb-5">Key Terms</h2>
+      <Card className="overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[var(--bg-elevated)]/50 border-b border-[var(--border-default)]">
-              <th className="text-left px-5 py-3.5 text-[var(--text-secondary)] font-semibold w-1/3 text-xs uppercase tracking-wider">
+            <tr className="bg-muted/50 border-b border-border">
+              <th className="text-left px-5 py-3.5 text-muted-foreground font-semibold w-1/3 text-xs uppercase tracking-wider">
                 Term
               </th>
-              <th className="text-left px-5 py-3.5 text-[var(--text-secondary)] font-semibold text-xs uppercase tracking-wider">
+              <th className="text-left px-5 py-3.5 text-muted-foreground font-semibold text-xs uppercase tracking-wider">
                 Definition
               </th>
             </tr>
@@ -263,21 +267,21 @@ function KeyTermsTable({ terms }: { terms: NotesTerm[] }) {
                 key={i}
                 className={
                   i % 2 === 0
-                    ? "bg-transparent hover:bg-[var(--bg-surface-raised)] transition-colors"
-                    : "bg-[var(--bg-elevated)]/30 hover:bg-[var(--bg-surface-raised)] transition-colors"
+                    ? "bg-transparent hover:bg-muted/50 transition-colors"
+                    : "bg-muted/30 hover:bg-muted/50 transition-colors"
                 }
               >
-                <td className="px-5 py-4 font-semibold text-[var(--accent-primary)] align-top border-t border-[var(--border-subtle)]">
+                <td className="px-5 py-4 font-semibold text-primary align-top border-t border-border/50">
                   {item.term}
                 </td>
-                <td className="px-5 py-4 text-[var(--text-secondary)] leading-loose border-t border-[var(--border-subtle)]">
+                <td className="px-5 py-4 text-muted-foreground leading-loose border-t border-border/50">
                   {item.definition}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </Card>
     </section>
   );
 }
@@ -287,19 +291,19 @@ function KeyTermsTable({ terms }: { terms: NotesTerm[] }) {
 function TakeawaysBox({ takeaways }: { takeaways: string[] }) {
   return (
     <section id="takeaways" className="mb-8">
-      <div className="bg-[var(--color-warning-muted)] border border-[var(--color-warning-muted)] rounded-xl p-6">
-        <h2 className="text-xl font-semibold text-[var(--color-warning)] mb-4">Key Takeaways</h2>
+      <Card className="bg-muted border-border p-6 shadow-sm">
+        <h2 className="text-xl font-semibold text-foreground mb-4">Key Takeaways</h2>
         <ol className="space-y-3">
           {takeaways.map((t, i) => (
             <li key={i} className="flex items-start gap-3">
-              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-warning-muted)] text-[var(--color-warning)] text-sm font-bold flex items-center justify-center">
+              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-background border border-border text-foreground text-sm font-bold flex items-center justify-center shadow-sm">
                 {i + 1}
               </span>
-              <span className="text-[var(--text-secondary)] leading-7">{t}</span>
+              <span className="text-muted-foreground leading-7">{t}</span>
             </li>
           ))}
         </ol>
-      </div>
+      </Card>
     </section>
   );
 }
@@ -321,17 +325,17 @@ export function StructuredNotesView({ notes, summary }: StructuredNotesProps) {
   return (
     <article className="space-y-2">
       {/* Document Title */}
-      <header className="border-b border-[var(--border-default)] pb-6 mb-8">
-        <h1 className="text-3xl font-bold text-[var(--text-primary)] leading-tight">{notes.title}</h1>
+      <header className="border-b border-border pb-6 mb-8">
+        <h1 className="text-3xl font-bold text-foreground leading-tight">{notes.title}</h1>
       </header>
 
       {/* Summary Section */}
       {summaryBlocks.length > 0 && (
         <section id="summary" className="mb-8">
-          <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-3">Summary</h2>
-          <div className="rounded-xl border border-[var(--border-default)]/80 bg-[var(--bg-elevated)]/35 p-5 space-y-4">
+          <h2 className="text-xl font-semibold text-foreground mb-3">Summary</h2>
+          <Card className="p-5 space-y-4">
             {summaryBlocks.map((block, index) => renderSummaryBlock(block, index))}
-          </div>
+          </Card>
         </section>
       )}
 

@@ -17,6 +17,12 @@ import type {
 import { useLectureStore, useSettingsStore } from "../../stores";
 import { ViewHeader } from "../Layout";
 import EmptyState from "./EmptyState";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 
 type SortOption = "newest" | "oldest" | "alphabetical";
 type StatusFilter = "all" | "complete" | "processing" | "error";
@@ -67,11 +73,11 @@ function statusLabel(status: LectureStatus): string {
   return "Error";
 }
 
-function statusBadgeClass(status: LectureStatus): string {
-  if (status === "complete") return "badge-success";
-  if (status === "error") return "badge-error";
-  if (status === "uploaded") return "badge-neutral";
-  return "badge-info";
+function statusBadgeVariant(status: LectureStatus): "default" | "secondary" | "destructive" | "outline" {
+  if (status === "complete") return "default"; // green would be custom, default is primary
+  if (status === "error") return "destructive";
+  if (status === "uploaded") return "secondary";
+  return "default";
 }
 
 function statusMatchesFilter(status: LectureStatus, filter: StatusFilter): boolean {
@@ -81,12 +87,9 @@ function statusMatchesFilter(status: LectureStatus, filter: StatusFilter): boole
   return PROCESSING_STATUSES.includes(status);
 }
 
-function sourceBadgeClass(sourceType: LectureSourceType): string {
-  if (sourceType === "video") {
-    return "badge-accent";
-  }
-
-  return "badge-info";
+function sourceBadgeVariant(sourceType: LectureSourceType): "default" | "secondary" {
+  if (sourceType === "video") return "default";
+  return "secondary";
 }
 
 function sourceLabel(sourceType: LectureSourceType): string {
@@ -285,55 +288,57 @@ export default function LectureLibrary() {
         title="Your Knowtes"
         description="Browse, search, and manage your knowte history."
         actions={
-          <button
+          <Button
             type="button"
             onClick={() => navigate("/upload")}
-            className="btn-primary"
           >
             Add Knowte
-          </button>
+          </Button>
         }
       />
+      <Card className="animate-slide-up">
+        <CardContent className="grid gap-4 p-5 md:grid-cols-[1fr_auto_auto] items-end pb-5">
+          <label className="block w-full">
+            <span className="mb-2 block text-sm font-medium text-muted-foreground">Search knowtes</span>
+            <Input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search title, transcript, or notes..."
+              className="w-full"
+            />
+          </label>
 
-      <section className="glass-panel grid gap-4 p-5 md:grid-cols-[1fr_auto_auto] animate-slide-up">
-        <label className="block">
-          <span className="sr-only">Search knowtes</span>
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search title, transcript, or notes..."
-            className="input w-full"
-          />
-        </label>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-muted-foreground">Sort</span>
+            <Select value={sortOption} onValueChange={(v) => setSortOption(v as SortOption)}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest first</SelectItem>
+                <SelectItem value="oldest">Oldest first</SelectItem>
+                <SelectItem value="alphabetical">Alphabetical</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <label className="flex items-center gap-3 text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-          <span>Sort</span>
-          <select
-            value={sortOption}
-            onChange={(event) => setSortOption(event.target.value as SortOption)}
-            className="input pr-8"
-          >
-            <option value="newest">Newest first</option>
-            <option value="oldest">Oldest first</option>
-            <option value="alphabetical">Alphabetical</option>
-          </select>
-        </label>
-
-        <label className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-          <span>Status</span>
-          <select
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
-            className="input"
-          >
-            <option value="all">All</option>
-            <option value="complete">Complete</option>
-            <option value="processing">Processing</option>
-            <option value="error">Error</option>
-          </select>
-        </label>
-      </section>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-muted-foreground">Status</span>
+            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="complete">Complete</SelectItem>
+                <SelectItem value="processing">Processing</SelectItem>
+                <SelectItem value="error">Error</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
       {error && (
         <div className="rounded-lg px-4 py-3 text-sm" style={{ border: "1px solid var(--color-error-muted)", background: "var(--color-error-muted)", color: "var(--color-error)" }}>
@@ -342,11 +347,9 @@ export default function LectureLibrary() {
       )}
 
       {isLoading ? (
-        <div className="flex h-64 items-center justify-center text-sm" style={{ color: "var(--text-muted)" }}>
-          <span className="inline-flex items-center gap-2">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: "var(--text-muted)", borderTopColor: "transparent" }} />
-            Loading knowtes...
-          </span>
+        <div className="flex h-64 flex-col items-center justify-center gap-4 text-sm text-muted-foreground">
+          <Spinner className="size-8" />
+          <p>Loading knowtes...</p>
         </div>
       ) : lectureSummaries.length === 0 ? (
         <EmptyState />
@@ -362,51 +365,53 @@ export default function LectureLibrary() {
             const showProgress = progress !== null;
 
             return (
-              <article
+              <Card
                 key={lecture.id}
-                className="card card-interactive relative p-5 transition-all animate-card-in"
-                style={{ cursor: "pointer", animationDelay: `${Math.min(idx * 55, 400)}ms` }}
+                className="group relative transition-all animate-card-in hover:shadow-md cursor-pointer pt-0"
+                style={{ animationDelay: `${Math.min(idx * 55, 400)}ms` }}
+                onClick={() => !isBusy && openLecture(lecture.id)}
               >
-                <button
-                  type="button"
-                  onClick={() => openLecture(lecture.id)}
-                  disabled={isBusy}
-                  className="block w-full text-left"
-                >
-                  <p className="truncate text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>{lecture.title}</p>
-                  <p className="mt-1 truncate text-xs" style={{ color: "var(--text-muted)" }}>{lecture.filename}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs" style={{ color: "var(--text-muted)" }}>
-                    <span>{formatDate(lecture.created_at)}</span>
-                    <span>•</span>
-                    <span>{formatDuration(lecture.duration)}</span>
-                    <span
-                      className={`inline-flex rounded-full border px-2 py-0.5 text-[11px] font-medium ${sourceBadgeClass(lecture.source_type)}`}
-                    >
-                      {sourceLabel(lecture.source_type)}
-                    </span>
-                  </div>
-                  <div className="mt-3">
-                    <span
-                      className={`inline-flex rounded-full border px-2 py-1 text-xs font-medium ${statusBadgeClass(lecture.status)}`}
-                    >
-                      {statusLabel(lecture.status)}
-                    </span>
-                  </div>
-                  {showProgress && (
-                    <div className="mt-3">
-                      <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--bg-elevated)" }}>
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${progress}%`, background: "var(--accent-primary)" }}
-                        />
-                      </div>
-                      <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>{progress}% complete</p>
+                <div role="button" tabIndex={0} className="w-full text-left" aria-disabled={isBusy}>
+                  <CardHeader className="pb-3 pt-5">
+                    <CardTitle className="truncate font-heading text-base leading-tight">
+                      {lecture.title}
+                    </CardTitle>
+                    <CardDescription className="mt-1 truncate text-xs">
+                      {lecture.filename}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span>{formatDate(lecture.created_at)}</span>
+                      <span>•</span>
+                      <span>{formatDuration(lecture.duration)}</span>
+                      <Badge variant={sourceBadgeVariant(lecture.source_type)}>
+                        {sourceLabel(lecture.source_type)}
+                      </Badge>
                     </div>
-                  )}
-                </button>
+                    <div className="mt-3">
+                      <Badge variant={statusBadgeVariant(lecture.status)}>
+                        {statusLabel(lecture.status)}
+                      </Badge>
+                    </div>
+                    {showProgress && (
+                      <div className="mt-4">
+                        <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+                          <div
+                            className="h-full rounded-full bg-primary transition-all"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                        <p className="mt-1.5 text-xs text-muted-foreground">{progress}% complete</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </div>
 
                 <div className="absolute right-3 top-3">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     type="button"
                     onClick={(event) => {
                       event.stopPropagation();
@@ -415,11 +420,11 @@ export default function LectureLibrary() {
                       );
                     }}
                     disabled={isBusy}
-                    className="btn-ghost px-2 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+                    className="h-8 w-8 disabled:cursor-not-allowed disabled:opacity-50"
                     aria-label={`Knowte actions for ${lecture.title}`}
                   >
                     ⋮
-                  </button>
+                  </Button>
 
                   {activeMenuLectureId === lecture.id && (
                     <div
@@ -454,7 +459,7 @@ export default function LectureLibrary() {
                     </div>
                   )}
                 </div>
-              </article>
+              </Card>
             );
           })}
         </section>

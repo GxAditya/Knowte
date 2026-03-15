@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { HOTKEY_EVENT_NAMES } from "../../lib/hotkeys";
 import type { Question, Quiz } from "../../lib/types";
 import { QuestionCard } from "./QuestionCard";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export interface UserAnswers {
   [questionId: number]: string;
@@ -32,17 +34,17 @@ function NavDot({ index, isCurrent, isSubmitted, isCorrect, onClick }: NavDotPro
     "w-2.5 h-2.5 rounded-full transition-all duration-200 cursor-pointer hover:scale-125 ";
 
   if (isCurrent) {
-    style += "ring-2 ring-offset-1 ring-offset-[var(--bg-base)] ring-[var(--accent-primary)] ";
+    style += "ring-2 ring-offset-1 ring-offset-background ring-primary ";
   }
 
   if (!isSubmitted) {
-    style += isCurrent ? "bg-[var(--accent-primary)]" : "bg-[var(--border-strong)]";
+    style += isCurrent ? "bg-primary" : "bg-border";
   } else if (isCorrect === null) {
-    style += "bg-[var(--color-warning)]"; // short answer, self-graded
+    style += "bg-yellow-500"; // short answer, self-graded
   } else if (isCorrect) {
-    style += "bg-[var(--color-success)]";
+    style += "bg-green-500";
   } else {
-    style += "bg-[var(--color-error)]";
+    style += "bg-destructive";
   }
 
   return (
@@ -62,7 +64,7 @@ function NavDot({ index, isCurrent, isSubmitted, isCorrect, onClick }: NavDotPro
 function ProgressBar({ answered, total }: { answered: number; total: number }) {
   const pct = total === 0 ? 0 : Math.round((answered / total) * 100);
   return (
-    <div className="w-full h-1.5 glass-panel !rounded-full overflow-hidden !border-none !p-0">
+    <div className="w-full h-1.5 bg-card/50 ring-1 ring-border rounded-full overflow-hidden">
       <div
         className="h-full bg-gradient-to-r from-violet-600 to-violet-400 rounded-full transition-all duration-500"
         style={{ width: `${pct}%` }}
@@ -148,7 +150,7 @@ export function QuizPlayer({ quiz, onComplete, onRegenerateQuiz, isRegenerating 
     <div data-quiz-player="true" className="flex flex-col gap-5 max-w-2xl mx-auto w-full">
       {/* Top bar: progress */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{answeredCount} of {total} answered</span>
           <span>{Math.round((answeredCount / total) * 100)}%</span>
         </div>
@@ -157,13 +159,13 @@ export function QuizPlayer({ quiz, onComplete, onRegenerateQuiz, isRegenerating 
 
       {/* Question card */}
       <div
-        className={`glass-panel p-8 transition-all duration-300 ${
+        className={`bg-card rounded-xl p-8 transition-all duration-300 border ${
           isCurrentSubmitted
             ? answers[currentQuestion.id] === currentQuestion.correct_answer ||
               currentQuestion.type === "short_answer"
-              ? "border-[var(--color-success-muted)] shadow-[var(--card-shadow-success)]"
-              : "border-[var(--color-error)]/40 shadow-[var(--card-shadow-error)]"
-            : "border-[var(--border-subtle)] hover:shadow-[var(--card-shadow-hover)]"
+              ? "border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.1)]"
+              : "border-destructive/40 shadow-[0_0_15px_rgba(239,68,68,0.1)]"
+            : "border-border hover:shadow-md"
         }`}
       >
         <QuestionCard
@@ -178,35 +180,34 @@ export function QuizPlayer({ quiz, onComplete, onRegenerateQuiz, isRegenerating 
 
       {/* Action buttons */}
       <div className="flex items-center justify-between gap-3">
-        <button
+        <Button
+          variant="ghost"
           type="button"
           onClick={goToPreviousQuestion}
           disabled={currentIndex === 0}
-          className="btn-ghost"
         >
           ← Previous
-        </button>
+        </Button>
 
         <div className="flex gap-2 items-center">
           {!isCurrentSubmitted ? (
-            <button
+            <Button
               type="button"
               onClick={handleSubmit}
               disabled={!currentAnswer || currentAnswer.trim() === ""}
-              className="btn-primary"
             >
               Submit Answer
-            </button>
+            </Button>
           ) : allSubmitted ? (
-            <button
+            <Button
               type="button"
               onClick={handleFinish}
-              className="px-5 py-2 rounded-full text-sm font-bold bg-[var(--color-success)] hover:brightness-110 text-white transition-all shadow-[var(--card-shadow-success)]"
+              className="rounded-full bg-green-600 hover:bg-green-700 text-white shadow"
             >
               See Results →
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               type="button"
               onClick={() => {
                 // Advance to next unanswered question, or next in order
@@ -219,21 +220,21 @@ export function QuizPlayer({ quiz, onComplete, onRegenerateQuiz, isRegenerating 
                   setCurrentIndex((i) => Math.min(total - 1, i + 1));
                 }
               }}
-              className="btn-primary flex items-center gap-2"
+              className="flex items-center gap-2"
             >
               Next Question →
-            </button>
+            </Button>
           )}
         </div>
 
-        <button
+        <Button
+          variant="ghost"
           type="button"
           onClick={goToNextQuestion}
           disabled={currentIndex === total - 1}
-          className="btn-ghost"
         >
           Next →
-        </button>
+        </Button>
       </div>
 
       {/* Navigation dots */}
@@ -257,21 +258,22 @@ export function QuizPlayer({ quiz, onComplete, onRegenerateQuiz, isRegenerating 
 
       {/* Regenerate quiz */}
       <div className="flex justify-center pt-1">
-        <button
+        <Button
+          variant="ghost"
           type="button"
           onClick={onRegenerateQuiz}
           disabled={isRegenerating}
-          className="flex items-center gap-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
         >
           {isRegenerating ? (
             <>
-              <div className="w-3 h-3 border border-[var(--border-default)] border-t-transparent rounded-full animate-spin" />
+              <Spinner className="size-3" />
               Generating new quiz…
             </>
           ) : (
             <>🔄 Generate New Quiz</>
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );

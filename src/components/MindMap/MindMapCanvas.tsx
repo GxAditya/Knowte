@@ -20,6 +20,7 @@ import "@xyflow/react/dist/style.css";
 import dagre from "dagre";
 import { toPng, toSvg } from "html-to-image";
 import type { MindMapData, MindMapNode } from "../../lib/types";
+import { Button } from "@/components/ui/button";
 
 // ─── Node size / colour per depth ─────────────────────────────────────────────
 
@@ -41,10 +42,10 @@ function estimateNodeDims(label: string, level: number): { width: number; height
 }
 
 const NODE_STYLES: Record<number, React.CSSProperties> = {
-  0: { background: "var(--accent-primary)", border: "2px solid var(--accent-secondary)", color: "#fff", fontSize: 15, fontWeight: 700, borderRadius: 12,  boxShadow: "0 4px 20px var(--accent-glow)" },
-  1: { background: "var(--color-info)", border: "2px solid var(--color-info)", color: "#fff", fontSize: 13, fontWeight: 600, borderRadius: 10, boxShadow: "0 2px 12px var(--accent-glow)" },
-  2: { background: "var(--color-success)", border: "2px solid var(--color-success)", color: "#fff", fontSize: 12, fontWeight: 500, borderRadius: 8,  boxShadow: "0 2px 10px var(--color-success-muted)" },
-  3: { background: "var(--bg-surface-overlay)", border: "2px solid var(--border-strong)", color: "var(--text-secondary)", fontSize: 11, fontWeight: 400, borderRadius: 8,  boxShadow: "0 1px 6px rgba(0,0,0,.25)" },
+  0: { background: "hsl(var(--primary))", border: "2px solid hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontSize: 15, fontWeight: 700, borderRadius: 12,  boxShadow: "0 4px 20px hsl(var(--primary)/0.25)" },
+  1: { background: "hsl(var(--accent))", border: "2px solid hsl(var(--accent))", color: "hsl(var(--accent-foreground))", fontSize: 13, fontWeight: 600, borderRadius: 10, boxShadow: "0 2px 12px hsl(var(--accent)/0.25)" },
+  2: { background: "hsl(var(--secondary))", border: "2px solid hsl(var(--secondary))", color: "hsl(var(--secondary-foreground))", fontSize: 12, fontWeight: 500, borderRadius: 8,  boxShadow: "0 2px 10px hsl(var(--secondary)/0.25)" },
+  3: { background: "hsl(var(--card))", border: "2px solid hsl(var(--border))", color: "hsl(var(--foreground))", fontSize: 11, fontWeight: 400, borderRadius: 8,  boxShadow: "0 1px 6px rgba(0,0,0,.1)" },
 };
 
 // ─── Custom node component ─────────────────────────────────────────────────────
@@ -80,10 +81,10 @@ function MindMapNodeComp({ data, isConnectable }: NodeProps) {
   return (
     <>
       {level > 0 && (
-        <Handle type="target" position={Position.Left} isConnectable={isConnectable} style={{ background: "var(--border-strong)" }} />
+        <Handle type="target" position={Position.Left} isConnectable={isConnectable} style={{ background: "hsl(var(--border))" }} />
       )}
       <div style={style}>{d.label}</div>
-      <Handle type="source" position={Position.Right} isConnectable={isConnectable} style={{ background: "var(--border-strong)" }} />
+      <Handle type="source" position={Position.Right} isConnectable={isConnectable} style={{ background: "hsl(var(--border))" }} />
     </>
   );
 }
@@ -116,7 +117,7 @@ function flattenTree(
       target: node.id,
       type: "smoothstep",
       animated: false,
-      style: { stroke: "var(--border-strong)", strokeWidth: 2 },
+      style: { stroke: "hsl(var(--border))", strokeWidth: 2 },
     });
   }
   for (const child of node.children ?? []) {
@@ -203,10 +204,10 @@ function InnerCanvas({ data }: { data: MindMapData }) {
           ...e.style,
           stroke:
             selectedBranch === null
-              ? "var(--border-strong)"
+              ? "hsl(var(--border))"
               : selectedBranch.has(e.source) && selectedBranch.has(e.target)
-                ? "var(--accent-primary)"
-                : "var(--bg-surface-overlay)",
+                ? "hsl(var(--primary))"
+                : "hsl(var(--muted))",
           opacity: selectedBranch === null ? 1 : selectedBranch.has(e.source) && selectedBranch.has(e.target) ? 1 : 0.2,
         },
       })),
@@ -306,25 +307,24 @@ function InnerCanvas({ data }: { data: MindMapData }) {
         nodesConnectable={false}
         elementsSelectable={true}
         proOptions={{ hideAttribution: true }}
-        style={{ background: "var(--bg-base)" }}
+        style={{ background: "transparent" }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="var(--border-default)" />
+        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="hsl(var(--border))" />
         <MiniMap
           nodeColor={(n) => {
             const level = Math.min(((n.data as MindMapNodeData).level ?? 0) as number, 3);
-            const colors = getComputedStyle(document.documentElement);
             return [
-              colors.getPropertyValue('--accent-primary').trim() || '#4f46e5',
-              colors.getPropertyValue('--color-info').trim() || '#1d4ed8',
-              colors.getPropertyValue('--color-success').trim() || '#047857',
-              colors.getPropertyValue('--bg-surface-overlay').trim() || '#334155',
+              "hsl(var(--primary))",
+              "hsl(var(--accent))",
+              "hsl(var(--secondary))",
+              "hsl(var(--card))",
             ][level];
           }}
-          style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)" }}
+          style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
           maskColor="rgba(15,23,42,0.7)"
         />
         <Controls
-          style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: 8 }}
+          style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
           showInteractive={false}
         />
       </ReactFlow>
@@ -332,44 +332,47 @@ function InnerCanvas({ data }: { data: MindMapData }) {
 
       {/* Toolbar — excluded from image export */}
       <div className="absolute top-3 right-3 flex gap-2 z-10" data-export-exclude="true">
-        <button
+        <Button
+          variant="secondary"
           type="button"
           onClick={handleFitView}
-          className="btn-secondary !px-3 !py-1.5 !text-xs !rounded-lg"
+          className="h-8 px-3 py-1.5 text-xs rounded-lg"
           title="Fit the full map in view"
         >
           Fit View
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="secondary"
           type="button"
           data-hotkey-export="true"
           onClick={downloadPng}
-          className="btn-secondary !px-3 !py-1.5 !text-xs !rounded-lg"
+          className="h-8 px-3 py-1.5 text-xs rounded-lg"
           title="Download as PNG"
         >
           ↓ PNG
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="secondary"
           type="button"
           onClick={downloadSvg}
-          className="btn-secondary !px-3 !py-1.5 !text-xs !rounded-lg"
+          className="h-8 px-3 py-1.5 text-xs rounded-lg"
           title="Download as SVG"
         >
           ↓ SVG
-        </button>
+        </Button>
         {selectedBranch !== null && (
-          <button
+          <Button
             type="button"
             onClick={() => setSelectedBranch(null)}
-            className="btn-primary !px-3 !py-1.5 !text-xs !rounded-lg"
+            className="h-8 px-3 py-1.5 text-xs rounded-lg"
           >
             Clear Selection
-          </button>
+          </Button>
         )}
       </div>
 
       {selectedBranch !== null && (
-        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-[var(--text-primary)] font-medium glass-panel !rounded-full px-4 py-2 shadow-sm" data-export-exclude="true">
+        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-foreground font-medium bg-card border border-border rounded-full px-4 py-2 shadow-sm" data-export-exclude="true">
           Click a node to highlight its branch · Click background to clear
         </p>
       )}

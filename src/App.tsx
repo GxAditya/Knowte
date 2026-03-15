@@ -13,7 +13,7 @@ import { KeyboardShortcutsModal, SetupWizard, Sidebar, TitleBar } from "./compon
 import { ToastViewport } from "./components/Toast";
 import { useHotkeys } from "./hooks";
 import { HOTKEY_EVENT_NAMES, LECTURE_VIEW_SHORTCUTS } from "./lib/hotkeys";
-import { listLectures } from "./lib/tauriApi";
+import { getLectureSummary, listLectures } from "./lib/tauriApi";
 import type { Lecture, LectureSummary, LlmStreamEvent, PipelineStageEvent, Settings, ThemeMode } from "./lib/types";
 import { useLectureStore, usePipelineStore, useSettingsStore, useToastStore, useUiStore } from "./stores";
 import "./index.css";
@@ -130,7 +130,26 @@ function AppLayout() {
 
     void (async () => {
       const unlistenStage = await listen<PipelineStageEvent>("pipeline-stage", (event) => {
-        usePipelineStore.getState().handleStageEvent(event.payload);
+        const payload = event.payload;
+        usePipelineStore.getState().handleStageEvent(payload);
+
+        if (
+          (payload.stage === "summary" && payload.status === "complete") ||
+          (payload.stage === "pipeline" && payload.status === "complete")
+        ) {
+          void (async () => {
+            try {
+              const lecture = await getLectureSummary(payload.lecture_id);
+              if (!lecture) {
+                return;
+              }
+
+              useLectureStore.getState().updateLecture(payload.lecture_id, summaryToLecture(lecture));
+            } catch {
+              // Non-fatal: the page can still load fresh data directly later.
+            }
+          })();
+        }
       });
       const unlistenStream = await listen<LlmStreamEvent>("llm-stream", (event) => {
         usePipelineStore.getState().handleStreamEvent(event.payload);

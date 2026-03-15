@@ -2,9 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { FlashcardSkeleton } from "../components/Skeletons";
 import { AnkiExport, FlashcardViewer } from "../components/Flashcards";
 import { ViewHeader } from "../components/Layout";
+import { parseFlashcardsJson } from "../lib/generatedContent";
 import { getFlashcards, regenerateFlashcards } from "../lib/tauriApi";
-import type { Flashcard, FlashcardsOutput } from "../lib/types";
-import { useLectureStore, useToastStore } from "../stores";
+import type { Flashcard } from "../lib/types";
+import { useLectureStore, usePipelineStore, useToastStore } from "../stores";
 
 // ─── Empty States ─────────────────────────────────────────────────────────────
 
@@ -12,10 +13,12 @@ function EmptyState({
   reason,
   onRegenerate,
   isRegenerating,
+  detail,
 }: {
   reason: "no-lecture" | "no-flashcards";
   onRegenerate?: () => void;
   isRegenerating?: boolean;
+  detail?: string | null;
 }) {
   if (reason === "no-lecture") {
     return (
@@ -33,6 +36,11 @@ function EmptyState({
         <p className="text-sm font-medium text-[var(--text-secondary)]">No flashcards generated yet.</p>
         <p className="text-xs">Run the processing pipeline or generate flashcards directly.</p>
       </div>
+      {detail && (
+        <p className="max-w-md rounded-lg border border-[var(--color-error-muted)] bg-[var(--color-error-muted)] px-4 py-2 text-center text-xs text-[var(--color-error)]">
+          {detail}
+        </p>
+      )}
       {onRegenerate && (
         <button
           type="button"
@@ -59,11 +67,29 @@ function EmptyState({
 export default function Flashcards() {
   const { currentLectureId } = useLectureStore();
   const pushToast = useToastStore((state) => state.pushToast);
+  const flashcardsStageError = usePipelineStore((state) =>
+    currentLectureId
+      ? state.lectureStates[currentLectureId]?.stages.find((stage) => stage.name === "flashcards")
+          ?.error ?? null
+      : null,
+  );
 
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const applyFlashcardsPayload = useCallback((raw: string, invalidMessage: string) => {
+    const parsed = parseFlashcardsJson(raw);
+    if (!parsed) {
+      setCards([]);
+      setError(invalidMessage);
+      return false;
+    }
+
+    setCards(parsed.cards);
+    return true;
+  }, []);
 
   // Load flashcards from backend
   const loadFlashcards = useCallback(async (lectureId: string) => {
@@ -74,15 +100,14 @@ export default function Flashcards() {
     try {
       const raw = await getFlashcards(lectureId);
       if (raw) {
-        const parsed = JSON.parse(raw) as FlashcardsOutput;
-        setCards(Array.isArray(parsed.cards) ? parsed.cards : []);
+        applyFlashcardsPayload(raw, "Stored flashcards data is invalid or incomplete.");
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [applyFlashcardsPayload]);
 
   useEffect(() => {
     if (!currentLectureId) return;
@@ -98,9 +123,11 @@ export default function Flashcards() {
     try {
       const raw = await regenerateFlashcards(currentLectureId);
       if (raw) {
-        const parsed = JSON.parse(raw) as FlashcardsOutput;
-        setCards(Array.isArray(parsed.cards) ? parsed.cards : []);
-        pushToast({ kind: "success", message: "Flashcards regenerated successfully." });
+        if (applyFlashcardsPayload(raw, "Regenerated flashcards data is invalid or incomplete.")) {
+          pushToast({ kind: "success", message: "Flashcards regenerated successfully." });
+        } else {
+          pushToast({ kind: "error", message: "Flashcard regeneration returned invalid data." });
+        }
       } else {
         pushToast({ kind: "warning", message: "Flashcard regeneration returned no data." });
       }
@@ -110,7 +137,7 @@ export default function Flashcards() {
     } finally {
       setIsRegenerating(false);
     }
-  }, [currentLectureId, isRegenerating, pushToast]);
+  }, [applyFlashcardsPayload, currentLectureId, isRegenerating, pushToast]);
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -203,6 +230,7 @@ export default function Flashcards() {
         />
         <EmptyState
           reason="no-flashcards"
+          detail={flashcardsStageError}
           onRegenerate={handleRegenerate}
           isRegenerating={isRegenerating}
         />

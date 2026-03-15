@@ -3,9 +3,10 @@ import { ExplainableTextView } from "../components";
 import { NotesSkeleton } from "../components/Skeletons";
 import { NotesExport, StructuredNotesView } from "../components/Notes";
 import { ViewHeader } from "../components/Layout";
+import { parseStructuredNotesJson } from "../lib/generatedContent";
 import { getNotes, regenerateNotes } from "../lib/tauriApi";
 import type { StructuredNotes } from "../lib/types";
-import { useLectureStore, useToastStore, useUiStore } from "../stores";
+import { useLectureStore, usePipelineStore, useToastStore, useUiStore } from "../stores";
 
 // ─── Table of Contents ────────────────────────────────────────────────────────
 
@@ -106,7 +107,13 @@ function useActiveSection(ids: string[]) {
 
 // ─── Empty / Loading States ───────────────────────────────────────────────────
 
-function EmptyState({ reason }: { reason: "no-lecture" | "no-notes" }) {
+function EmptyState({
+  reason,
+  detail,
+}: {
+  reason: "no-lecture" | "no-notes";
+  detail?: string | null;
+}) {
   if (reason === "no-lecture") {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-[var(--text-muted)] space-y-2">
@@ -121,6 +128,11 @@ function EmptyState({ reason }: { reason: "no-lecture" | "no-notes" }) {
       <span className="text-4xl">📝</span>
       <p className="text-sm font-medium text-[var(--text-secondary)]">No notes generated yet.</p>
       <p className="text-xs">Run the processing pipeline to generate structured notes.</p>
+      {detail && (
+        <p className="max-w-md rounded-lg border border-[var(--color-error-muted)] bg-[var(--color-error-muted)] px-4 py-2 text-center text-xs text-[var(--color-error)]">
+          {detail}
+        </p>
+      )}
     </div>
   );
 }
@@ -131,6 +143,12 @@ export default function Notes() {
   const { currentLectureId, lectures } = useLectureStore();
   const isSidebarCollapsed = useUiStore((state) => state.isSidebarCollapsed);
   const pushToast = useToastStore((state) => state.pushToast);
+  const notesStageError = usePipelineStore((state) =>
+    currentLectureId
+      ? state.lectureStates[currentLectureId]?.stages.find((stage) => stage.name === "notes")
+          ?.error ?? null
+      : null,
+  );
   const currentLecture = lectures.find((l) => l.id === currentLectureId) ?? null;
 
   const [notes, setNotes] = useState<StructuredNotes | null>(null);
@@ -139,9 +157,23 @@ export default function Notes() {
   const [isOutlineOpen, setIsOutlineOpen] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const applyNotesPayload = useCallback((raw: string, invalidMessage: string) => {
+    const parsed = parseStructuredNotesJson(raw);
+    if (!parsed) {
+      setNotes(null);
+      setError(invalidMessage);
+      return false;
+    }
+
+    setNotes(parsed);
+    return true;
+  }, []);
+
   const loadNotes = useCallback(async () => {
     if (!currentLectureId) {
       setNotes(null);
+      setError(null);
+      setIsLoading(false);
       return;
     }
 
@@ -156,17 +188,15 @@ export default function Notes() {
         return;
       }
 
-      try {
-        setNotes(JSON.parse(raw) as StructuredNotes);
-      } catch {
-        setError("Failed to parse notes data.");
+      if (!applyNotesPayload(raw, "Stored notes data is invalid or incomplete.")) {
+        return;
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsLoading(false);
     }
-  }, [currentLectureId]);
+  }, [applyNotesPayload, currentLectureId]);
 
   // ── Load notes from backend ─────────────────────────────────────────────────
   useEffect(() => {
@@ -182,8 +212,11 @@ export default function Notes() {
     try {
       const raw = await regenerateNotes(currentLectureId);
       if (raw) {
-        setNotes(JSON.parse(raw) as StructuredNotes);
-        pushToast({ kind: "success", message: "Notes regenerated successfully." });
+        if (applyNotesPayload(raw, "Regenerated notes data is invalid or incomplete.")) {
+          pushToast({ kind: "success", message: "Notes regenerated successfully." });
+        } else {
+          pushToast({ kind: "error", message: "Notes regeneration returned invalid data." });
+        }
       } else {
         pushToast({ kind: "warning", message: "Notes regeneration returned no data." });
       }
@@ -193,12 +226,19 @@ export default function Notes() {
     } finally {
       setIsRegenerating(false);
     }
-  }, [currentLectureId, isRegenerating, pushToast]);
+  }, [applyNotesPayload, currentLectureId, isRegenerating, pushToast]);
 
   // ── ToC ─────────────────────────────────────────────────────────────────────
   const tocItems = notes ? buildToc(notes, Boolean(currentLecture?.summary)) : [];
   const tocIds = tocItems.map((item) => item.id);
   const activeId = useActiveSection(tocIds);
+  const hasNotesContent = Boolean(
+    notes &&
+      (notes.topics.length > 0 ||
+        notes.key_terms.length > 0 ||
+        notes.takeaways.length > 0 ||
+        currentLecture?.summary),
+  );
   const notesContainerClass = isSidebarCollapsed
     ? "mx-auto w-full max-w-[1240px] space-y-6"
     : "mx-auto w-full max-w-[900px] space-y-6";
@@ -270,7 +310,7 @@ export default function Notes() {
   }
 
   // ── No notes yet ────────────────────────────────────────────────────────────
-  if (!notes) {
+  if (!notes || !hasNotesContent) {
     return (
       <div className={notesContainerClass}>
         <ViewHeader
@@ -293,7 +333,7 @@ export default function Notes() {
             </button>
           }
         />
-        <EmptyState reason="no-notes" />
+        <EmptyState reason="no-notes" detail={notesStageError} />
       </div>
     );
   }

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { FlashcardViewer } from "../components/Flashcards";
 import { ViewHeader } from "../components/Layout";
 import { MindMapCanvas } from "../components/MindMap";
-import { parseMindMapJson } from "../lib/mindmap";
+import { hasMindMapContent, parseMindMapJson } from "../lib/mindmap";
 import {
   compareLectures,
   getMindmap,
@@ -266,9 +266,14 @@ export default function Compare() {
         }
 
         try {
+          const data = parseMindMapJson(raw);
+          if (!hasMindMapContent(data)) {
+            return null;
+          }
+
           const parsed = {
             lectureId,
-            data: parseMindMapJson(raw),
+            data,
           };
           return parsed;
         } catch {

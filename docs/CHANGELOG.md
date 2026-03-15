@@ -2,6 +2,30 @@
 
 All notable changes to the Knowte project will be documented in this file.
 
+## [Task 6.1] - 2026-03-15
+- Fixed: Notes and flashcards views now normalize malformed stored JSON before rendering so failed LLM outputs fall back to safe empty/error states instead of crashing the React tree
+- Fixed: Quiz loading now normalizes malformed stored question JSON and treats empty/invalid decks as safe empty/error states instead of crashing the quiz player
+- Fixed: Mind map views now reject incomplete placeholder-only payloads, clear stale map state on lecture changes, and surface the last stage failure message when generation produced no usable graph
+- Fixed: Summary stage persistence now happens before the frontend receives the "summary complete" event, and the app refreshes the current lecture summary from the backend so Notes reliably shows generated summaries
+- Fixed: Comparison mind-map loading now skips unusable stored mind maps instead of merging placeholder data
+- Changed: Flashcard viewer now guards against missing `front`, `back`, or `tags` fields at render time as a final safety net
+- Files modified:
+  - src/lib/generatedContent.ts
+  - src/pages/Quiz.tsx
+  - src/App.tsx
+  - src/lib/mindmap.ts
+  - src/lib/tauriApi.ts
+  - src/pages/Notes.tsx
+  - src/pages/Flashcards.tsx
+  - src/pages/MindMap.tsx
+  - src/pages/Compare.tsx
+  - src/components/Flashcards/FlashcardViewer.tsx
+  - src-tauri/src/db/queries.rs
+  - src-tauri/src/commands/library.rs
+  - src-tauri/src/lib.rs
+  - src-tauri/src/pipeline/orchestrator.rs
+  - docs/CHANGELOG.md
+
 ## GitHub Pages Deployment - 2026-02-23
 - Added: GitHub Action workflow to deploy the landing page from the `landing/` directory.
 - Features: Automatic build of Tailwind CSS assets and deployment to GitHub Pages on every push to the `main` branch.

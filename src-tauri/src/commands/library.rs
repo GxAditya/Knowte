@@ -1,7 +1,8 @@
 use crate::db::queries::{
-    delete_lecture as delete_lecture_record, get_flashcards, get_lecture_by_id, get_mindmap,
-    get_notes, get_quiz, get_transcript_by_lecture_id, list_lectures as list_lecture_records,
-    search_lectures as search_lecture_records, LectureSummaryRecord,
+    delete_lecture as delete_lecture_record, get_flashcards, get_lecture_by_id,
+    get_lecture_summary_record, get_mindmap, get_notes, get_quiz, get_transcript_by_lecture_id,
+    list_lectures as list_lecture_records, search_lectures as search_lecture_records,
+    LectureSummaryRecord,
 };
 use crate::db::AppDatabase;
 use crate::models::{FlashcardsOutput, MindMapData, MindMapNode};
@@ -125,6 +126,14 @@ pub fn search_lectures(app: AppHandle, query: String) -> Result<Vec<LectureSumma
 }
 
 #[tauri::command]
+pub fn get_lecture_summary(
+    app: AppHandle,
+    lecture_id: String,
+) -> Result<Option<LectureSummary>, String> {
+    get_lecture_summary_impl(&app, &lecture_id).map_err(Into::into)
+}
+
+#[tauri::command]
 pub fn delete_lecture(app: AppHandle, lecture_id: String) -> Result<(), String> {
     delete_lecture_impl(&app, &lecture_id).map_err(Into::into)
 }
@@ -160,6 +169,21 @@ fn search_lectures_impl(app: &AppHandle, query: &str) -> Result<Vec<LectureSumma
     let records = search_lecture_records(&connection, query)
         .map_err(|_| LibraryError::DatabaseUnavailable)?;
     Ok(records.into_iter().map(LectureSummary::from).collect())
+}
+
+fn get_lecture_summary_impl(
+    app: &AppHandle,
+    lecture_id: &str,
+) -> Result<Option<LectureSummary>, LibraryError> {
+    let database = app
+        .try_state::<AppDatabase>()
+        .ok_or(LibraryError::DatabaseNotInitialised)?;
+    let connection = database
+        .connect()
+        .map_err(|_| LibraryError::DatabaseUnavailable)?;
+    let record = get_lecture_summary_record(&connection, lecture_id)
+        .map_err(|_| LibraryError::DatabaseUnavailable)?;
+    Ok(record.map(LectureSummary::from))
 }
 
 fn delete_lecture_impl(app: &AppHandle, lecture_id: &str) -> Result<(), LibraryError> {

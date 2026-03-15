@@ -729,12 +729,12 @@ pub async fn run_full_pipeline_with_options(
         Ok(text) => {
             let cleaned_summary = sanitize_summary_text(&text);
             let preview = make_preview(&cleaned_summary);
-            mark_stage_complete(&db, &lecture_id, stage, &preview);
-            emit_stage(&app, &lecture_id, stage, "complete", Some(preview), None, 1);
             if let Ok(conn) = db.connect() {
                 let _ = queries::update_lecture_summary(&conn, &lecture_id, &cleaned_summary);
             }
             store_cached_stage_result(&db, &lecture_id, stage, &transcript_hash, &cleaned_summary);
+            mark_stage_complete(&db, &lecture_id, stage, &preview);
+            emit_stage(&app, &lecture_id, stage, "complete", Some(preview), None, 1);
             cleaned_summary
         }
         Err(e) => {

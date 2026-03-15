@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { MindMapSkeleton } from "../components/Skeletons";
 import { MindMapCanvas } from "../components/MindMap";
 import { ViewHeader } from "../components/Layout";
-import { parseMindMapJson } from "../lib/mindmap";
+import { hasMindMapContent, parseMindMapJson } from "../lib/mindmap";
 import { getMindmap, regenerateMindmap } from "../lib/tauriApi";
 import type { MindMapData } from "../lib/types";
-import { useLectureStore, useToastStore } from "../stores";
+import { useLectureStore, usePipelineStore, useToastStore } from "../stores";
 
 // ─── Empty / error states ─────────────────────────────────────────────────────
 
@@ -90,26 +90,47 @@ function NoLecture() {
 export default function MindMap() {
   const { currentLectureId } = useLectureStore();
   const pushToast = useToastStore((state) => state.pushToast);
+  const mindmapStageError = usePipelineStore((state) =>
+    currentLectureId
+      ? state.lectureStates[currentLectureId]?.stages.find((stage) => stage.name === "mindmap")
+          ?.error ?? null
+      : null,
+  );
 
   const [mindmapData, setMindmapData] = useState<MindMapData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const parseStoredMindMap = useCallback((json: string) => {
+    const parsed = parseMindMapJson(json);
+    return hasMindMapContent(parsed) ? parsed : null;
+  }, []);
+
   // Load mindmap from backend when lecture changes
   useEffect(() => {
     if (!currentLectureId) {
       setMindmapData(null);
+      setError(null);
+      setIsLoading(false);
       return;
     }
+    setMindmapData(null);
     setIsLoading(true);
     setError(null);
     getMindmap(currentLectureId)
       .then((json) => {
         if (json) {
           try {
-            setMindmapData(parseMindMapJson(json));
+            const parsed = parseStoredMindMap(json);
+            if (parsed) {
+              setMindmapData(parsed);
+            } else {
+              setMindmapData(null);
+              setError("Stored mind map data is invalid or incomplete.");
+            }
           } catch {
+            setMindmapData(null);
             setError("Could not parse mind map data.");
           }
         } else {
@@ -117,10 +138,11 @@ export default function MindMap() {
         }
       })
       .catch((err: unknown) => {
-        setError(String(err));
+        setMindmapData(null);
+        setError(err instanceof Error ? err.message : String(err));
       })
       .finally(() => setIsLoading(false));
-  }, [currentLectureId]);
+  }, [currentLectureId, parseStoredMindMap]);
 
   const handleGenerate = useCallback(async () => {
     if (!currentLectureId) return;
@@ -129,18 +151,24 @@ export default function MindMap() {
     try {
       const json = await regenerateMindmap(currentLectureId);
       if (json) {
-        setMindmapData(parseMindMapJson(json));
-        pushToast({ kind: "success", message: "Mind map regenerated successfully." });
+        const parsed = parseStoredMindMap(json);
+        if (parsed) {
+          setMindmapData(parsed);
+          pushToast({ kind: "success", message: "Mind map regenerated successfully." });
+        } else {
+          setError("Regenerated mind map data is invalid or incomplete.");
+          pushToast({ kind: "error", message: "Mind map regeneration returned invalid data." });
+        }
       } else {
         pushToast({ kind: "warning", message: "Mind map regeneration returned no data." });
       }
     } catch (err: unknown) {
-      setError(String(err));
+      setError(err instanceof Error ? err.message : String(err));
       pushToast({ kind: "error", message: "Failed to regenerate mind map." });
     } finally {
       setIsGenerating(false);
     }
-  }, [currentLectureId, pushToast]);
+  }, [currentLectureId, parseStoredMindMap, pushToast]);
 
   // ─── Render ──────────────────────────────────────────────────────────────
 
@@ -198,7 +226,11 @@ export default function MindMap() {
         ) : mindmapData ? (
           <MindMapCanvas data={mindmapData} />
         ) : (
-          <EmptyState isGenerating={isGenerating} error={error} onGenerate={handleGenerate} />
+          <EmptyState
+            isGenerating={isGenerating}
+            error={error ?? mindmapStageError}
+            onGenerate={handleGenerate}
+          />
         )}
       </div>
     </div>

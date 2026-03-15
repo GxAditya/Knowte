@@ -14,7 +14,9 @@ use commands::audio::{
 };
 use commands::compare::{compare_lectures, merge_flashcards};
 use commands::explain::{add_custom_flashcard, explain_text};
-use commands::library::{delete_lecture, export_all_lecture_data, list_lectures, search_lectures};
+use commands::library::{
+    delete_lecture, export_all_lecture_data, get_lecture_summary, list_lectures, search_lectures,
+};
 use commands::llm::{check_llm_availability, generate_llm_response};
 use commands::pipeline::{
     estimate_pipeline_work, export_flashcards_anki, export_flashcards_tsv, export_notes_markdown,
@@ -92,6 +94,7 @@ pub fn run() {
             export_flashcards_anki,
             export_flashcards_tsv,
             list_lectures,
+            get_lecture_summary,
             search_lectures,
             delete_lecture,
             export_all_lecture_data,

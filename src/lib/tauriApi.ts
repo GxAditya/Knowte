@@ -146,6 +146,10 @@ export async function listLectures(): Promise<LectureSummary[]> {
   return invoke<LectureSummary[]>("list_lectures");
 }
 
+export async function getLectureSummary(lectureId: string): Promise<LectureSummary | null> {
+  return invoke<LectureSummary | null>("get_lecture_summary", { lectureId });
+}
+
 export async function searchLectures(query: string): Promise<LectureSummary[]> {
   return invoke<LectureSummary[]>("search_lectures", { query });
 }

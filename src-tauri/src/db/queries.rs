@@ -273,6 +273,59 @@ pub fn list_lectures(connection: &Connection) -> rusqlite::Result<Vec<LectureSum
     rows.collect()
 }
 
+pub fn get_lecture_summary_record(
+    connection: &Connection,
+    lecture_id: &str,
+) -> rusqlite::Result<Option<LectureSummaryRecord>> {
+    let mut statement = connection.prepare(
+        r#"
+        SELECT
+            l.id,
+            l.filename,
+            l.audio_path,
+            l.source_type,
+            l.duration,
+            l.status,
+            l.created_at,
+            l.summary,
+            n.notes_json,
+            COALESCE((
+                SELECT COUNT(*)
+                FROM pipeline_stages ps
+                WHERE ps.lecture_id = l.id
+                  AND ps.status = 'complete'
+            ), 0) AS stages_complete
+        FROM lectures l
+        LEFT JOIN notes n ON n.lecture_id = l.id
+        WHERE l.id = ?1
+        "#,
+    )?;
+
+    let result = statement.query_row(params![lecture_id], |row| {
+        let filename: String = row.get(1)?;
+        let notes_json: Option<String> = row.get(8)?;
+
+        Ok(LectureSummaryRecord {
+            id: row.get(0)?,
+            title: title_from_notes(notes_json.as_deref(), &filename),
+            filename,
+            audio_path: row.get(2)?,
+            source_type: row.get(3)?,
+            duration: row.get(4)?,
+            status: row.get(5)?,
+            created_at: row.get(6)?,
+            summary: row.get(7)?,
+            stages_complete: row.get(9)?,
+        })
+    });
+
+    match result {
+        Ok(record) => Ok(Some(record)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(error) => Err(error),
+    }
+}
+
 pub fn search_lectures(
     connection: &Connection,
     query: &str,

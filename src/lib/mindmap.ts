@@ -146,3 +146,8 @@ export function normalizeMindMapData(input: unknown): MindMapData {
 export function parseMindMapJson(rawJson: string): MindMapData {
   return normalizeMindMapData(JSON.parse(rawJson) as unknown);
 }
+
+export function hasMindMapContent(data: MindMapData): boolean {
+  const rootLabel = data.root.label.trim();
+  return (data.root.children?.length ?? 0) > 0 || rootLabel !== ROOT_FALLBACK_LABEL;
+}

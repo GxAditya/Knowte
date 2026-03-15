@@ -63,6 +63,13 @@ function FlashcardDisplay({
   prefersReducedMotion,
   onFlip,
 }: FlashcardProps) {
+  const front = typeof card.front === "string" && card.front.trim().length > 0
+    ? card.front
+    : "Untitled card";
+  const back = typeof card.back === "string" ? card.back : "";
+  const tags = Array.isArray(card.tags)
+    ? card.tags.filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
+    : [];
   const containerStyle: CSSProperties = prefersReducedMotion
     ? {
         minHeight: "300px",
@@ -124,7 +131,7 @@ function FlashcardDisplay({
             Front
           </span>
           <p className="text-base font-medium text-[var(--text-primary)] text-center leading-relaxed w-full break-words">
-            {card.front}
+            {front}
           </p>
           <span className="mt-6 text-xs text-[var(--text-muted)] shrink-0">Click to reveal answer</span>
         </div>
@@ -148,11 +155,11 @@ function FlashcardDisplay({
             Back
           </span>
           <p className="text-base font-medium text-[var(--text-primary)] text-center leading-relaxed w-full break-words">
-            {card.back}
+            {back}
           </p>
-          {card.tags.length > 0 && (
+          {tags.length > 0 && (
             <div className="flex flex-wrap justify-center gap-1.5 mt-5">
-              {card.tags.map((tag) => (
+              {tags.map((tag) => (
                 <span
                   key={tag}
                   className="px-2 py-0.5 text-xs rounded-full bg-[var(--accent-glow)] text-[var(--accent-primary)] border border-[var(--accent-primary)]"
@@ -252,7 +259,9 @@ function VirtualizedCardIndex({
         style={style}
       >
         <span className="truncate pr-2">
-          {index + 1}. {entry.card.front}
+          {index + 1}. {typeof entry.card.front === "string" && entry.card.front.trim().length > 0
+            ? entry.card.front
+            : "Untitled card"}
         </span>
         <span className="text-[10px] uppercase text-[var(--text-muted)]">{entry.pile}</span>
       </button>

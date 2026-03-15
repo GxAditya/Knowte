@@ -304,6 +304,99 @@ fn collapse_blank_lines(text: &str) -> String {
     lines.join("\n")
 }
 
+fn normalise_summary_lead_in(value: &str) -> String {
+    value.trim()
+        .replace(['’', '`'], "'")
+        .to_ascii_lowercase()
+}
+
+fn trim_courtesy_prefix(value: &str) -> String {
+    let mut current = normalise_summary_lead_in(value);
+
+    for prefix in [
+        "okay,",
+        "okay",
+        "sure,",
+        "sure",
+        "certainly,",
+        "certainly",
+        "of course,",
+    ] {
+        if current.starts_with(prefix) {
+            current = current[prefix.len()..].trim_start().to_string();
+            break;
+        }
+    }
+
+    current
+}
+
+fn is_summary_lead_in(line: &str) -> bool {
+    let mut current = trim_courtesy_prefix(line);
+
+    if current.starts_with("here's ") {
+        current = current["here's ".len()..].to_string();
+    } else if current.starts_with("here is ") {
+        current = current["here is ".len()..].to_string();
+    } else {
+        return false;
+    }
+
+    for prefix in ["a ", "the "] {
+        if current.starts_with(prefix) {
+            current = current[prefix.len()..].to_string();
+            break;
+        }
+    }
+
+    for prefix in ["concise ", "brief ", "short ", "quick "] {
+        if current.starts_with(prefix) {
+            current = current[prefix.len()..].to_string();
+            break;
+        }
+    }
+
+    if !current.starts_with("summary") {
+        return false;
+    }
+
+    matches!(
+        current["summary".len()..].trim(),
+        "" | ":" | "-" | "of the lecture" | "of the lecture:" | "of this lecture"
+            | "of this lecture:" | "for the lecture" | "for the lecture:"
+            | "for this lecture" | "for this lecture:"
+    )
+}
+
+fn strip_leading_summary_lead_in(text: &str) -> String {
+    let lines: Vec<&str> = text.lines().collect();
+    let Some(first_content_index) = lines.iter().position(|line| !line.trim().is_empty()) else {
+        return text.to_string();
+    };
+
+    let first_line = lines[first_content_index].trim();
+    if !is_summary_lead_in(first_line) {
+        return text.to_string();
+    }
+
+    if let Some((_, trailing)) = first_line.split_once(':') {
+        if !trailing.trim().is_empty() {
+            let mut rebuilt = Vec::with_capacity(lines.len());
+            rebuilt.extend(lines[..first_content_index].iter().copied());
+            rebuilt.push(trailing.trim());
+            rebuilt.extend(lines[first_content_index + 1..].iter().copied());
+            return rebuilt.join("\n").trim().to_string();
+        }
+    }
+
+    let mut next_index = first_content_index + 1;
+    while next_index < lines.len() && lines[next_index].trim().is_empty() {
+        next_index += 1;
+    }
+
+    lines[next_index..].join("\n").trim().to_string()
+}
+
 fn sanitize_summary_text(raw: &str) -> String {
     let fallback = raw.trim();
     if fallback.is_empty() {
@@ -320,6 +413,11 @@ fn sanitize_summary_text(raw: &str) -> String {
         .trim()
         .to_string();
 
+    if text.is_empty() {
+        return fallback.to_string();
+    }
+
+    text = strip_leading_summary_lead_in(&text);
     if text.is_empty() {
         return fallback.to_string();
     }
@@ -1137,5 +1235,18 @@ Would you like me to expand on these points?";
     fn sanitize_summary_keeps_regular_summary_content() {
         let raw = "## Summary\n\n- Main point one\n- Main point two";
         assert_eq!(sanitize_summary_text(raw), raw);
+    }
+
+    #[test]
+    fn sanitize_summary_removes_plain_summary_preface_line() {
+        let raw = "Here’s a concise summary of the lecture:\n\nGit is a database that \
+utilizes commits as fundamental units of history.";
+
+        let cleaned = sanitize_summary_text(raw);
+
+        assert_eq!(
+            cleaned,
+            "Git is a database that utilizes commits as fundamental units of history."
+        );
     }
 }

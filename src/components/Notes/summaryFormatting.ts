@@ -11,6 +11,97 @@ function findFirstIndex(haystack: string, markers: string[]): number {
   return indices.length > 0 ? Math.min(...indices) : -1;
 }
 
+function normalizeLeadIn(value: string): string {
+  return value
+    .trim()
+    .replace(/[’`]/g, "'")
+    .toLowerCase();
+}
+
+function trimCourtesyPrefix(value: string): string {
+  let current = normalizeLeadIn(value);
+
+  for (const prefix of ["okay,", "okay", "sure,", "sure", "certainly,", "certainly", "of course,"]) {
+    if (current.startsWith(prefix)) {
+      current = current.slice(prefix.length).trimStart();
+      break;
+    }
+  }
+
+  return current;
+}
+
+function isSummaryLeadIn(line: string): boolean {
+  let current = trimCourtesyPrefix(line);
+
+  if (current.startsWith("here's ")) {
+    current = current.slice("here's ".length);
+  } else if (current.startsWith("here is ")) {
+    current = current.slice("here is ".length);
+  } else {
+    return false;
+  }
+
+  for (const prefix of ["a ", "the "]) {
+    if (current.startsWith(prefix)) {
+      current = current.slice(prefix.length);
+      break;
+    }
+  }
+
+  for (const prefix of ["concise ", "brief ", "short ", "quick "]) {
+    if (current.startsWith(prefix)) {
+      current = current.slice(prefix.length);
+      break;
+    }
+  }
+
+  if (!current.startsWith("summary")) {
+    return false;
+  }
+
+  const remainder = current.slice("summary".length).trim();
+  return (
+    remainder === "" ||
+    remainder === ":" ||
+    remainder === "-" ||
+    remainder === "of the lecture" ||
+    remainder === "of the lecture:" ||
+    remainder === "of this lecture" ||
+    remainder === "of this lecture:" ||
+    remainder === "for the lecture" ||
+    remainder === "for the lecture:" ||
+    remainder === "for this lecture" ||
+    remainder === "for this lecture:"
+  );
+}
+
+function stripLeadingSummaryLeadIn(text: string): string {
+  const lines = text.split("\n");
+  const firstContentIndex = lines.findIndex((line) => line.trim().length > 0);
+  if (firstContentIndex === -1) {
+    return text;
+  }
+
+  const firstLine = lines[firstContentIndex].trim();
+  if (!isSummaryLeadIn(firstLine)) {
+    return text;
+  }
+
+  const [, trailing = ""] = firstLine.split(/:(.*)/s);
+  if (trailing.trim().length > 0) {
+    lines[firstContentIndex] = trailing.trim();
+    return lines.join("\n").trim();
+  }
+
+  let nextIndex = firstContentIndex + 1;
+  while (nextIndex < lines.length && lines[nextIndex].trim().length === 0) {
+    nextIndex += 1;
+  }
+
+  return lines.slice(nextIndex).join("\n").trim();
+}
+
 export function sanitizeSummaryText(raw?: string): string {
   if (!raw) return "";
 
@@ -23,6 +114,9 @@ export function sanitizeSummaryText(raw?: string): string {
     .join("\n")
     .trim();
 
+  if (!text) return "";
+
+  text = stripLeadingSummaryLeadIn(text);
   if (!text) return "";
 
   // Remove trailing rationale/meta sections commonly added by chatty responses.

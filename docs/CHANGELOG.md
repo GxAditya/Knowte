@@ -7,6 +7,7 @@ All notable changes to the Knowte project will be documented in this file.
 - Fixed: Quiz loading now normalizes malformed stored question JSON and treats empty/invalid decks as safe empty/error states instead of crashing the quiz player
 - Fixed: Mind map views now reject incomplete placeholder-only payloads, clear stale map state on lecture changes, and surface the last stage failure message when generation produced no usable graph
 - Fixed: Summary stage persistence now happens before the frontend receives the "summary complete" event, and the app refreshes the current lecture summary from the backend so Notes reliably shows generated summaries
+- Fixed: Leading chatty summary wrappers such as `Here’s a concise summary of the lecture:` are now stripped before notes summary rendering and before summary text is persisted for later stages
 - Fixed: Comparison mind-map loading now skips unusable stored mind maps instead of merging placeholder data
 - Changed: Flashcard viewer now guards against missing `front`, `back`, or `tags` fields at render time as a final safety net
 - Files modified:
@@ -20,6 +21,7 @@ All notable changes to the Knowte project will be documented in this file.
   - src/pages/MindMap.tsx
   - src/pages/Compare.tsx
   - src/components/Flashcards/FlashcardViewer.tsx
+  - src/components/Notes/summaryFormatting.ts
   - src-tauri/src/db/queries.rs
   - src-tauri/src/commands/library.rs
   - src-tauri/src/lib.rs

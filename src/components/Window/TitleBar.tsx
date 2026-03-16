@@ -92,7 +92,7 @@ export default function TitleBar({
       }}
     >
       <div className="flex min-w-0 items-center gap-3" data-tauri-drag-region>
-        <img src="/Knowte.png" alt="Knowte app icon" className="h-8 w-16 shrink-0 drop-shadow-sm" />
+        <img src="/Knowte.png" alt="Knowte app icon" className="h-8 w-8 shrink-0 drop-shadow-sm" />
         <p
           className="truncate text-xs font-semibold tracking-widest"
           style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}

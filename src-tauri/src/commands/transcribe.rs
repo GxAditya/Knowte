@@ -138,8 +138,8 @@ impl From<TranscribeError> for String {
 }
 
 #[tauri::command]
-pub fn check_whisper_models() -> Result<Vec<String>, String> {
-    check_whisper_models_impl().map_err(Into::into)
+pub fn check_whisper_models(app: AppHandle) -> Result<Vec<String>, String> {
+    check_whisper_models_impl(&app).map_err(Into::into)
 }
 
 #[tauri::command]
@@ -157,7 +157,7 @@ pub async fn transcribe_audio(
     lecture_id: String,
 ) -> Result<TranscriptionResult, String> {
     let settings = get_settings(app.clone()).map_err(TranscribeError::SettingsReadFailed)?;
-    let model_path = get_model_path(&settings.whisper_model)?;
+    let model_path = get_model_path(&app, &settings.whisper_model)?;
     if !model_path.exists() {
         return Err(TranscribeError::WhisperModelMissing.into());
     }
@@ -333,8 +333,8 @@ fn rebuild_full_text(segments: &[TranscriptSegment]) -> String {
     full_text
 }
 
-fn check_whisper_models_impl() -> Result<Vec<String>, TranscribeError> {
-    let model_dir = whisper_models_dir()?;
+fn check_whisper_models_impl(app: &AppHandle) -> Result<Vec<String>, TranscribeError> {
+    let model_dir = whisper_models_dir(app)?;
     if !model_dir.exists() {
         return Ok(Vec::new());
     }
@@ -363,7 +363,7 @@ async fn download_whisper_model_impl(
     app: &AppHandle,
     model_size: &str,
 ) -> Result<PathBuf, TranscribeError> {
-    let target_path = get_model_path(model_size)?;
+    let target_path = get_model_path(app, model_size)?;
     if target_path.exists() {
         app.emit(
             "whisper-download-progress",
@@ -1036,8 +1036,12 @@ fn is_wav_silent(path: &Path) -> Result<bool, TranscribeError> {
     Ok(average < SILENCE_AVERAGE_THRESHOLD && peak < SILENCE_PEAK_THRESHOLD)
 }
 
-fn whisper_models_dir() -> Result<PathBuf, TranscribeError> {
-    let models_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("whisper-models");
+fn whisper_models_dir(app: &AppHandle) -> Result<PathBuf, TranscribeError> {
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|_| TranscribeError::WhisperModelDirUnavailable)?;
+    let models_dir = app_data_dir.join("whisper-models");
     fs::create_dir_all(&models_dir).map_err(|_| TranscribeError::WhisperModelDirUnavailable)?;
     Ok(models_dir)
 }
@@ -1055,9 +1059,9 @@ fn model_file_name(model_size: &str) -> Result<&'static str, TranscribeError> {
     }
 }
 
-fn get_model_path(model_size: &str) -> Result<PathBuf, TranscribeError> {
+fn get_model_path(app: &AppHandle, model_size: &str) -> Result<PathBuf, TranscribeError> {
     let model_file = model_file_name(model_size)?;
-    Ok(whisper_models_dir()?.join(model_file))
+    Ok(whisper_models_dir(app)?.join(model_file))
 }
 
 fn emit_transcription_progress(app: &AppHandle, lecture_id: &str, percent: u8) {

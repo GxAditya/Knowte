@@ -133,7 +133,6 @@ export default function ModelSelector({
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-sm font-semibold">Whisper Models</CardTitle>
-              <CardDescription className="text-[10px]">Stored in `src-tauri/whisper-models`</CardDescription>
             </div>
           </div>
         </CardHeader>
